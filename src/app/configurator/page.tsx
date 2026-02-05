@@ -6,13 +6,14 @@ import { ChevronRight, Server, Check, ShoppingCart, Info, RotateCcw } from "luci
 import Image from "../../components/Image";
 import { useCart } from "../../contexts/CartContext";
 import { useUI } from "../../contexts/UIContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const ConfiguratorPage = () => {
     const { content } = useGlobalContent();
     const { addToCart } = useCart();
     const { openQuoteModal } = useUI();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
     const [configuration, setConfiguration] = useState<Record<string, any>>({});
@@ -30,12 +31,20 @@ const ConfiguratorPage = () => {
 
     const selectedModel = serverData.models.find(m => m.id === selectedModelId);
 
-    // Auto-select first model if none selected
+    // Auto-select model from URL or default to first
     useEffect(() => {
-        if (!selectedModelId && serverData.models.length > 0) {
-            setSelectedModelId(serverData.models[0].id);
+        if (serverData.models.length > 0) {
+            const params = new URLSearchParams(location.search);
+            const modelParam = params.get('model');
+
+            if (modelParam && serverData.models.find(m => m.id === modelParam)) {
+                if (selectedModelId !== modelParam) setSelectedModelId(modelParam);
+            } else if (!selectedModelId) {
+                // Default to first if no valid param and no current selection (initial load)
+                setSelectedModelId(serverData.models[0].id);
+            }
         }
-    }, [serverData.models, selectedModelId]);
+    }, [serverData.models, location.search]);
 
     // Reset configuration when model changes
     useEffect(() => {
@@ -149,7 +158,7 @@ const ConfiguratorPage = () => {
                                 {serverData.models.map((model: any) => (
                                     <button
                                         key={model.id}
-                                        onClick={() => setSelectedModelId(model.id)}
+                                        onClick={() => navigate(`?model=${model.id}`)}
                                         className={`relative p-4 rounded-sm border-2 transition-all text-left group
                       ${selectedModelId === model.id ? 'border-action-500 bg-action-50' : 'border-gray-200 hover:border-action-300 bg-white'}
                     `}
