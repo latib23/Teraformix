@@ -9,8 +9,9 @@ module.exports = {
     extend: {
       fontFamily: { sans: ['Inter', 'sans-serif'] },
       colors: {
-        navy: { 900: '#2C3E50', 800: '#34495E', 700: '#4F617D' },
-        action: { 500: '#5E8D7E', 600: '#4A7C77', 100: '#E8F3F1' },
+        navy: { 950: '#0B1120', 900: '#0F172A', 800: '#1E293B', 700: '#334155' },
+        action: { 500: '#10B981', 600: '#059669', 100: '#D1FAE5' }, // Emerald for "Renew" vibe
+        tera: { 500: '#5E8D7E', 900: '#2C3E50' }, // Original Brand Colors kept for accents
         alert: { 500: '#F97316' }
       }
     },

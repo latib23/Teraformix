@@ -406,7 +406,7 @@ const HomePage = () => {
       <section
         id="industry-section"
         ref={el => sectionRefs.current['industry-section'] = el}
-        className={`py-20 bg-navy-900 text-white transition-all duration-1000 ${visibleSections.has('industry-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+        className={`py-20 bg-navy-950 text-white transition-all duration-1000 ${visibleSections.has('industry-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
