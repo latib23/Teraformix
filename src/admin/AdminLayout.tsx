@@ -51,7 +51,7 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside className="w-64 bg-navy-900 text-white flex flex-col flex-shrink-0 transition-all">
                 <div className="p-6 border-b border-navy-800">
-                    <h1 className="text-xl font-bold tracking-tight">STC Admin</h1>
+                    <h1 className="text-xl font-bold tracking-tight">Teraformix Admin</h1>
                     <p className="text-xs text-gray-400 mt-1">Backend Portal</p>
                 </div>
 

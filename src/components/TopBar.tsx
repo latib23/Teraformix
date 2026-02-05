@@ -28,7 +28,7 @@ const TopBar = () => {
                 <div className="flex items-center gap-6">
                     <a href={`mailto:${email}`} className="flex items-center gap-2 hover:text-action-400 transition">
                         <Mail className="w-3 h-3" />
-                        <span>{email || 'sales@servertechcentral.com'}</span>
+                        <span>{email || 'sales@teraformix.com'}</span>
                     </a>
                     <span className="hidden md:inline text-navy-600">|</span>
                     <a href={`tel:${phone}`} className="flex items-center gap-2 hover:text-action-400 transition font-bold">

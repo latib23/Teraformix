@@ -107,7 +107,7 @@ const Header = () => {
   return (
     <>
       <TopBar />
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm relative">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm relative transition-all duration-300">
         {isChristmas && <ChristmasLights />}
         <div className="container mx-auto px-4 h-20 flex items-center justify-between relative z-10">
           {/* Logo */}

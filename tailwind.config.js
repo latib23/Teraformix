@@ -9,8 +9,8 @@ module.exports = {
     extend: {
       fontFamily: { sans: ['Inter', 'sans-serif'] },
       colors: {
-        navy: { 900: '#0F172A', 800: '#1E293B', 700: '#334155' },
-        action: { 500: '#16A34A', 600: '#15803D', 100: '#DCFCE7' },
+        navy: { 900: '#2C3E50', 800: '#34495E', 700: '#4F617D' },
+        action: { 500: '#5E8D7E', 600: '#4A7C77', 100: '#E8F3F1' },
         alert: { 500: '#F97316' }
       }
     },

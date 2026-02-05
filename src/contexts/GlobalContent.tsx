@@ -111,7 +111,7 @@ export interface ContentState {
 const defaultContent: ContentState = {
   general: {
     phone: '1-800-555-0199',
-    email: 'sales@servertechcentral.com',
+    email: 'sales@teraformix.com',
     address: '100 Tech Plaza, Austin, TX 78701',
     announcement: 'Same Day Shipping on In-Stock Items',
     cageCode: '8H7V2',
@@ -139,7 +139,7 @@ const defaultContent: ContentState = {
     verticalsHeaderTagline: 'Public Sector Speed',
     publicSectorTitle: 'Fast Hardware for Public Sector Timelines',
     publicSectorParagraphs: [
-      'Government, education, healthcare, and research institutions need enterprise hardware fast, but procurement moves slow. Server Tech Central solves this.',
+      'Government, education, healthcare, and research institutions need enterprise hardware fast, but procurement moves slow. Teraformix solves this.',
       'We stock both legacy components for aging infrastructure and cutting-edge servers for AI workloads, then handle the compliance complexity that delays public sector IT. TAA compliance for federal contracts. E-Rate processes for schools. Audit documentation for institutional buyers. Security vetting for classified systems.',
       "We deliver same-day on the hardware while managing the regulatory requirements that typically add weeks to timelines. When your infrastructure supports national security, student learning, patient care, or research operations, waiting isn't realistic. We eliminate the wait."
     ],
@@ -150,19 +150,19 @@ const defaultContent: ContentState = {
     ]
   },
   categoryPage: {
-    title: "Enterprise Servers & Storage Solutions | Server Tech Central",
+    title: "Enterprise Servers & Storage Solutions | Teraformix",
     description: "Browse our catalog of over 500,000 enterprise servers, storage drives, and networking components. In-stock items ship same day. ISO 9001 Certified.",
     h1: "Enterprise Servers & Storage Solutions",
     introText: "Browse our extensive catalog of new and refurbished enterprise hardware. We stock over 500,000 SKUs including Dell PowerEdge Servers, HPE ProLiant, and Cisco Networking equipment. All items are fully tested, include warranty, and are available for same-day shipping."
   },
   privacyPolicy: {
-    content: `## Privacy Policy\n\n**Effective Date:** January 1, 2024\n\nAt Server Tech Central, we prioritize your data privacy. We collect only the information necessary to process your orders and provide customer support.\n\n### Information We Collect\n- Contact details (Name, Email, Phone)\n- Shipping and Billing Addresses\n- Transaction History\n\nWe do not sell your personal data to third parties.`,
+    content: `## Privacy Policy\n\n**Effective Date:** January 1, 2024\n\nAt Teraformix, we prioritize your data privacy. We collect only the information necessary to process your orders and provide customer support.\n\n### Information We Collect\n- Contact details (Name, Email, Phone)\n- Shipping and Billing Addresses\n- Transaction History\n\nWe do not sell your personal data to third parties.`,
   },
   termsOfSale: {
-    content: `## Terms of Sale\n\n**1. Acceptance of Order**\nAll orders are subject to acceptance by Server Tech Central. We reserve the right to cancel orders due to pricing errors or stock discrepancies.\n\n**2. Warranty**\nAll hardware comes with a standard 3-Year Warranty unless otherwise noted. This covers hardware defects only.\n\n**3. Returns**\nReturns are accepted within 30 days of delivery. A 15% restocking fee may apply to non-defective items opened by the customer.`,
+    content: `## Terms of Sale\n\n**1. Acceptance of Order**\nAll orders are subject to acceptance by Teraformix. We reserve the right to cancel orders due to pricing errors or stock discrepancies.\n\n**2. Warranty**\nAll hardware comes with a standard 3-Year Warranty unless otherwise noted. This covers hardware defects only.\n\n**3. Returns**\nReturns are accepted within 30 days of delivery. A 15% restocking fee may apply to non-defective items opened by the customer.`,
   },
   termsAndConditions: {
-    content: `## Terms & Conditions\n\n**Use of Website**\nBy accessing this website, you agree to comply with our terms. Unauthorized scraping, data mining, or automated ordering is prohibited.\n\n**Payment Terms**\nWe accept major credit cards, Purchase Orders for qualified entities, and bank transfers. Orders may be held pending verification.\n\n**Limitation of Liability**\nServer Tech Central is not liable for indirect or consequential damages arising from product use.`,
+    content: `## Terms & Conditions\n\n**Use of Website**\nBy accessing this website, you agree to comply with our terms. Unauthorized scraping, data mining, or automated ordering is prohibited.\n\n**Payment Terms**\nWe accept major credit cards, Purchase Orders for qualified entities, and bank transfers. Orders may be held pending verification.\n\n**Limitation of Liability**\nTeraformix is not liable for indirect or consequential damages arising from product use.`,
   },
   returnPolicy: {
     content: `## Return Policy\n\n**30-Day Returns**\nReturns accepted within 30 days of delivery with RMA authorization. Items must be in original condition and packaging.\n\n**Defective Items**\nDefective or DOA products qualify for full replacement or refund.\n\n**Restocking Fees**\nNon-defective returns may be subject to up to a 15% restocking fee.\n\n**Process**\nContact support with your order reference to initiate an RMA.`,
@@ -183,15 +183,15 @@ const defaultContent: ContentState = {
     content: `## About Us\n\nServer Tech Central supplies enterprise-grade servers, storage, and networking hardware to data centers, MSPs, and public sector organizations. Our mission is rapid, reliable fulfillment backed by technical expertise.\n\n**Why Choose Us**\n- Large in-stock inventory\n- Fast, professional procurement\n- 3-Year standard warranty\n- Dedicated account managers`,
   },
   contactPage: {
-    content: `## Contact Us\n\nReach our team via the channels below. For urgent sourcing or order updates, include your reference number.\n\n**Sales & Support**\n- Phone: 1-800-555-0199\n- Email: sales@servertechcentral.com\n\n**Headquarters**\n100 Tech Plaza, Austin, TX 78701`,
+    content: `## Contact Us\n\nReach our team via the channels below. For urgent sourcing or order updates, include your reference number.\n\n**Sales & Support**\n- Phone: 1-800-555-0199\n- Email: sales@teraformix.com\n\n**Headquarters**\n100 Tech Plaza, Austin, TX 78701`,
   },
   settings: {
     favicon: 'https://cdn-icons-png.flaticon.com/512/4400/4400508.png',
     faviconDarkUrl: '',
-    siteTitle: 'Server Tech Central | Enterprise Hardware Reseller',
-    logoUrl: '',
-    logoText: 'SERVER TECH CENTRAL',
-    activeTheme: 'christmas',
+    siteTitle: 'Teraformix | Enterprise Hardware Reseller',
+    logoUrl: '/logo.jpg',
+    logoText: 'TERAFORMIX',
+    activeTheme: 'none',
   },
   payment: {
     stripePublicKey: '',
@@ -210,7 +210,7 @@ const defaultContent: ContentState = {
       description: 'Rack, Tower, & Blade Systems',
       image: '',
       isActive: true,
-      seoTitle: "Enterprise Servers | Dell PowerEdge & HPE ProLiant | Server Tech Central",
+      seoTitle: "Enterprise Servers | Dell PowerEdge & HPE ProLiant | Teraformix",
       seoDescription: "Buy new and refurbished enterprise servers. Huge inventory of Dell PowerEdge and HPE ProLiant rack, tower, and blade servers. 3-Year Warranty.",
       seoH1: "Enterprise Server Solutions",
       seoText: "Scale your data center with high-performance compute nodes. We stock the latest generation hardware as well as legacy systems for maintenance continuity. Our certified engineers rigorously test every unit to ensure mission-critical reliability."

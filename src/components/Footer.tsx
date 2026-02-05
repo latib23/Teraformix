@@ -90,7 +90,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Column 1: Brand & identifiers */}
           <div>
-            <h3 className="text-xl font-bold mb-4 tracking-tight">Server Tech Central</h3>
+            <h3 className="text-xl font-bold mb-4 tracking-tight">Teraformix</h3>
             <p className="text-gray-300 text-sm mb-6 leading-relaxed">
               {footer.aboutText}
             </p>
@@ -193,7 +193,7 @@ const Footer = () => {
 
         <div className="border-t border-navy-800 py-8 flex flex-col lg:flex-row justify-between items-center gap-6 text-xs text-gray-300">
           <div className="flex flex-col md:flex-row items-center gap-4">
-            <span>&copy; {new Date().getFullYear()} Server Tech Central. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} Teraformix. All rights reserved.</span>
             <div className="hidden md:block w-px h-4 bg-navy-700"></div>
             <div id="amex-logo" style={{ width: 230, height: 50 }}>
               <img
