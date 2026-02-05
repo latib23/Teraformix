@@ -189,7 +189,7 @@ const defaultContent: ContentState = {
     favicon: 'https://cdn-icons-png.flaticon.com/512/4400/4400508.png',
     faviconDarkUrl: '',
     siteTitle: 'Teraformix | Enterprise Hardware Reseller',
-    logoUrl: '/logo.jpg',
+    logoUrl: '/logot.jpg',
     logoText: 'TERAFORMIX',
     activeTheme: 'none',
   },
