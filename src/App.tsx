@@ -22,6 +22,7 @@ const Login = lazy(() => import('./app/login/page'));
 const Register = lazy(() => import('./app/register/page'));
 const Account = lazy(() => import('./app/account/page'));
 const Contact = lazy(() => import('./app/contact/page'));
+const Configurator = lazy(() => import('./app/configurator/page'));
 const Warranty = lazy(() => import('./app/warranty/page'));
 const NotFound = lazy(() => import('./app/not-found'));
 const PayQuote = lazy(() => import('./app/pay-quote/page'));
@@ -102,6 +103,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/account" element={<Account />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/configurator" element={<Configurator />} />
 
             {/* ✅ BLOG ROUTES (ADD THIS) */}
             <Route path="/blog" element={<BlogList />} />

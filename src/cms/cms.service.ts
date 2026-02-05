@@ -141,6 +141,119 @@ export class CmsService implements OnModuleInit {
           }
         ]
         ,
+        serverConfigurator: {
+          title: "Build Your Custom Server",
+          description: "Configure your enterprise server with our easy-to-use builder.",
+          models: [
+            {
+              id: "dell-r740xd-lff",
+              name: "Dell PowerEdge R740xd LFF",
+              brand: "Dell",
+              description: "2U Rack Server, 12x 3.5\" Drive Bays. The gold standard for storage-dense virtualization and data analytics workloads.",
+              basePrice: 1295.00,
+              baseImage: "https://i.dell.com/sites/csimages/Video_Imagery/all/PowerEdge_R740xd.png",
+              specs: {
+                formFactor: "2U Rack",
+                maxRam: "3TB DDR4",
+                maxStorage: "192TB (12x 16TB)",
+                cpuSockets: 2
+              },
+              compatibility: {
+                cpuFamily: "intel-scalable-gen2",
+                ramType: "ddr4-ecc",
+                diskResult: "lff-3.5",
+                raidFamily: "dell-perc"
+              }
+            },
+            {
+              id: "hpe-dl380-gen10",
+              name: "HPE ProLiant DL380 Gen10",
+              brand: "HPE",
+              description: "The industry standard 2U server. Unmatched versatility and resilience for diverse enterprise workloads.",
+              basePrice: 1450.00,
+              baseImage: "https://www.hpe.com/psnow/doc/a00008180enw.png",
+              specs: {
+                formFactor: "2U Rack",
+                maxRam: "3TB DDR4",
+                maxStorage: "200TB+ (with mid-plane)",
+                cpuSockets: 2
+              },
+              compatibility: {
+                cpuFamily: "intel-scalable-gen2",
+                ramType: "ddr4-ecc",
+                diskResult: "sff-2.5",
+                raidFamily: "hpe-smartarray"
+              }
+            },
+            {
+              id: "cisco-c240-m5",
+              name: "Cisco UCS C240 M5",
+              brand: "Cisco",
+              description: "2U Rack Server for high-performance computing, big data, and storage-intensive infrastructure.",
+              basePrice: 1350.00,
+              baseImage: "https://www.cisco.com/c/dam/en/us/products/servers-unified-computing/ucs-c-series-rack-servers/c240-m5-front.png",
+              specs: {
+                formFactor: "2U Rack",
+                maxRam: "3TB DDR4",
+                maxStorage: "180TB",
+                cpuSockets: 2
+              },
+              compatibility: {
+                cpuFamily: "intel-scalable-gen2",
+                ramType: "ddr4-ecc",
+                diskResult: "lff-3.5",
+                raidFamily: "cisco-12g"
+              }
+            }
+          ],
+          availableComponents: {
+            processors: [
+              { partNumber: "SRF9K", name: "Intel Xeon Silver 4210 (10C/20T, 2.2GHz, 13.75MB, 85W)", price: 385.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF9J", name: "Intel Xeon Silver 4214 (12C/24T, 2.2GHz, 16.5MB, 85W)", price: 450.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF9H", name: "Intel Xeon Silver 4216 (16C/32T, 2.1GHz, 22MB, 100W)", price: 595.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF9A", name: "Intel Xeon Gold 5218 (16C/32T, 2.3GHz, 22MB, 125W)", price: 850.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF95", name: "Intel Xeon Gold 6230 (20C/40T, 2.1GHz, 27.5MB, 125W)", price: 1250.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF90", name: "Intel Xeon Gold 6248 (20C/40T, 2.5GHz, 27.5MB, 150W)", price: 1800.00, category: "cpu", family: "intel-scalable-gen2" },
+              { partNumber: "SRF8Z", name: "Intel Xeon Platinum 8260 (24C/48T, 2.4GHz, 35.75MB, 165W)", price: 2950.00, category: "cpu", family: "intel-scalable-gen2" }
+            ],
+            memory: [
+              { partNumber: "M393A2K43CB2", name: "16GB DDR4-2933 ECC RDIMM (Samsung/Hynix)", price: 65.00, category: "ram", type: "ddr4-ecc" },
+              { partNumber: "M393A4K40CB2", name: "32GB DDR4-2933 ECC RDIMM (Samsung/Hynix)", price: 110.00, category: "ram", type: "ddr4-ecc" },
+              { partNumber: "M393A8G40AB2", name: "64GB DDR4-2933 ECC RDIMM (Samsung/Hynix)", price: 210.00, category: "ram", type: "ddr4-ecc" },
+              { partNumber: "M393AAG40M32", name: "128GB DDR4-2933 ECC LRDIMM (Samsung/Hynix)", price: 550.00, category: "ram", type: "ddr4-ecc" }
+            ],
+            storage: [
+              { partNumber: "HUH721212AL5200", name: "12TB 7.2K SAS 12Gbps 3.5\" HDD (HGST/Seagate)", price: 245.00, category: "hdd", formFactor: "lff-3.5" },
+              { partNumber: "ST16000NM002G", name: "16TB 7.2K SAS 12Gbps 3.5\" HDD (Seagate Exos)", price: 320.00, category: "hdd", formFactor: "lff-3.5" },
+              { partNumber: "ST8000NM0075", name: "8TB 7.2K SAS 12Gbps 3.5\" HDD (Enterprise)", price: 165.00, category: "hdd", formFactor: "lff-3.5" },
+              { partNumber: "HUS726T4TALS200", name: "4TB 7.2K SAS 12Gbps 3.5\" HDD (Ultrastar)", price: 95.00, category: "hdd", formFactor: "lff-3.5" },
+              { partNumber: "MZ-7L31T900", name: "1.92TB SATA Enterprise SSD (Samsung PM883)", price: 220.00, category: "ssd", formFactor: "sff-2.5" },
+              { partNumber: "MZ-7L33T800", name: "3.84TB SATA Enterprise SSD (Samsung PM883)", price: 410.00, category: "ssd", formFactor: "sff-2.5" },
+              { partNumber: "KPM5XRUG3T84", name: "3.84TB SAS 12Gbps Enterprise SSD (Kioxia/Toshiba)", price: 480.00, category: "ssd", formFactor: "sff-2.5" },
+              { partNumber: "KPM5XRUG7T68", name: "7.68TB SAS 12Gbps Enterprise SSD (Kioxia/Toshiba)", price: 950.00, category: "ssd", formFactor: "sff-2.5" }
+            ],
+            raidControllers: [
+              { partNumber: "405-AAES", name: "Dell PERC H730P 2GB NV Cache", price: 185.00, category: "raid", family: "dell-perc" },
+              { partNumber: "405-AAMR", name: "Dell PERC H740P 8GB NV Cache", price: 345.00, category: "raid", family: "dell-perc" },
+              { partNumber: "804331-B21", name: "HPE Smart Array P408i-a SR Gen10 Controller", price: 210.00, category: "raid", family: "hpe-smartarray" },
+              { partNumber: "804338-B21", name: "HPE Smart Array P816i-a SR Gen10 Controller", price: 395.00, category: "raid", family: "hpe-smartarray" },
+              { partNumber: "UCSC-RAID-M5", name: "Cisco 12G SAS Modular RAID Controller (2GB)", price: 225.00, category: "raid", family: "cisco-12g" }
+            ],
+            networking: [
+              { partNumber: "540-BBGY", name: "Broadcom 57414 Dual Port 25GbE SFP28", price: 240.00, category: "nic" },
+              { partNumber: "540-BBUK", name: "Intel X550 Dual Port 10GbE Network Adapter (Base-T)", price: 140.00, category: "nic" },
+              { partNumber: "540-BBGU", name: "Intel X710 Dual Port 10GbE SFP+", price: 160.00, category: "nic" },
+              { partNumber: "817749-B21", name: "HPE Ethernet 10/25Gb 2-port 640FLR-SFP28 Adapter", price: 215.00, category: "nic" }
+            ],
+            powerSupplies: [
+              { partNumber: "450-AGMN", name: "Dell 750W Platinum Hot-Plug PSU", price: 75.00, category: "psu" },
+              { partNumber: "450-AGMY", name: "Dell 1100W Platinum Hot-Plug PSU", price: 120.00, category: "psu" },
+              { partNumber: "865414-B21", name: "HPE 800W Flex Slot Platinum Hot Plug Low Halogen PSU", price: 85.00, category: "psu" },
+              { partNumber: "865428-B21", name: "HPE 800W Flex Slot Titanium Hot Plug Low Halogen PSU", price: 115.00, category: "psu" },
+              { partNumber: "UCS-PSU1-770W", name: "Cisco 770W AC Hot-Plug Power Supply", price: 95.00, category: "psu" }
+            ]
+          }
+        },
         blogPosts: []
         ,
         landingCollections: [
@@ -337,7 +450,7 @@ export class CmsService implements OnModuleInit {
     this.logger.log(`PERSIST: Success '${key}'`);
 
     // SEO: Notify search engines if public content changed
-    const publicKeys = ['home', 'categoryPage', 'privacyPolicy', 'termsOfSale', 'termsAndConditions', 'returnPolicy', 'aboutPage', 'contactPage', 'categories'];
+    const publicKeys = ['home', 'categoryPage', 'privacyPolicy', 'termsOfSale', 'termsAndConditions', 'returnPolicy', 'aboutPage', 'contactPage', 'categories', 'serverConfigurator'];
     if (publicKeys.includes(key)) {
       const origin = 'https://teraformix.com';
       if (key === 'categories' && Array.isArray(data)) {
@@ -353,6 +466,7 @@ export class CmsService implements OnModuleInit {
           'returnPolicy': '/returns',
           'aboutPage': '/about',
           'contactPage': '/contact',
+          'serverConfigurator': '/configurator',
         };
         if (map[key]) pingIndexNow(`${origin}${map[key]}`);
       }

@@ -105,6 +105,28 @@ export interface ContentState {
     faqs?: Array<{ question: string; answer: string }>;
   }>;
   redirects?: Array<{ from: string; to: string; permanent?: boolean }>;
+  serverConfigurator?: {
+    title: string;
+    description: string;
+    models: Array<{
+      id: string;
+      name: string;
+      brand: string;
+      description: string;
+      basePrice: number;
+      baseImage: string;
+      specs: any;
+      compatibility: any;
+    }>;
+    availableComponents: {
+      processors: any[];
+      memory: any[];
+      storage: any[];
+      raidControllers: any[];
+      networking: any[];
+      powerSupplies: any[];
+    };
+  };
 }
 
 // Default/Fallback values
