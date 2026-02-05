@@ -9,7 +9,7 @@ const TopBar = () => {
     const activeTheme = content.settings.activeTheme;
 
     return (
-        <div className="bg-navy-900 text-white text-xs py-2">
+        <div className="bg-navy-950 text-white text-xs py-2 border-b border-navy-800">
             <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
 
                 {/* Left Side: Guarantees/Policies */}

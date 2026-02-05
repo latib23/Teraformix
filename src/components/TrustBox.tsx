@@ -52,6 +52,7 @@ const TrustBox = () => {
             data-businessunit-id="6825e3b743a58c4ab5232cae"
             data-style-height="20px"
             data-style-width="100%"
+            data-theme="dark"
             data-href="https://www.trustpilot.com/review/servertechcentral.com"
             data-token="ba4f6bff-2e90-4115-8e89-c0843b6eb97d"
         >

@@ -85,7 +85,7 @@ const Footer = () => {
   }, [content.categories, products]);
 
   return (
-    <footer className="bg-navy-900 text-white pt-12 border-t border-navy-800">
+    <footer className="bg-navy-950 text-white pt-12 border-t border-navy-800">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Column 1: Brand & identifiers */}
