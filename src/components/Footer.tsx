@@ -90,7 +90,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Column 1: Brand & identifiers */}
           <div>
-            <h3 className="text-xl font-bold mb-4 tracking-tight">Teraformix</h3>
+            {content.settings.logoUrl ? (
+              <img src={content.settings.logoUrl} alt={content.settings.logoText} className="h-8 md:h-10 w-auto object-contain mb-6 bg-white/10 rounded-sm p-1" />
+            ) : (
+              <h3 className="text-xl font-bold mb-4 tracking-tight">Teraformix</h3>
+            )}
             <p className="text-gray-300 text-sm mb-6 leading-relaxed">
               {footer.aboutText}
             </p>

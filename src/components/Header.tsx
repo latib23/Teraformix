@@ -98,7 +98,7 @@ const Header = () => {
               <img
                 src={logoUrl}
                 alt={logoText}
-                className="h-10 w-auto object-contain brightness-0 invert group-hover:opacity-80 transition"
+                className="h-12 md:h-14 w-auto object-contain group-hover:opacity-90 transition rounded-sm"
               />
             ) : (
               <span className="text-white text-2xl font-bold tracking-tight">{logoText}</span>

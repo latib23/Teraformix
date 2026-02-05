@@ -2,453 +2,324 @@
 import React, { Suspense, lazy, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 const Header = lazy(() => import('../components/Header'));
-import Hero from '../components/Hero';
-const Footer = lazy(() => import('../components/Footer'));
-const ProductCard = lazy(() => import('../components/ProductCard'));
 import { fetchJson } from '../lib/api';
 import { useGlobalContent } from '../contexts/GlobalContent';
 import { Product } from '../types';
-import { Shield, Globe, CheckCircle, BarChart3, Building2, GraduationCap, Database, BadgeCheck, HardDrive, Network, Cpu, Layers, Server } from 'lucide-react';
+import {
+  Server, HardDrive, Network, Cpu, ShieldCheck, Zap,
+  Recycle, Truck, Settings, ArrowRight, ChevronRight,
+  Terminal, Database, Globe
+} from 'lucide-react';
 import SEOHead from '../components/SEO/SEOHead';
 import TrustBox from '../components/TrustBox';
 import Image from '../components/Image';
+import { useUI } from '../contexts/UIContext';
+
+// New: Industrial "Tech Spec" Card for Products
+const TechSpecCard = ({ product }: { product: Product }) => {
+  const { openQuoteModal } = useUI();
+
+  return (
+    <div className="group relative bg-navy-900 border border-navy-700 hover:border-action-500 transition-all duration-300 flex flex-col overflow-hidden">
+      <div className="absolute top-0 right-0 p-3 z-10">
+        <span className={`text-[10px] font-bold px-2 py-1 rounded-sm ${product.stockStatus === 'IN_STOCK' ? 'bg-action-900/50 text-action-400 border border-action-500/30' : 'bg-orange-900/50 text-orange-400 border border-orange-500/30'}`}>
+          {product.stockStatus === 'IN_STOCK' ? 'IN STOCK' : 'LEAD TIME'}
+        </span>
+      </div>
+
+      <div className="p-6 flex-grow flex items-center justify-center bg-gradient-to-b from-navy-800 to-navy-900">
+        <Link to={`/product/${product.sku}`} className="block relative w-full aspect-[4/3]">
+          <Image
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain mix-blend-overlay opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+          />
+        </Link>
+      </div>
+
+      <div className="p-4 border-t border-navy-800 bg-navy-950 px-5">
+        <div className="flex justify-between items-start gap-4 mb-2">
+          <div>
+            <p className="text-[10px] text-gray-500 font-mono uppercase tracking-wider mb-1">{product.brand || 'Enterprise'}</p>
+            <Link to={`/product/${product.sku}`} className="font-bold text-gray-200 text-sm leading-tight group-hover:text-action-400 transition line-clamp-2">
+              {product.name}
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between">
+          <div className="font-mono text-xs text-gray-500">{product.sku}</div>
+          <div className="tria-button">
+            <button
+              onClick={() => openQuoteModal(product.name)}
+              className="text-xs font-bold text-action-500 hover:text-white flex items-center gap-1 transition-colors"
+            >
+              CONFIGURE <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const HomePage = () => {
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  React.useEffect(() => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const { content } = useGlobalContent();
+  const { openQuoteModal } = useUI();
+
+  useEffect(() => {
     (async () => {
-      const initial = (window as any).INITIAL_DATA?.featuredItems;
-      if (initial && Array.isArray(initial) && initial.length > 0) {
-        setProducts(initial);
-        setLoading(false);
-        // Optional: clear it to prevent reuse issues if any, implies single use
-        // (window as any).INITIAL_DATA.featuredItems = null; 
-        return;
-      }
-      setLoading(true);
       try {
-        const res = await fetchJson<{ items: Product[]; total: number }>(`/products/paginated?limit=8&offset=0`);
-        setProducts((res?.items || []) as Product[]);
-      } catch {
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
+        const res = await fetchJson<{ items: Product[] }>(`/products/paginated?limit=4&offset=0`);
+        setProducts(res?.items || []);
+      } catch { }
     })();
   }, []);
 
-  const { content } = useGlobalContent();
-
-  // Blog posts from Global Content
-  const blogPosts = React.useMemo(() => {
-    return (content.blogPosts || [])
-      .filter((p: any) => p && p.isPublished)
-      .slice(0, 3)
-      .map((p: any) => ({
-        ...p,
-        coverImage: p.image,
-        category: p.tags?.[0] || 'Insight',
-        publishedAt: p.publishDate
-      }));
-  }, [content.blogPosts]);
-  const productList = products as Product[] || [];
-  const categories = content.categories || [];
-  const { cageCode, dunsNumber } = content.general;
-  const partnerLogos = ((content.home as any)?.partnerLogos || []) as Array<{ image: string; alt?: string; url?: string }>;
-
-
-  // Scroll animation tracking
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-
-  // Scroll observer for fade-in animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.target.id) {
-            setVisibleSections(prev => new Set(prev).add(entry.target.id));
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
-    );
-
-    Object.values(sectionRefs.current).forEach(ref => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const [showHeader, setShowHeader] = React.useState(false);
-  React.useEffect(() => {
-    const reveal = () => setShowHeader(true);
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(reveal);
-    } else {
-      setTimeout(reveal, 300);
-    }
-  }, []);
-
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Server Tech Central",
-    "url": "https://servertechcentral.com",
-    "logo": "https://servertechcentral.com/logo.png",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+1-800-555-0199",
-      "contactType": "Sales",
-      "areaServed": "US",
-      "availableLanguage": "English"
-    },
-    "sameAs": [
-      "https://www.linkedin.com/company/servertechcentral",
-      "https://twitter.com/servertechcentral"
-    ]
-  };
-
-  // Helper to get icon based on name (if image is missing)
-  const getCategoryIcon = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('server')) return <Server className="w-6 h-6" />;
-    if (n.includes('storage') || n.includes('drive')) return <HardDrive className="w-6 h-6" />;
-    if (n.includes('network') || n.includes('switch')) return <Network className="w-6 h-6" />;
-    if (n.includes('component') || n.includes('part') || n.includes('cpu')) return <Cpu className="w-6 h-6" />;
-    return <Layers className="w-6 h-6" />;
-  };
+  const { heroTitle } = content.home;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-navy-950 text-gray-200 selection:bg-action-500 selection:text-white font-sans">
       <SEOHead
-        title="Enterprise Hardware Reseller | Servers, Storage & Networking | Server Tech Central"
-        description="Leading B2B reseller of enterprise hardware. Buy refurbished and new Dell PowerEdge, HPE ProLiant, and Cisco networking gear. Same-day shipping available."
+        title="Thinking Ahead. | Teraformix Enterprise"
+        description="The source for renewed enterprise infrastructure."
         canonicalUrl="https://servertechcentral.com"
-        preloadImages={[String((content.home as any)?.heroImage || '')].filter(Boolean)}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-      />
-      {showHeader ? (
-        <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}>
-          <Header />
-        </Suspense>
-      ) : (
-        <div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />
-      )}
-      <Hero />
+      <Suspense fallback={<div className="h-16 bg-navy-900" />}>
+        <Header />
+      </Suspense>
 
-      {/* Trustpilot Widget */}
-      <div className="bg-navy-950 border-b border-navy-800 py-4">
+      {/* --- RE-ARCHITECTED HERO: "The Command Center" --- */}
+      <section className="relative pt-20 pb-32 overflow-hidden">
+        {/* Abstract Cyber Grid Background */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(16,185,129,0.15) 1px, transparent 0)', backgroundSize: '40px 40px' }}>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="w-12 h-[1px] bg-action-500"></span>
+              <span className="text-action-400 font-mono text-sm tracking-widest uppercase">Infrastructure Refined</span>
+            </div>
+
+            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none mb-8">
+              BUILD.<br />
+              DEPLOY.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-action-400 to-teal-600">SCALE.</span>
+            </h1>
+
+            <div className="flex flex-col md:flex-row gap-6 items-start mt-12">
+              <div className="bg-navy-900/80 backdrop-blur border border-navy-700 p-8 rounded-sm max-w-md w-full hover:border-action-500/50 transition-colors group">
+                <Terminal className="w-8 h-8 text-action-500 mb-4 group-hover:animate-pulse" />
+                <h3 className="text-xl font-bold text-white mb-2">Start Configuration</h3>
+                <p className="text-sm text-gray-400 mb-6">Select a base platform to customize your build.</p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Link to="/category/servers" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">DELL POWEREDGE</Link>
+                  <Link to="/category/servers" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">HPE PROLIANT</Link>
+                  <Link to="/category/storage" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">CISCO UCS</Link>
+                  <button onClick={() => openQuoteModal()} className="px-4 py-2 bg-action-600 border border-action-600 text-white text-xs font-bold text-center hover:bg-action-500 transition-colors">CUSTOM BOM</button>
+                </div>
+              </div>
+
+              <div className="hidden lg:block h-full w-px bg-gradient-to-b from-navy-700 via-action-900 to-transparent"></div>
+
+              <div className="pt-4 max-w-sm">
+                <p className="text-lg text-gray-300 leading-relaxed font-light">
+                  {content.home.heroSubtitle || "We supply the world's data centers with certified refurbished hardware. 3-Year Warranty included."}
+                </p>
+                <div className="mt-8 flex items-center gap-8">
+                  <div>
+                    <div className="text-2xl font-bold text-white">500k+</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">Parts In Stock</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-white">99.9%</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">QC Pass Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- NEW SECTION: "Bento Grid" Categories --- */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <h2 className="text-3xl font-bold text-navy-950 tracking-tight">Core Infrastructure</h2>
+            <Link to="/category" className="text-sm font-bold text-action-600 hover:text-navy-900 flex items-center gap-2">
+              FULL CATALOG <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-[800px] md:h-[600px]">
+            {/* Large Feature: Servers */}
+            <Link to="/category/servers" className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-sm bg-gray-100 min-h-[300px]">
+              <Image
+                src="https://images.unsplash.com/photo-1558494949-ef526b0042a0?auto=format&fit=crop&w=1000"
+                alt="Servers"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-navy-950/40 group-hover:bg-navy-950/20 transition-colors"></div>
+              <div className="absolute bottom-0 left-0 p-8">
+                <h3 className="text-3xl font-bold text-white mb-2">Servers</h3>
+                <p className="text-gray-200">Rack, Tower & Blade Systems</p>
+              </div>
+            </Link>
+
+            {/* Medium: Storage */}
+            <Link to="/category/storage" className="md:col-span-2 relative group overflow-hidden rounded-sm bg-navy-900">
+              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity duration-500">
+                <Database className="w-32 h-32 text-action-900" />
+              </div>
+              <div className="absolute top-6 left-6 z-10">
+                <h3 className="text-2xl font-bold text-white">Storage Arrays</h3>
+              </div>
+              <div className="absolute bottom-6 right-6">
+                <div className="bg-action-500 text-white rounded-full p-2 group-hover:rotate-45 transition-transform"><ArrowRight className="w-4 h-4" /></div>
+              </div>
+            </Link>
+
+            {/* Small: Networking */}
+            <Link to="/category/networking" className="relative group overflow-hidden rounded-sm bg-gray-100 p-6 flex flex-col justify-between hover:bg-gray-200 transition-colors border border-gray-200">
+              <Network className="w-10 h-10 text-navy-900 mb-4" />
+              <div>
+                <h3 className="text-xl font-bold text-navy-900">Networking</h3>
+                <p className="text-sm text-gray-500 mt-1">Switches & Routers</p>
+              </div>
+            </Link>
+
+            {/* Small: Components */}
+            <Link to="/category/components" className="relative group overflow-hidden rounded-sm bg-gray-100 p-6 flex flex-col justify-between hover:bg-gray-200 transition-colors border border-gray-200">
+              <Cpu className="w-10 h-10 text-navy-900 mb-4" />
+              <div>
+                <h3 className="text-xl font-bold text-navy-900">Components</h3>
+                <p className="text-sm text-gray-500 mt-1">CPUs, RAM, Drives</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FEATURE: "The Renewed Promise" (Direct Renewtech Inspiration) --- */}
+      <section className="py-24 bg-navy-900 border-y border-navy-800 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-navy-800 -skew-x-12 opacity-50"></div>
+
+        <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Recycle className="w-5 h-5 text-action-500" />
+              <span className="text-action-500 font-bold uppercase tracking-widest text-sm">Certified Refurbished</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              Performance without the Premium.
+            </h2>
+            <p className="text-lg text-gray-400 mb-8 leading-relaxed">
+              Our "Teraformix Renewed" program restores enterprise hardware to factory-like condition.
+              Rigorous 24-hour stress testing, latest firmware updates, and cosmetic refinishing ensures
+              you get 100% of the performance at 40% of the cost.
+            </p>
+
+            <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="border-l-2 border-action-500 pl-4">
+                <div className="text-2xl font-bold text-white">3 Year</div>
+                <div className="text-sm text-gray-500">Comprehensive Warranty</div>
+              </div>
+              <div className="border-l-2 border-action-500 pl-4">
+                <div className="text-2xl font-bold text-white">ISO 9001</div>
+                <div className="text-sm text-gray-500">Quality Certified</div>
+              </div>
+            </div>
+
+            <Link to="/warranty" className="text-white border-b border-action-500 pb-1 hover:text-action-400 transition-colors inline-flex items-center gap-2">
+              Read our restoration process <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="relative">
+            <div className="bg-navy-950 p-8 rounded-sm border border-navy-800 shadow-2xl">
+              <div className="flex items-center gap-4 mb-6 border-b border-navy-800 pb-4">
+                <ShieldCheck className="w-6 h-6 text-action-500" />
+                <h3 className="font-bold text-white">Quality Assurance Checklist</h3>
+              </div>
+              <ul className="space-y-4">
+                {["Visual Inspection & Cleaning", "Component Level Diagnostics", "Firmware & BIOS Updates", "24-Hr Load Testing", "Secure Data Erasure (NIST 800-88)"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-action-900/50 text-action-500 flex items-center justify-center text-[10px] font-bold">✓</div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- INVENTORY FEED: "Live Manifest" Style --- */}
+      <section className="py-24 bg-navy-950">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-navy-800 pb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                <Zap className="w-5 h-5 text-yellow-500 fill-current" />
+                Live Inventory Feed
+              </h2>
+              <p className="text-gray-500 mt-2 font-mono text-xs">UPDATED: {new Date().toLocaleDateString()}</p>
+            </div>
+            <div className="flex gap-2 mt-4 md:mt-0">
+              {['Most Popular', 'New Arrivals', 'Clearance'].map((tab, i) => (
+                <button key={i} className={`px-4 py-2 text-xs font-bold rounded-sm ${i === 0 ? 'bg-white text-navy-900' : 'text-gray-400 hover:text-white'}`}>
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.slice(0, 4).map(p => (
+              <TechSpecCard key={p.id} product={p} />
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link to="/category" className="inline-block px-12 py-4 border border-navy-700 text-gray-300 font-bold hover:bg-white hover:text-navy-900 transition-all uppercase tracking-widest text-sm">
+              Load Full Catalog
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SERVICES BAR --- */}
+      <section className="py-16 bg-gradient-to-r from-action-900 to-navy-900 text-white">
+        <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
+          <div className="px-4 py-4">
+            <Truck className="w-10 h-10 mx-auto mb-4 text-action-300" />
+            <h3 className="font-bold text-lg mb-2">Same Day Shipping</h3>
+            <p className="text-sm text-blue-100 opacity-80">Order by 4PM EST for immediate dispatch from our TX facility.</p>
+          </div>
+          <div className="px-4 py-4">
+            <Globe className="w-10 h-10 mx-auto mb-4 text-action-300" />
+            <h3 className="font-bold text-lg mb-2">International Freight</h3>
+            <p className="text-sm text-blue-100 opacity-80">We ship to 150+ countries with proper customs documentation.</p>
+          </div>
+          <div className="px-4 py-4">
+            <ShieldCheck className="w-10 h-10 mx-auto mb-4 text-action-300" />
+            <h3 className="font-bold text-lg mb-2">Government POs</h3>
+            <p className="text-sm text-blue-100 opacity-80">CAGE Code: {content.general.cageCode}. We accept Net 30 from qualified agencies.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer is handled by layout, but we include TrustBox here as a final signal */}
+      <div className="bg-navy-950 border-t border-navy-900 py-8">
         <div className="container mx-auto px-4">
           <TrustBox />
         </div>
       </div>
-
-      {/* Trust Strip - ISO & Partners */}
-      <div className="bg-gradient-to-r from-navy-900 to-navy-950 border-y border-navy-800 py-10">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide">{(content.home as any)?.trustTitle || 'Trusted Certifications & Partners'}</h3>
-          </div>
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-10">
-
-            {/* Certifications Left */}
-            <div className="flex items-center gap-4 text-sm font-medium">
-              <div className="flex items-center gap-3 bg-navy-800 rounded-full px-4 py-2 border border-navy-700 shadow-sm" title="Quality Management">
-                <div className="w-6 h-6 rounded-full bg-blue-900/50 text-blue-400 flex items-center justify-center">
-                  <BadgeCheck className="w-4 h-4" />
-                </div>
-                <div className="leading-tight">
-                  <span className="block font-semibold text-white">ISO 9001</span>
-                  <span className="text-xs text-gray-400 font-normal">Quality</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-navy-800 rounded-full px-4 py-2 border border-navy-700 shadow-sm" title="Environmental Management">
-                <div className="w-6 h-6 rounded-full bg-action-900/50 text-action-400 flex items-center justify-center">
-                  <BadgeCheck className="w-4 h-4" />
-                </div>
-                <div className="leading-tight">
-                  <span className="block font-semibold text-white">ISO 14001</span>
-                  <span className="text-xs text-gray-400 font-normal">Environmental</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-navy-800 rounded-full px-4 py-2 border border-navy-700 shadow-sm" title="Information Security">
-                <div className="w-6 h-6 rounded-full bg-indigo-900/50 text-indigo-400 flex items-center justify-center">
-                  <BadgeCheck className="w-4 h-4" />
-                </div>
-                <div className="leading-tight">
-                  <span className="block font-semibold text-white">ISO 27001</span>
-                  <span className="text-xs text-gray-400 font-normal">Security</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={`flex items-center gap-8 transition-all duration-500 ${partnerLogos.length > 0 ? 'hidden' : 'opacity-80'}`}>
-              <div className="h-10 w-auto text-gray-400 flex items-center hover:opacity-100 hover:text-white" title="Cisco Partner">
-                <svg viewBox="0 0 64 32" className="h-full w-auto fill-current" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15.5 19.3c-1.7 0-3.1-1.4-3.1-3.1s1.4-3.1 3.1-3.1 3.1 1.4 3.1 3.1-1.4 3.1-3.1 3.1zm0-5.4c-1.2 0-2.3 1-2.3 2.3s1 2.3 2.3 2.3 2.3-1 2.3-2.3-1.1-2.3-2.3-2.3zm15.6 5.4c-1.7 0-3.1-1.4-3.1-3.1s1.4-3.1 3.1-3.1 3.1 1.4 3.1 3.1-1.4 3.1-3.1 3.1zm0-5.4c-1.2 0-2.3 1-2.3 2.3s1 2.3 2.3 2.3 2.3-1 2.3-2.3-1-2.3-2.3-2.3zm15.6 5.4c-1.7 0-3.1-1.4-3.1-3.1s1.4-3.1 3.1-3.1 3.1 1.4 3.1 3.1-1.4 3.1-3.1 3.1zm0-5.4c-1.2 0-2.3 1-2.3 2.3s1 2.3 2.3 2.3 2.3-1 2.3-2.3-1-2.3-2.3-2.3zM7.7 16.2c-1.7 0-3.1 1.4-3.1 3.1s1.4 3.1 3.1 3.1 3.1-1.4 3.1-3.1-1.4-3.1-3.1-3.1zm0 5.4c-1.2 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm46.8-5.4c-1.7 0-3.1 1.4-3.1 3.1s1.4 3.1 3.1 3.1 3.1-1.4 3.1-3.1-1.4-3.1-3.1-3.1zm0 5.4c-1.2 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM15.5 9.7V2.2h-1.7v7.5h1.7zm15.6 0V2.2h-1.7v7.5h1.7zm15.6 0V2.2h-1.7v7.5h1.7zM7.7 15.1V7.5H6v7.6h1.7zm46.8 0V7.5h-1.7v7.6h1.7zM23.3 9.7V5.9h-1.7v3.8h1.7zm15.6 0V5.9h-1.7v3.8h1.7z" />
-                </svg>
-                <span className="ml-2 text-xs font-bold">Partner</span>
-              </div>
-
-              <div className="h-8 w-auto text-gray-400 flex items-center hover:opacity-100 hover:text-white" title="Seagate Partner">
-                <svg viewBox="0 0 120 32" className="h-full w-auto fill-current" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17.3 15.8c-4.5 0-7.8-2.2-7.8-6.4 0-4.6 4.2-6.7 8.5-6.7 3 0 5.2.7 6.9 1.6l.7-2.7C23.8.8 21.3 0 18 0 11.2 0 4.7 3.5 4.7 10c0 6 4.7 9 10.7 9 4.9 0 8.2 2.2 8.2 6.5 0 4.8-4.5 7-9 7-3.2 0-6.2-.8-7.9-1.9l-.8 2.8c1.9.9 5 1.7 8.7 1.7 7.2 0 13.9-3.7 13.9-10.2 0-6.3-4.9-9.1-11.2-9.1zM0 13.3h2.7v10H0v-10zm112.9-1.5c-1.7 0-3.1.6-4.2 1.9V0h-2.8v23.3h2.8v-8.9c0-2.3 1.7-3.5 3.9-3.5 2.1 0 3.2 1.1 3.2 3.4v9h2.8v-9.6c0-3.2-2-5.2-5.7-5.2zm-16.7 5.4v-9H93.4v2.4h2.8v6.6c0 2.4 1.1 3.6 3.2 3.6 1.4 0 2.4-.5 3.2-1.2l1.4 2c-1.3 1.1-2.9 1.7-5 1.7-3.7 0-5.6-2-5.6-5.6V2.7h2.8V0h-2.8V-2.5h-2.7V0H88v2.7h2.6v10c0 5.2 2.7 8 8 8 2.8 0 5-1 6.7-2.6l-1.6-2c-1.4 1.2-3 1.9-4.8 1.9-1.7-.1-2.7-.8-2.7-2.8z" />
-                </svg>
-              </div>
-
-              <div className="h-8 w-auto text-gray-400 flex items-center hover:opacity-100 hover:text-white" title="Fortinet Authorized">
-                <svg viewBox="0 0 100 30" className="h-full w-auto fill-current" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16.8 7.2h-6.2v4.8h5.5v3.8h-5.5v10.7H6.2V15.8H.7v-3.8h5.5V6.1C6.2 2.3 8.7 0 12.8 0c2 0 3.5.4 4 .6l-.1 6.6zM33.5 13.9c0 7.2-5 13-12.6 13-7.6 0-12.6-5.8-12.6-13s5-13 12.6-13c7.7 0 12.6 5.8 12.6 13zm-4.8 0c0-4.8-3.1-9-7.8-9-4.7 0-7.8 4.2-7.8 9 0 4.8 3.1 9 7.8 9 4.7 0 7.8-4.2 7.8-9zm13.3-3h-1.2c-2.9 0-3.8 1.7-3.8 4.3v11.3h-4.5V8.3h4.5v2.2c.9-1.6 2.5-2.6 4.6-2.6h.4v3zm8.8 8.3v6h-3.7v-6c0-2.1-1-3.2-2.8-3.2-1.9 0-3.3 1.2-3.3 3.5v5.7h-4.5V8.3h4.5v1.9c.9-1.4 2.6-2.2 4.6-2.2 3.4 0 5.2 2 5.2 5.2V11zm3.5-7.8h4.5v14.3h-4.5V11.4zM54.3 6c1.5 0 2.6 1.1 2.6 2.5S55.8 11 54.3 11 51.7 9.9 51.7 8.5 52.8 6 54.3 6zm23.9 5.4v3.9h-4.5v5.5c0 1.3.5 1.8 1.6 1.8.6 0 1.1-.1 1.4-.2l.2 3.6c-.7.3-1.9.6-3.4.6-3.1 0-4.3-1.8-4.3-4.7v-6.6h-2.6v-3.9h2.6V8.7l4.5-1.4v4.1h4.5zm12.4 5.7h-8.8c.2 3 2.2 4.7 4.8 4.7 1.9 0 3.3-.7 4.1-1.8l2.7 2.1c-1.6 2.3-4.1 3.4-6.9 3.4-5.1 0-8.9-3.6-8.9-9.1 0-5.1 3.5-9 8.3-9 5.3 0 7.8 4.1 7.8 8.5v1.2zm-4-3c-.2-2.4-1.7-3.6-3.8-3.6-2.2 0-3.9 1.3-4.3 3.6h8.1z" />
-                </svg>
-              </div>
-            </div>
-            {partnerLogos.length > 0 && (
-              <div className="flex items-center gap-8 transition-all duration-500 opacity-100">
-                {partnerLogos.map((logo, idx) => {
-                  const img = <Image src={logo.image} alt={logo.alt || 'Partner'} width={128} height={32} className="h-8 w-auto object-contain grayscale hover:grayscale-0 opacity-80 hover:opacity-100 transition" />;
-                  return (
-                    <div key={idx} className="flex items-center hover:scale-105">
-                      {logo.url ? (
-                        <a href={logo.url} title={logo.alt || 'Partner'} target="_blank" rel="noopener noreferrer" className="inline-flex items-center">
-                          {img}
-                        </a>
-                      ) : (
-                        img
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-          </div>
-        </div>
-      </div>
-
-      {/* Why Choose Us Section */}
-      <section
-        id="why-section"
-        ref={el => sectionRefs.current['why-section'] = el}
-        className={`py-16 bg-navy-950 transition-all duration-1000 ${visibleSections.has('why-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">{(content.home as any)?.whyTitle || 'Why Procurement Teams Trust Us'}</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">{(content.home as any)?.whyDescription || 'We understand that downtime is not an option. Our infrastructure is built to support yours with speed, reliability, and financial flexibility.'}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {(((content.home as any)?.whyCards) || [
-              { title: 'Global Logistics Network', description: 'With distribution centers in New York, California, and Texas, we offer same-day shipping on 95% of in-stock inventory. We provide blind drop-shipping and international pallet freight to data centers worldwide.' },
-              { title: 'Rigorous QA Testing', description: 'Every server and drive that leaves our facility undergoes a 24-hour stress test. Our certified engineers verify firmware updates, clear logs, and ensure strict cosmetic standards for a "like-new" deployment experience.' },
-              { title: 'Financial Services', description: 'We streamline procurement for enterprise clients. Access Net 30 terms, volume discounts, and detailed BOM (Bill of Materials) auditing. We accept University and Government Purchase Orders instantly.' }
-            ]).slice(0, 3).map((card: any, idx: number) => (
-              <div
-                key={idx}
-                className="p-8 bg-navy-900 rounded-xl border border-navy-800 hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300 hover:border-action-500"
-                style={{ transitionDelay: `${idx * 100}ms` }}
-              >
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-6 ${idx === 0 ? 'bg-blue-900/50 text-blue-400' : idx === 1 ? 'bg-action-900/50 text-action-400' : 'bg-orange-900/50 text-orange-400'}`}>
-                  {idx === 0 ? <Globe className="w-6 h-6" /> : idx === 1 ? <CheckCircle className="w-6 h-6" /> : <BarChart3 className="w-6 h-6" />}
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{card.title}</h3>
-                <p className="text-gray-400 leading-relaxed text-sm">{card.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <main
-        id="featured-section"
-        ref={el => sectionRefs.current['featured-section'] = el}
-        className={`bg-navy-900 py-16 border-t border-navy-800 transition-all duration-1000 ${visibleSections.has('featured-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-white">{(content.home as any)?.featuredTitle || 'Featured Inventory'}</h2>
-              <p className="text-gray-400 mt-1">{(content.home as any)?.featuredSubtitle || 'High-demand components ready to ship.'}</p>
-            </div>
-            <Link to="/category" className="text-action-600 font-semibold hover:underline">{(content.home as any)?.featuredViewAllText || 'View All →'}</Link>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-20 text-gray-500">Loading catalog...</div>
-          ) : (
-            <Suspense
-              fallback={
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx} className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 animate-pulse">
-                      <div className="h-48 w-full bg-gray-200 rounded mb-4" />
-                      <div className="h-4 w-3/4 bg-gray-200 rounded mb-2" />
-                      <div className="h-4 w-1/2 bg-gray-200 rounded mb-6" />
-                      <div className="h-6 w-24 bg-gray-200 rounded" />
-                    </div>
-                  ))}
-                </div>
-              }
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.slice(0, 4).map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </Suspense>
-          )}
-        </div>
-      </main>
-
-      {/* Explore by Category Section */}
-      <section
-        id="category-section"
-        ref={el => sectionRefs.current['category-section'] = el}
-        className={`py-16 bg-navy-950 border-t border-navy-900 transition-all duration-1000 ${visibleSections.has('category-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-white">{(content.home as any)?.exploreTitle || 'Explore by Category'}</h2>
-            <p className="text-gray-400 mt-2">{(content.home as any)?.exploreSubtitle || 'Browse our specialized hardware divisions'}</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.filter(c => c.isActive).slice(0, 4).map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/category/${cat.id}`}
-                className="group p-6 border border-navy-800 rounded-xl hover:border-action-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all duration-300 flex flex-col items-center text-center bg-navy-900 hover:bg-navy-800 transform hover:-translate-y-2 hover:scale-105"
-              >
-                <div className="w-16 h-16 bg-navy-800 text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:bg-action-900/40 group-hover:text-action-500 transition overflow-hidden ring-1 ring-navy-700">
-                  {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
-                  ) : (
-                    getCategoryIcon(cat.name)
-                  )}
-                </div>
-                <h3 className="font-bold text-white group-hover:text-action-400 transition">{cat.name}</h3>
-                <p className="text-xs text-gray-400 mt-2 line-clamp-1">{cat.description}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Latest Blog Posts Section */}
-      {blogPosts.length > 0 && (
-        <section
-          id="blog-section"
-          ref={el => sectionRefs.current['blog-section'] = el}
-          className={`py-16 bg-navy-900 border-t border-navy-800 transition-all duration-1000 ${visibleSections.has('blog-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-        >
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-end mb-10">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Latest Insights</h2>
-                <p className="text-gray-400">Stay updated with industry trends and hardware guides</p>
-              </div>
-              <Link to="/blog" className="text-action-600 font-semibold hover:underline flex items-center gap-1">
-                View All Articles →
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {blogPosts.map((post, idx) => (
-                <Link
-                  key={post.id}
-                  to={`/blog/${post.slug}`}
-                  className="group bg-navy-950 rounded-xl border border-navy-800 overflow-hidden hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300"
-                  style={{ transitionDelay: `${idx * 100}ms` }}
-                >
-                  {post.coverImage && (
-                    <div className="aspect-video overflow-hidden bg-gray-100">
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="text-xs text-gray-500 mb-2 flex items-center gap-2">
-                      <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      {post.category && (
-                        <>
-                          <span>•</span>
-                          <span className="text-action-600 font-semibold">{post.category}</span>
-                        </>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-3 group-hover:text-action-400 transition line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-gray-400 leading-relaxed mb-4 line-clamp-3">
-                      {post.excerpt || post.content?.substring(0, 150) + '...'}
-                    </p>
-                    <span className="text-action-600 font-semibold text-sm group-hover:underline">
-                      Read More →
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Industry Solutions Section */}
-      <section
-        id="industry-section"
-        ref={el => sectionRefs.current['industry-section'] = el}
-        className={`py-20 bg-navy-950 text-white transition-all duration-1000 ${visibleSections.has('industry-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="text-action-500 font-bold tracking-wider uppercase text-sm mb-2 block">{(content.home as any)?.verticalsHeaderTagline || 'Public Sector Speed'}</span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">{(content.home as any)?.publicSectorTitle || 'Fast Hardware for Public Sector Timelines'}</h2>
-              <div className="space-y-6 text-gray-300 leading-relaxed">
-                {(((content.home as any)?.publicSectorParagraphs) || [
-                  'Government, education, healthcare, and research institutions need enterprise hardware fast, but procurement moves slow. Server Tech Central solves this.',
-                  'We stock both legacy components for aging infrastructure and cutting-edge servers for AI workloads, then handle the compliance complexity that delays public sector IT. TAA compliance for federal contracts. E-Rate processes for schools. Audit documentation for institutional buyers. Security vetting for classified systems.',
-                  "We deliver same-day on the hardware while managing the regulatory requirements that typically add weeks to timelines. When your infrastructure supports national security, student learning, patient care, or research operations, waiting isn't realistic. We eliminate the wait."
-                ]).map((t: string, i: number) => (<p key={i}>{t}</p>))}
-                <div className="flex gap-4 mt-6 items-center text-sm font-mono text-gray-400 bg-navy-950/50 p-4 rounded border border-navy-700 inline-block">
-                  <span className="block">CAGE: <span className="text-white">{cageCode}</span></span>
-                  <span className="w-px h-4 bg-gray-600"></span>
-                  <span className="block">DUNS: <span className="text-white">{dunsNumber}</span></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              {(((content.home as any)?.verticalCards) || [
-                { title: 'Hyperscale Data Centers', description: 'Pallets of compute nodes and NVMe storage shipped same-day, because cloud capacity waits for no one.' },
-                { title: 'Federal & Local Government', description: 'TAA-compliant hardware with secure chain of custody and GSA-ready account management. Federal procurement without federal delays.' },
-                { title: 'Education & Research', description: 'HPC clusters for breakthrough research and reliable infrastructure for student networks, E-Rate ready, shipped fast.' }
-              ]).slice(0, 3).map((card: any, idx: number) => (
-                <div key={idx} className="bg-navy-800 p-6 rounded-lg border border-navy-700 flex items-start gap-4">
-                  {idx === 0 ? <Database className="w-8 h-8 text-blue-400 mt-1" /> : idx === 1 ? <Building2 className="w-8 h-8 text-action-500 mt-1" /> : <GraduationCap className="w-8 h-8 text-orange-500 mt-1" />}
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">{card.title}</h3>
-                    <p className="text-sm text-gray-400">{card.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Suspense fallback={<div style={{ height: 96 }} />}>
-        <Footer />
-      </Suspense>
     </div>
   );
 };
