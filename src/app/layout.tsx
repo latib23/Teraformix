@@ -12,6 +12,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
   const { content } = useGlobalContent();
 
+  /*
   useEffect(() => {
     const path = location.pathname || '';
     const isAdmin = path.startsWith('/admin') || path.startsWith('/salesteam');
@@ -64,6 +65,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
       } catch (e) { }
     }
   }, [location.pathname]);
+  */
 
   useEffect(() => {
     const path = location.pathname || '';

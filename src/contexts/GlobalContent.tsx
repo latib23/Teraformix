@@ -186,7 +186,7 @@ const defaultContent: ContentState = {
     content: `## Contact Us\n\nReach our team via the channels below. For urgent sourcing or order updates, include your reference number.\n\n**Sales & Support**\n- Phone: 1-800-555-0199\n- Email: sales@teraformix.com\n\n**Headquarters**\n100 Tech Plaza, Austin, TX 78701`,
   },
   settings: {
-    favicon: 'https://cdn-icons-png.flaticon.com/512/4400/4400508.png',
+    favicon: '/favicon.jpg',
     faviconDarkUrl: '',
     siteTitle: 'Teraformix | Enterprise Hardware Reseller',
     logoUrl: '/logot.jpg',
