@@ -1,0 +1,1 @@
+import{l as r,k as t,j as e,N as u,O as i}from"./index-CFXgF25F.js";const l=()=>{const s=r(),a=t.isAuthenticated(),o=t.getUserRole();return!a||o!=="SALESPERSON"?(t.logout(),e.jsx(u,{to:"/salesteam/login",state:{from:s},replace:!0})):e.jsx(i,{})};export{l as default};

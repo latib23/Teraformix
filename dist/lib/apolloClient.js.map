@@ -1,0 +1,1 @@
+{"version":3,"file":"apolloClient.js","sourceRoot":"","sources":["../../src/lib/apolloClient.ts"],"names":[],"mappings":";;AAAA,2CAA6D;AAG7D,MAAM,MAAM,GAAG,IAAI,qBAAY,CAAC;IAC9B,GAAG,EAAE,2CAA2C;IAChD,KAAK,EAAE,IAAI,sBAAa,EAAE;IAC1B,OAAO,EAAE;QAEP,OAAO,EAAE,SAAS;KACnB;CACF,CAAC,CAAC;AAEH,kBAAe,MAAM,CAAC"}

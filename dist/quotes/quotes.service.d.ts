@@ -1,0 +1,34 @@
+import { Repository } from 'typeorm';
+import { Quote } from './entities/quote.entity';
+import { User } from '../users/entities/user.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ConciergeRequestDto } from './dto/concierge-request.dto';
+import { BulkQuoteRequestDto } from './dto/bulk-quote-request.dto';
+import { BomUploadRequestDto } from './dto/bom-upload-request.dto';
+import { QuoteBeatingRequestDto } from './dto/quote-beating-request.dto';
+import { ContactRequestDto } from './dto/contact-request.dto';
+import { AirtableService } from '../orders/airtable.service';
+export declare class QuotesService {
+    private quoteRepository;
+    private notificationsService;
+    private airtableService;
+    constructor(quoteRepository: Repository<Quote>, notificationsService: NotificationsService, airtableService: AirtableService);
+    private generateReferenceNumber;
+    requestQuote(user: User, items: any[]): Promise<Quote>;
+    findAll(): Promise<Quote[]>;
+    findOne(id: string): Promise<Quote>;
+    findForUser(userId: string, email?: string): Promise<Quote[]>;
+    approveQuote(id: string, negotiatedTotal: number): Promise<Quote>;
+    acceptQuote(id: string): Promise<Quote>;
+    update(id: string, updateData: any): Promise<Quote>;
+    createManual(data: any): Promise<Quote>;
+    handleConciergeRequest(data: ConciergeRequestDto): Promise<Quote>;
+    handleBulkQuoteRequest(data: BulkQuoteRequestDto): Promise<Quote>;
+    private extractCategoriesFromText;
+    private slugify;
+    handleBomUpload(data: BomUploadRequestDto): Promise<Quote>;
+    handleQuoteBeatingRequest(data: QuoteBeatingRequestDto): Promise<Quote>;
+    handleContactRequest(data: ContactRequestDto): Promise<Quote>;
+    captureAbandon(payload: any): Promise<Quote>;
+    syncToAirtable(id: string): Promise<void>;
+}

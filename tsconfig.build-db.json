@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist-db",
+        "declaration": false,
+        "noEmit": false,
+        "incremental": false,
+        "tsBuildInfoFile": null
+    },
+    "include": [
+        "src/database/data-source.ts",
+        "src/**/*.entity.ts"
+    ]
+}

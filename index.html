@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <meta name="description"
+    content="Server Tech Central - Enterprise Hardware Reseller. Servers, Storage, and Networking." />
+  <title>Server Tech Central</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </noscript>
+
+  <!-- Compiled CSS (deferred load pattern) -->
+  <link rel="stylesheet" href="/index.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="/index.css">
+  </noscript>
+
+  <style>
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      scrollbar-gutter: stable;
+    }
+  </style>
+  <!-- TrustBox script removed for TBT optimization (loaded lazily in component) -->
+
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Preload and load the main entry point compiled by Vite -->
+  <link rel="modulepreload" href="/index.tsx" />
+  <script type="module" src="/index.tsx"></script>
+
+</body>
+
+</html>

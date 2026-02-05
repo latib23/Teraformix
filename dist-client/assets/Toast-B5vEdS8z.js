@@ -1,0 +1,6 @@
+import{c as a,u as c,j as s,C as i,X as n}from"./index-CFXgF25F.js";import{X as o}from"./x-circle-DoRHLI6b.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const l=a("Info",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"M12 16v-4",key:"1dtifu"}],["path",{d:"M12 8h.01",key:"e9boi3"}]]),m=()=>{const{toasts:r,removeToast:t}=c();return r.length===0?null:s.jsx("div",{className:"fixed bottom-4 right-4 z-[100] flex flex-col gap-2",children:r.map(e=>s.jsxs("div",{className:`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border animate-slideInRight min-w-[300px] ${e.type==="success"?"bg-white border-action-500 text-navy-900":e.type==="error"?"bg-red-50 border-red-200 text-red-800":"bg-navy-800 border-navy-700 text-white"}`,children:[e.type==="success"&&s.jsx(i,{className:"w-5 h-5 text-action-600"}),e.type==="error"&&s.jsx(o,{className:"w-5 h-5 text-red-600"}),e.type==="info"&&s.jsx(l,{className:"w-5 h-5 text-blue-400"}),s.jsx("span",{className:"text-sm font-medium flex-grow",children:e.message}),s.jsx("button",{onClick:()=>t(e.id),className:"text-gray-400 hover:text-gray-600 transition",children:s.jsx(n,{className:"w-4 h-4"})})]},e.id))})};export{m as default};
