@@ -353,7 +353,7 @@ class SpaController {
     res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
   }
 
-  @Get(['/admin', '/admin/*', 'cart', 'checkout', 'upload-bom', 'thank-you', 'login', 'register', 'account', '404'])
+  @Get(['/admin', '/admin/*', 'cart', 'checkout', 'upload-bom', 'thank-you', 'login', 'register', 'account', 'configurator', '404'])
   async genericPages(@Req() req: any, @Res() res: Response) {
     if (req.url === '/404') {
       res.status(404);

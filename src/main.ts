@@ -34,6 +34,7 @@ async function bootstrap() {
       { path: 'admin', method: RequestMethod.GET },
       { path: 'admin/(.*)', method: RequestMethod.GET },
       { path: 'contact', method: RequestMethod.GET },
+      { path: 'configurator', method: RequestMethod.GET },
       { path: 'returns', method: RequestMethod.GET },
     ],
   });
@@ -522,7 +523,7 @@ async function bootstrap() {
     const isApi = path.startsWith('/api');
     const isAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|map|txt|xml)$/i.test(path);
     const isSpecial = path === '/robots.txt' || path === '/sitemap.xml';
-    const isHandledRoute = path.startsWith('/product/') || path.startsWith('/category/') || path.startsWith('/landing') || path.startsWith('/products') || path.startsWith('/admin') || path.startsWith('/warranty') || path.startsWith('/contact') || path.startsWith('/returns') || path.startsWith('/upload-bom') || path.startsWith('/cart') || path.startsWith('/checkout') || path.startsWith('/thank-you') || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/account') || path.startsWith('/about') || path.startsWith('/sitemap') || path.startsWith('/track') || path.startsWith('/privacy') || path.startsWith('/terms');
+    const isHandledRoute = path.startsWith('/product/') || path.startsWith('/category/') || path.startsWith('/landing') || path.startsWith('/products') || path.startsWith('/admin') || path.startsWith('/warranty') || path.startsWith('/contact') || path.startsWith('/configurator') || path.startsWith('/returns') || path.startsWith('/upload-bom') || path.startsWith('/cart') || path.startsWith('/checkout') || path.startsWith('/thank-you') || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/account') || path.startsWith('/about') || path.startsWith('/sitemap') || path.startsWith('/track') || path.startsWith('/privacy') || path.startsWith('/terms');
     if (req.method === 'GET' && !isApi && !isAsset && !isSpecial && !isHandledRoute) {
       const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
       const rawHost = req.get('host');
