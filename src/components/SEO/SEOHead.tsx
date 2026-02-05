@@ -18,7 +18,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   description, 
   canonicalUrl, 
   type = 'website',
-  image = 'https://servertechcentral.com/og-default.jpg',
+  image = 'https://teraformix.com/og-default.jpg',
   price,
   currency = 'USD',
   availability,
@@ -49,7 +49,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     updateMeta('og:type', type, 'property');
     updateMeta('og:image', image, 'property');
     updateMeta('og:url', canonicalUrl || window.location.href, 'property');
-    updateMeta('og:site_name', 'Server Tech Central', 'property');
+    updateMeta('og:site_name', 'Teraformix', 'property');
 
     // 5. Product Specific OG
     if (type === 'product' && price) {

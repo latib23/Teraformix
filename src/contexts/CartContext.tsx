@@ -31,7 +31,7 @@ export const CartProvider = ({ children }: React.PropsWithChildren<{}>) => {
     let savedCart: string | null = null;
     try {
       if (typeof localStorage !== 'undefined') {
-        savedCart = localStorage.getItem('stc_cart');
+        savedCart = localStorage.getItem('tfx_cart');
       }
     } catch { }
     if (savedCart) {
@@ -47,13 +47,13 @@ export const CartProvider = ({ children }: React.PropsWithChildren<{}>) => {
   useEffect(() => {
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('stc_cart', JSON.stringify(cart));
+        localStorage.setItem('tfx_cart', JSON.stringify(cart));
       }
     } catch { }
   }, [cart]);
 
   const dispatchToast = (message: string, type: 'success' | 'info' | 'error') => {
-    window.dispatchEvent(new CustomEvent('stc-toast', { detail: { message, type } }));
+    window.dispatchEvent(new CustomEvent('tfx-toast', { detail: { message, type } }));
   };
 
   const addToCart = (product: Product, qty = 1) => {

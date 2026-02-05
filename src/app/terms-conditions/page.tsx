@@ -11,9 +11,9 @@ const TermsConditionsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead 
-        title="Terms & Conditions | Server Tech Central"
+        title="Terms & Conditions | Teraformix"
         description="Read our terms and conditions governing the use of this site."
-        canonicalUrl="https://servertechcentral.com/terms-and-conditions"
+        canonicalUrl="https://teraformix.com/terms-and-conditions"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

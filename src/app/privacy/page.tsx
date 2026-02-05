@@ -15,9 +15,9 @@ const PrivacyPolicyPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead 
-        title="Privacy Policy | Server Tech Central"
+        title="Privacy Policy | Teraformix"
         description="Read our privacy policy to understand how we collect, use, and protect your data."
-        canonicalUrl="https://servertechcentral.com/privacy"
+        canonicalUrl="https://teraformix.com/privacy"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

@@ -4,11 +4,11 @@ import { ContentState } from '../contexts/GlobalContent';
 import { Product, Order, FormSubmission } from '../types';
 
 const DB_KEYS = {
-  CONTENT: 'stc_global_content_v2',
-  ORDERS: 'stc_orders',
-  SUBMISSIONS: 'stc_submissions',
-  USERS: 'stc_users',
-  PRODUCTS: 'stc_products',
+  CONTENT: 'tfx_global_content_v2',
+  ORDERS: 'tfx_orders',
+  SUBMISSIONS: 'tfx_submissions',
+  USERS: 'tfx_users',
+  PRODUCTS: 'tfx_products',
 };
 
 // Helper to safely set items in localStorage with Quota handling

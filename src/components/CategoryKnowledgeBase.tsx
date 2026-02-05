@@ -11,7 +11,7 @@ const CategoryKnowledgeBase = () => {
     },
     {
       question: "Do you offer warranty on refurbished servers?",
-      answer: "Yes, all refurbished servers from Server Tech Central undergo a rigorous 28-point QA testing process and come with a standard 3-Year Advanced Replacement Warranty. We also offer extended warranties up to 5 years."
+      answer: "Yes, all refurbished servers from Teraformix undergo a rigorous 28-point QA testing process and come with a standard 3-Year Advanced Replacement Warranty. We also offer extended warranties up to 5 years."
     },
     {
       question: "How fast can you ship a custom configuration?",
@@ -54,7 +54,7 @@ const CategoryKnowledgeBase = () => {
             
             <article className="text-gray-600 space-y-4 leading-relaxed">
               <p>
-                Navigating the complex landscape of enterprise hardware procurement requires a deep understanding of workload requirements, scalability, and total cost of ownership (TCO). At Server Tech Central, we bridge the gap between legacy infrastructure and next-generation data center solutions.
+                Navigating the complex landscape of enterprise hardware procurement requires a deep understanding of workload requirements, scalability, and total cost of ownership (TCO). At Teraformix, we bridge the gap between legacy infrastructure and next-generation data center solutions.
               </p>
               
               <h3 className="text-lg font-bold text-navy-800 mt-6">Optimizing for Workload Performance</h3>

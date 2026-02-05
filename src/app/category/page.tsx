@@ -23,7 +23,7 @@ const getCategoryMetadata = (query: string, content: any) => {
 
   if (category) {
     return {
-      title: category.seoTitle || `${category.name} | Server Tech Central`,
+      title: category.seoTitle || `${category.name} | Teraformix`,
       description: category.seoDescription || category.description,
       h1: category.seoH1 || category.name,
       text: category.seoText || category.description,
@@ -34,8 +34,8 @@ const getCategoryMetadata = (query: string, content: any) => {
   // 2. Search Results (if query exists but no category matched)
   if (query && !category) {
     return {
-      title: `Search Results for "${query}" | Server Tech Central`,
-      description: `Browse results for ${query}. Find enterprise hardware including servers, storage, and networking equipment at Server Tech Central.`,
+      title: `Search Results for "${query}" | Teraformix`,
+      description: `Browse results for ${query}. Find enterprise hardware including servers, storage, and networking equipment at Teraformix.`,
       h1: `Search Results for "${query}"`,
       text: "",
       isSpecific: false
@@ -44,7 +44,7 @@ const getCategoryMetadata = (query: string, content: any) => {
 
   // 3. Root Category Page (Default)
   return {
-    title: content.categoryPage?.title || "Enterprise Servers & Storage Solutions | Server Tech Central",
+    title: content.categoryPage?.title || "Enterprise Servers & Storage Solutions | Teraformix",
     description: content.categoryPage?.description || "Browse our catalog of over 500,000 enterprise servers...",
     h1: content.categoryPage?.h1 || "Enterprise Servers & Storage Solutions",
     text: content.categoryPage?.introText || "Browse our extensive catalog of new and refurbished enterprise hardware...",
@@ -291,7 +291,7 @@ const CategoryPage = () => {
       <SEOHead
         title={metadata.title}
         description={metadata.description}
-        canonicalUrl={`https://servertechcentral.com/category/${slug || ''}`}
+        canonicalUrl={`https://teraformix.com/category/${slug || ''}`}
       />
       <Header />
       <Breadcrumbs items={[{ label: searchQuery || 'Enterprise Hardware', path: slug ? `/category/${slug}` : `/category?search=${searchQuery}` }]} />

@@ -162,7 +162,7 @@ export class ProductsService implements OnModuleInit {
     const templates = [
       'Fantastic performance. We integrated this into our cluster and saw immediate improvements.',
       'Solid build quality. Exactly what you expect from enterprise-grade hardware.',
-      'Server Tech Central delivered this faster than expected. Perfect condition.',
+      'Teraformix delivered this faster than expected. Perfect condition.',
       'Reliable and robust. We have been running this for 3 months now with zero downtime.',
       'Excellent value for the price. Hard to beat this level of performance in this budget.',
       'The compatibility was spot on. Plug and play with our existing infrastructure.',
@@ -331,7 +331,7 @@ export class ProductsService implements OnModuleInit {
     await this.syncToQdrant(saved);
 
     // SEO: Notify search engines
-    pingIndexNow(`https://servertechcentral.com/product/${encodeURIComponent(saved.sku)}`);
+    pingIndexNow(`https://teraformix.com/product/${encodeURIComponent(saved.sku)}`);
 
     return saved;
   }
@@ -376,7 +376,7 @@ export class ProductsService implements OnModuleInit {
     await this.syncToQdrant(saved);
 
     // SEO: Notify search engines
-    pingIndexNow(`https://servertechcentral.com/product/${encodeURIComponent(saved.sku)}`);
+    pingIndexNow(`https://teraformix.com/product/${encodeURIComponent(saved.sku)}`);
 
     return saved;
   }
@@ -666,7 +666,7 @@ export class ProductsService implements OnModuleInit {
     if (details.length > 0) {
       const urls = details
         .filter(d => d.status === 'created' || d.status === 'updated')
-        .map(d => `https://servertechcentral.com/product/${encodeURIComponent(d.sku)}`);
+        .map(d => `https://teraformix.com/product/${encodeURIComponent(d.sku)}`);
       if (urls.length > 0) pingIndexNow(urls);
     }
 
@@ -689,7 +689,7 @@ export class ProductsService implements OnModuleInit {
     const templates = [
       'Fantastic performance. We integrated this into our cluster and saw immediate improvements.',
       'Solid build quality. Exactly what you expect from enterprise-grade hardware.',
-      'Server Tech Central delivered this faster than expected. Perfect condition.',
+      'Teraformix delivered this faster than expected. Perfect condition.',
       'Reliable and robust. We have been running this for 3 months now with zero downtime.',
       'Excellent value for the price. Hard to beat this level of performance in this budget.',
       'The compatibility was spot on. Plug and play with our existing infrastructure.',

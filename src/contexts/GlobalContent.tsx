@@ -180,7 +180,7 @@ const defaultContent: ContentState = {
     }
   },
   aboutPage: {
-    content: `## About Us\n\nServer Tech Central supplies enterprise-grade servers, storage, and networking hardware to data centers, MSPs, and public sector organizations. Our mission is rapid, reliable fulfillment backed by technical expertise.\n\n**Why Choose Us**\n- Large in-stock inventory\n- Fast, professional procurement\n- 3-Year standard warranty\n- Dedicated account managers`,
+    content: `## About Us\n\nTeraformix supplies enterprise-grade servers, storage, and networking hardware to data centers, MSPs, and public sector organizations. Our mission is rapid, reliable fulfillment backed by technical expertise.\n\n**Why Choose Us**\n- Large in-stock inventory\n- Fast, professional procurement\n- 3-Year standard warranty\n- Dedicated account managers`,
   },
   contactPage: {
     content: `## Contact Us\n\nReach our team via the channels below. For urgent sourcing or order updates, include your reference number.\n\n**Sales & Support**\n- Phone: 1-800-555-0199\n- Email: sales@teraformix.com\n\n**Headquarters**\n100 Tech Plaza, Austin, TX 78701`,

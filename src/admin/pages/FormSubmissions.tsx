@@ -10,7 +10,7 @@ import autoTable from 'jspdf-autotable';
 import { useGlobalContent } from '../../contexts/GlobalContent';
 
 const QUOTE_TERMS = `1. Quotation Validity 
-Unless otherwise stated in writing, this quotation is valid for 15 calendar days from the date issued. After the expiration date, Server Tech Central Inc. ("Seller") reserves the right to revise pricing, availability, or other terms.
+Unless otherwise stated in writing, this quotation is valid for 15 calendar days from the date issued. After the expiration date, Teraformix Inc. ("Seller") reserves the right to revise pricing, availability, or other terms.
 
 2. Non-Binding Offer 
 This quotation is not a binding agreement. It is provided solely for Buyer's review and does not obligate Seller to deliver goods or services until a formal Sales Order is accepted and confirmed by both parties in writing.
@@ -298,12 +298,12 @@ const FormSubmissions = () => {
           console.warn("PDF Logo Load Failed", e);
           doc.setFontSize(22);
           doc.setFont("helvetica", "bold");
-          doc.text(content.settings.logoText || "Server Tech Central", 15, 25);
+          doc.text(content.settings.logoText || "Teraformix", 15, 25);
         }
       } else {
         doc.setFontSize(22);
         doc.setFont("helvetica", "bold");
-        doc.text(content.settings.logoText || "Server Tech Central", 15, 25);
+        doc.text(content.settings.logoText || "Teraformix", 15, 25);
       }
 
       // Document Title (Right Side of Blue Bar)
@@ -320,12 +320,12 @@ const FormSubmissions = () => {
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text("Server Tech Central Inc.", 15, currentY);
+      doc.text("Teraformix Inc.", 15, currentY);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(slate[0], slate[1], slate[2]);
       doc.text(content.general.address || "123 Tech Blvd, Austin, TX 78701", 15, currentY + 5);
       doc.text(`Phone: ${content.general.phone || "N/A"}`, 15, currentY + 10);
-      doc.text(`Email: ${content.general.email || "sales@servertechcentral.com"}`, 15, currentY + 15);
+      doc.text(`Email: ${content.general.email || "sales@teraformix.com"}`, 15, currentY + 15);
 
       if (currentUser && currentUser.name) {
         doc.text(`Sales Rep: ${currentUser.name}`, 15, currentY + 20);

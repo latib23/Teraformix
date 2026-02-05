@@ -35,7 +35,7 @@ const QuoteBeatingForm = lazy(() => import('../../components/QuoteBeatingForm'))
 export async function generateMetadata({ params }: { params: { sku: string } }) {
   // Placeholder for server-side logic
   return {
-    title: `Product ${params.sku} | Server Tech Central`
+    title: `Product ${params.sku} | Teraformix`
   };
 }
 
@@ -492,9 +492,9 @@ const ProductPage = () => {
       )}
 
       <SEOHead
-        title={product.metaTitle || `${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} ${product.category || 'Hardware'} | Server Tech Central`}
+        title={product.metaTitle || `${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} ${product.category || 'Hardware'} | Teraformix`}
         description={product.metaDescription || `Buy genuine ${product.brand || 'OEM'} ${product.name} (SKU: ${product.sku}). ${product.category ? `Enterprise ${product.category}` : 'Enterprise hardware'} - New condition, 3-year warranty included. ${product.stockStatus === 'IN_STOCK' ? 'In stock and ready to ship' : 'Available on backorder'}. ${Object.values(product.specs || {}).slice(0, 3).join(' • ')}. ISO 9001 certified reseller. Free shipping, 30-day returns.`}
-        canonicalUrl={`https://servertechcentral.com/product/${product.sku}`}
+        canonicalUrl={`https://teraformix.com/product/${product.sku}`}
         type="product"
         image={product.image}
         price={product.price}
@@ -503,9 +503,9 @@ const ProductPage = () => {
       <JsonLd data={product} />
       {(() => {
         const items = [
-          { position: 1, name: 'Home', item: 'https://servertechcentral.com/' },
-          { position: 2, name: product.category || 'Components', item: categorySlug ? `https://servertechcentral.com/category/${categorySlug}` : 'https://servertechcentral.com/category' },
-          { position: 3, name: product.name, item: `https://servertechcentral.com/product/${product.sku}` },
+          { position: 1, name: 'Home', item: 'https://teraformix.com/' },
+          { position: 2, name: product.category || 'Components', item: categorySlug ? `https://teraformix.com/category/${categorySlug}` : 'https://teraformix.com/category' },
+          { position: 3, name: product.name, item: `https://teraformix.com/product/${product.sku}` },
         ];
         const data = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(i => ({ '@type': 'ListItem', position: i.position, name: i.name, item: i.item })) };
         return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
@@ -586,7 +586,7 @@ const ProductPage = () => {
             "price": product.price || 0,
             "priceCurrency": "USD",
             "availability": product.stockStatus === 'IN_STOCK' ? "https://schema.org/InStock" : "https://schema.org/BackOrder",
-            "url": `https://servertechcentral.com/product/${product.sku}`
+            "url": `https://teraformix.com/product/${product.sku}`
           }
         };
         return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }} />;
@@ -613,7 +613,7 @@ const ProductPage = () => {
                 <div className="border border-gray-200 rounded-lg p-2 bg-white flex items-center justify-center h-full max-h-[320px]">
                   <Image
                     src={product.image}
-                    alt={`${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} Enterprise ${product.category || 'Hardware'} - New Condition - In Stock at Server Tech Central`}
+                    alt={`${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} Enterprise ${product.category || 'Hardware'} - New Condition - In Stock at Teraformix`}
                     className="w-full h-full object-contain"
                     width={500}
                     height={500}
@@ -1204,7 +1204,7 @@ const ProductPage = () => {
 
                 {/* Why Buy Here Box */}
                 <div className="bg-navy-900 text-white rounded-lg p-6">
-                  <h3 className="font-bold text-lg mb-4">Why Server Tech Central?</h3>
+                  <h3 className="font-bold text-lg mb-4">Why Teraformix?</h3>
                   <ul className="space-y-4 text-sm">
                     <li className="flex gap-3">
                       <div className="bg-navy-800 p-1.5 rounded h-fit"><ShieldCheck className="w-4 h-4 text-action-500" /></div>

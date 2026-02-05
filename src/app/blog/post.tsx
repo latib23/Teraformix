@@ -270,9 +270,9 @@ const BlogPostPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead
-        title={post.metaTitle || `${post.title} | Blog | Server Tech Central`}
+        title={post.metaTitle || `${post.title} | Blog | Teraformix`}
         description={post.metaDescription || post.excerpt || post.title}
-        canonicalUrl={`https://servertechcentral.com/blog/${post.slug}`}
+        canonicalUrl={`https://teraformix.com/blog/${post.slug}`}
         image={post.image}
         type="article"
       />

@@ -13,9 +13,9 @@ const BlogListPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead
-        title="Blog | Server Tech Central"
+        title="Blog | Teraformix"
         description="Expert insights, guides, and news on enterprise hardware, servers, storage, and networking solutions."
-        canonicalUrl="https://servertechcentral.com/blog"
+        canonicalUrl="https://teraformix.com/blog"
       />
       <Header />
 

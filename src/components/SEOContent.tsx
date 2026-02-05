@@ -16,7 +16,7 @@ const SEOContent = () => {
         <h1 className="text-3xl font-bold text-navy-900 mb-6">Enterprise Grade Hardware Solutions</h1>
         <div className="prose prose-slate max-w-none text-gray-600 mb-10">
           <p>
-            Server Tech Central provides industry-leading infrastructure hardware for data centers, cloud providers, and enterprise IT environments. 
+            Teraformix provides industry-leading infrastructure hardware for data centers, cloud providers, and enterprise IT environments. 
             We specialize in rapid deployment of mission-critical assets from top manufacturers like Dell EMC, HPE, Cisco, and Seagate. 
             Whether you are scaling a hyper-converged cluster or maintaining legacy systems, our inventory strategy ensures high availability.
           </p>

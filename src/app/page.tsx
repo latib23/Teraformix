@@ -84,7 +84,7 @@ const HomePage = () => {
       <SEOHead
         title="Thinking Ahead. | Teraformix Enterprise"
         description="The source for renewed enterprise infrastructure."
-        canonicalUrl="https://servertechcentral.com"
+        canonicalUrl="https://teraformix.com"
       />
       <Suspense fallback={<div className="h-16 bg-navy-900" />}>
         <Header />

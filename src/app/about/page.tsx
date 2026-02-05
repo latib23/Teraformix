@@ -11,9 +11,9 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead 
-        title="About Us | Server Tech Central"
-        description="Learn about Server Tech Central and our mission to supply enterprise hardware."
-        canonicalUrl="https://servertechcentral.com/about"
+        title="About Us | Teraformix"
+        description="Learn about Teraformix and our mission to supply enterprise hardware."
+        canonicalUrl="https://teraformix.com/about"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

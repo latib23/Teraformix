@@ -131,7 +131,7 @@ class SpaController {
       const rawHost = req.get('host'); const host = rawHost.replace(/^www\./, '');
       const origin = `https://${host}`;
       const settings = await this.cmsService.getContent('settings');
-      const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Server Tech Central';
+      const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Teraformix';
       const siteDesc = (settings && settings.siteDescription) ? String(settings.siteDescription) : 'Enterprise Hardware Reseller. Servers, Storage, and Networking.';
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
@@ -153,14 +153,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/">
         <link rel="alternate" hreflang="x-default" href="${origin}/">
       `);
@@ -428,7 +428,7 @@ class SpaController {
       const productUrl = `${origin}/product/${encodeURIComponent(String((p as any).sku))}`;
 
       const settings = await this.cmsService.getContent('settings');
-      const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Server Tech Central';
+      const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Teraformix';
       const a: any = (p as any).attributes || {};
       const s: any = (p as any).schema || {};
       const schemaData: any = {
@@ -471,7 +471,7 @@ class SpaController {
 
       };
       const img = String((p as any).image || '');
-      const defaultOg = 'https://servertechcentral.com/og-default.jpg';
+      const defaultOg = 'https://teraformix.com/og-default.jpg';
       schemaData.image = img && !img.startsWith('data:') ? [img] : [defaultOg];
       if (s.gtin13 || a.__schema_gtin13) schemaData.gtin13 = String(s.gtin13 || a.__schema_gtin13);
       if (s.gtin14 || a.__schema_gtin14) schemaData.gtin14 = String(s.gtin14 || a.__schema_gtin14);
@@ -512,7 +512,7 @@ class SpaController {
       };
       const rawName = String((p as any).name || '');
       const truncName = rawName.length > 40 ? rawName.substring(0, 40) + '...' : rawName;
-      const pageTitle = `${truncName} | Server Tech Central`;
+      const pageTitle = `${truncName} | Teraformix`;
       const pageDesc = String((p as any).description || `${(p as any).brand || ''} ${(p as any).sku || ''}`).slice(0, 160).replace(/"/g, '');
       $('title').text(pageTitle);
 
@@ -530,11 +530,11 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="product">
         <meta property="og:url" content="${productUrl}">
-        <meta property="og:site_name" content="Server Tech Central">
+        <meta property="og:site_name" content="Teraformix">
         <meta property="og:image" content="${schemaData.image[0]}">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
         <meta name="twitter:image" content="${schemaData.image[0]}">
@@ -608,7 +608,7 @@ class SpaController {
           <section class="mt-8 border-t border-gray-100 pt-6">
             <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Trusted by Professionals Worldwide</h2>
             ${logosHtml}
-            <p class="text-[11px] text-gray-500 mt-4 italic">Join over 10,000 IT professionals who rely on Server Tech Central for mission-critical infrastructure.</p>
+            <p class="text-[11px] text-gray-500 mt-4 italic">Join over 10,000 IT professionals who rely on Teraformix for mission-critical infrastructure.</p>
           </section>
           ${resourcesHtml}
           ${relatedCategoriesHtml}
@@ -644,7 +644,7 @@ class SpaController {
         const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
         const catName = String(cat.name || '');
         const truncCat = catName.length > 40 ? catName.substring(0, 40) + '...' : catName;
-        const pageTitle = String(cat.seoTitle || `${truncCat} | Server Tech Central`);
+        const pageTitle = String(cat.seoTitle || `${truncCat} | Teraformix`);
         const pageDesc = String(cat.seoDescription || cat.description || `${cat.name} inventory`).replace(/"/g, '').slice(0, 160);
         $('title').text(pageTitle);
 
@@ -662,14 +662,14 @@ class SpaController {
           <meta property="og:description" content="${pageDesc}">
           <meta property="og:type" content="website">
           <meta property="og:url" content="${origin}/category/${encodeURIComponent(String(cat.id))}">
-          <meta property="og:site_name" content="Server Tech Central">
-          <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+          <meta property="og:site_name" content="Teraformix">
+          <meta property="og:image" content="https://teraformix.com/og-default.jpg">
           <meta name="twitter:card" content="summary_large_image">
-          <meta name="twitter:site" content="@ServerTechCent">
-          <meta name="twitter:creator" content="@ServerTechCent">
+          <meta name="twitter:site" content="@Teraformix">
+          <meta name="twitter:creator" content="@Teraformix">
           <meta name="twitter:title" content="${pageTitle}">
           <meta name="twitter:description" content="${pageDesc}">
-          <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+          <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
           <link rel="alternate" hreflang="en-US" href="${origin}/category/${encodeURIComponent(String(cat.id))}">
           <link rel="alternate" hreflang="x-default" href="${origin}/category/${encodeURIComponent(String(cat.id))}">
         `);
@@ -711,7 +711,7 @@ class SpaController {
       const origin = `${proto}://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Categories | Server Tech Central`;
+      const pageTitle = `Categories | Teraformix`;
       const pageDesc = `Browse enterprise hardware categories: Servers, Storage, Networking.`;
 
       $('title').text(pageTitle);
@@ -765,7 +765,7 @@ class SpaController {
       const origin = `${proto}://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Privacy Policy | Server Tech Central`;
+      const pageTitle = `Privacy Policy | Teraformix`;
       const pageDesc = `Read our privacy practices and data protection policy.`;
 
       $('title').text(pageTitle);
@@ -784,14 +784,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/privacy">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/privacy">
         <link rel="alternate" hreflang="x-default" href="${origin}/privacy">
       `);
@@ -822,7 +822,7 @@ class SpaController {
       const origin = `${proto}://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Terms of Sale | Server Tech Central`;
+      const pageTitle = `Terms of Sale | Teraformix`;
       const pageDesc = `View order policies, returns, warranties, and terms.`;
 
       $('title').text(pageTitle);
@@ -841,14 +841,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/terms">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/terms">
         <link rel="alternate" hreflang="x-default" href="${origin}/terms">
       `);
@@ -879,7 +879,7 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Terms & Conditions | Server Tech Central`;
+      const pageTitle = `Terms & Conditions | Teraformix`;
       const pageDesc = `Website usage terms, payment policies, and liability disclaimers.`;
 
       $('title').text(pageTitle);
@@ -898,14 +898,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/terms-and-conditions">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/terms-and-conditions">
         <link rel="alternate" hreflang="x-default" href="${origin}/terms-and-conditions">
       `);
@@ -936,7 +936,7 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Warranty Policy | Server Tech Central`;
+      const pageTitle = `Warranty Policy | Teraformix`;
       const pageDesc = `Standard 3-Year Warranty on all enterprise hardware. Advanced replacement and support terms.`;
 
       $('title').text(pageTitle);
@@ -955,14 +955,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/warranty">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/warranty">
         <link rel="alternate" hreflang="x-default" href="${origin}/warranty">
       `);
@@ -993,7 +993,7 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Return Policy | Server Tech Central`;
+      const pageTitle = `Return Policy | Teraformix`;
       const pageDesc = `30-day return policy for enterprise hardware. RMA process and warranty info.`;
 
       $('title').text(pageTitle);
@@ -1012,14 +1012,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/returns">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/returns">
         <link rel="alternate" hreflang="x-default" href="${origin}/returns">
       `);
@@ -1050,8 +1050,8 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `About Us | Server Tech Central`;
-      const pageDesc = `Learn about Server Tech Central, our mission, and enterprise hardware expertise.`;
+      const pageTitle = `About Us | Teraformix`;
+      const pageDesc = `Learn about Teraformix, our mission, and enterprise hardware expertise.`;
 
       $('title').text(pageTitle);
 
@@ -1069,14 +1069,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/about">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/about">
         <link rel="alternate" hreflang="x-default" href="${origin}/about">
       `);
@@ -1089,7 +1089,7 @@ class SpaController {
       const ssrBlock = `
         <section id="ssr-about" class="container mx-auto px-4 py-8">
           <h1 class="text-2xl font-bold text-navy-900">About Us</h1>
-          <div class="prose max-w-none text-gray-800 mt-4">${body || '<p class="text-sm text-gray-700">About Server Tech Central.</p>'}</div>
+          <div class="prose max-w-none text-gray-800 mt-4">${body || '<p class="text-sm text-gray-700">About Teraformix.</p>'}</div>
         </section>
       `;
       const footerHtml = await this.getFooterHtml();
@@ -1107,7 +1107,7 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Contact Us | Server Tech Central`;
+      const pageTitle = `Contact Us | Teraformix`;
       const pageDesc = `Get in touch with our sales and support team for enterprise hardware needs.`;
 
       $('title').text(pageTitle);
@@ -1126,14 +1126,14 @@ class SpaController {
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/contact">
-        <meta property="og:site_name" content="Server Tech Central">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@ServerTechCent">
-        <meta name="twitter:creator" content="@ServerTechCent">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
         <link rel="alternate" hreflang="en-US" href="${origin}/contact">
         <link rel="alternate" hreflang="x-default" href="${origin}/contact">
       `);
@@ -1165,7 +1165,7 @@ class SpaController {
       const origin = `https://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Sitemap | Server Tech Central`;
+      const pageTitle = `Sitemap | Teraformix`;
       const pageDesc = `Navigate our complete catalog of enterprise servers, storage, and networking.`;
 
       $('title').text(pageTitle);
@@ -1220,7 +1220,7 @@ class SpaController {
       const origin = `${proto}://${host}`;
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Track Order | Server Tech Central`;
+      const pageTitle = `Track Order | Teraformix`;
       $('title').text(pageTitle);
 
       const ssrBlock = `
@@ -1245,7 +1245,7 @@ class SpaController {
     try {
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const pageTitle = `Admin Login | Server Tech Central`;
+      const pageTitle = `Admin Login | Teraformix`;
       $('title').text(pageTitle);
 
       const ssrBlock = `
@@ -1426,7 +1426,7 @@ class SpaController {
           <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
               <div>
-                <h3 class="text-xl font-bold mb-4 tracking-tight">Server Tech Central</h3>
+                <h3 class="text-xl font-bold mb-4 tracking-tight">Teraformix</h3>
                 <p class="text-gray-300 text-sm mb-6 leading-relaxed">${footer.aboutText || ''}</p>
                 <div class="bg-navy-800 rounded p-4 border border-navy-700">
                   <h4 class="text-xs font-bold text-gray-200 uppercase mb-2 flex items-center gap-2">
@@ -1476,7 +1476,7 @@ class SpaController {
             </div>
             <div class="border-t border-navy-800 py-8 flex flex-col lg:flex-row justify-between items-center gap-6 text-xs text-gray-300">
               <div class="flex flex-col md:flex-row items-center gap-4">
-                <span>&copy; ${year} Server Tech Central. All rights reserved.</span>
+                <span>&copy; ${year} Teraformix. All rights reserved.</span>
                 <div class="hidden md:block w-px h-4 bg-navy-700"></div>
                 <div id="amex-logo" style="width: 230px; height: 50px;">
                   <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/4_Card_color_horizontal.png" width="100%" height="100%" alt="American Express Accepted Here" />

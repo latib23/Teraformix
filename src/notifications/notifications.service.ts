@@ -5,16 +5,16 @@ import nodemailer, { Transporter } from 'nodemailer';
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private readonly salesEmail = 'sales@servertechcentral.com';
+  private readonly salesEmail = 'sales@teraformix.com';
   private transporter: Transporter | null = null;
 
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
 
   async sendEmail(subject: string, html: string, to?: string | string[]): Promise<void> {
     try {
       const apiToken = this.configService.get<string>('MAILTRAP_TOKEN');
-      const fromEmail = this.configService.get<string>('MAILTRAP_FROM') || 'noreply@servertechcentral.com';
-      const fromName = this.configService.get<string>('MAILTRAP_FROM_NAME') || 'Server Tech Central';
+      const fromEmail = this.configService.get<string>('MAILTRAP_FROM') || 'noreply@teraformix.com';
+      const fromName = this.configService.get<string>('MAILTRAP_FROM_NAME') || 'Teraformix';
       const recipients: string[] = Array.isArray(to) ? to.filter(Boolean) : (to ? [to] : []);
       if (!recipients.includes(this.salesEmail)) recipients.push(this.salesEmail);
       if (recipients.length === 0) recipients.push(this.salesEmail);

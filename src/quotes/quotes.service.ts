@@ -191,7 +191,7 @@ export class QuotesService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">Concierge Sourcing Request</div>
           </div>
           <div style="padding:24px">
@@ -207,10 +207,10 @@ export class QuotesService {
             </div>
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
     await this.notificationsService.sendEmail(subject, html, [data.email]);
@@ -248,7 +248,7 @@ export class QuotesService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">Bulk Quote Request</div>
           </div>
           <div style="padding:24px">
@@ -266,10 +266,10 @@ export class QuotesService {
             </div>
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
     await this.notificationsService.sendEmail(subject, html, [data.email]);
@@ -329,7 +329,7 @@ export class QuotesService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">BOM Upload Received</div>
           </div>
           <div style="padding:24px">
@@ -353,10 +353,10 @@ export class QuotesService {
             </div>
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
     await this.notificationsService.sendEmail(subject, html, [data.email]);
@@ -395,7 +395,7 @@ export class QuotesService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">Quote Beating Request</div>
           </div>
           <div style="padding:24px">
@@ -418,10 +418,10 @@ export class QuotesService {
             </div>
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
     await this.notificationsService.sendEmail(subject, html, [data.email]);
@@ -459,7 +459,7 @@ export class QuotesService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">Contact Request Received</div>
           </div>
           <div style="padding:24px">
@@ -481,10 +481,10 @@ export class QuotesService {
             </div>
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
 

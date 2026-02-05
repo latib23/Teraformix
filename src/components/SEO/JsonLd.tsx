@@ -9,7 +9,7 @@ interface JsonLdProps {
 
 const JsonLd: React.FC<JsonLdProps> = ({ data }) => {
   const { content } = useGlobalContent();
-  const siteName = (content?.settings?.siteTitle || 'Server Tech Central');
+  const siteName = (content?.settings?.siteTitle || 'Teraformix');
 
   const specs: any = data?.specs || {};
   const schema: any = (data as any)?.schema || {};

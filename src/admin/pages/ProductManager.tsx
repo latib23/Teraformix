@@ -95,7 +95,7 @@ const ProductManager = () => {
     if (envKey) return envKey;
     if (typeof window !== 'undefined') {
       try {
-        const local = localStorage.getItem('stc_gemini_api_key');
+        const local = localStorage.getItem('tfx_gemini_api_key');
         if (local) return local;
       } catch { }
     }
@@ -357,14 +357,14 @@ const ProductManager = () => {
     const sample = [
       'SRV-720XD', 'PowerEdge R720XD', 'High-density 2U server', 'Dell', 'Servers', '',
       '4999.99', '100', '45 lbs', '3.4 x 17.4 x 28.7 in', '{"cpu":"Xeon","ram":"128GB","drive":"12x 3.5"}', 'Enterprise overview', '3-Year', 'R720,R730', 'https://example.com/datasheet.pdf', 'Enterprise Server', 'High performance compute node', 'server, dell, r720', '', 'true',
-      'SRV-720XD', 'NewCondition', '', '', '2025-12-31', 'Server Tech Central', '4.8', '24', '[{"author":"Jane","datePublished":"2024-01-01","reviewBody":"Great","ratingValue":5}]'
+      'SRV-720XD', 'NewCondition', '', '', '2025-12-31', 'Teraformix', '4.8', '24', '[{"author":"Jane","datePublished":"2024-01-01","reviewBody":"Great","ratingValue":5}]'
     ];
     const rows = [csvHeaders.join(','), sample.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')].join('\n');
     const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'stc_product_bulk_template.csv';
+    a.download = 'tfx_product_bulk_template.csv';
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
@@ -884,7 +884,7 @@ const ProductManager = () => {
                   <div className="space-y-4 animate-fadeIn">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Page Title (Meta Title)</label>
-                      <input name="metaTitle" value={formData.metaTitle} onChange={handleInputChange} className="border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-navy-900" placeholder="e.g. Dell R720XD | Server Tech Central" />
+                      <input name="metaTitle" value={formData.metaTitle} onChange={handleInputChange} className="border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-navy-900" placeholder="e.g. Dell R720XD | Teraformix" />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">H1 Headline</label>
@@ -959,7 +959,7 @@ const ProductManager = () => {
                           <input
                             value={(formData as any)?.schema?.seller || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, schema: { ...((prev as any).schema || {}), seller: e.target.value } }))}
-                            placeholder="e.g. Server Tech Central"
+                            placeholder="e.g. Teraformix"
                             className="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-navy-900"
                           />
                         </div>

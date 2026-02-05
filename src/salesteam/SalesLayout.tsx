@@ -24,7 +24,7 @@ const SalesLayout = () => {
       <aside className="w-64 bg-navy-900 text-white flex flex-col flex-shrink-0">
         <div className="p-6 border-b border-navy-800">
           <h1 className="text-xl font-bold tracking-tight">Sales Portal</h1>
-          <p className="text-xs text-gray-400 mt-1">Server Tech Central</p>
+          <p className="text-xs text-gray-400 mt-1">Teraformix</p>
         </div>
         
         <nav className="flex-grow p-4 space-y-2">

@@ -87,7 +87,7 @@ const LandingPage = () => {
 
   return (
     <div>
-      <SEOHead title={`${collection.title} | Server Tech Central`} description={collection.description} />
+      <SEOHead title={`${collection.title} | Teraformix`} description={collection.description} />
       {showHeader ? (
         <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}> 
           <Header />

@@ -14,9 +14,9 @@ const TermsOfSalePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead 
-        title="Terms of Sale | Server Tech Central"
+        title="Terms of Sale | Teraformix"
         description="Review our terms of sale, warranty information, and return policies."
-        canonicalUrl="https://servertechcentral.com/terms"
+        canonicalUrl="https://teraformix.com/terms"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

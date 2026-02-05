@@ -29,13 +29,13 @@ export class UsersService implements OnModuleInit {
         return;
       }
       // Seeder for Admin and Sales users if they don't exist
-      const admin = await this.userRepository.findOneBy({ email: 'admin@servertechcentral.com' });
+      const admin = await this.userRepository.findOneBy({ email: 'admin@teraformix.com' });
       if (!admin) {
         const adminPass = process.env.SEED_ADMIN_PASSWORD || 'password123';
         const passwordHash = await bcrypt.hash(adminPass, 10);
         const newAdmin = this.userRepository.create({
           name: 'System Admin',
-          email: 'admin@servertechcentral.com',
+          email: 'admin@teraformix.com',
           passwordHash,
           role: UserRole.SUPER_ADMIN
         });
@@ -43,13 +43,13 @@ export class UsersService implements OnModuleInit {
         this.logger.log('Seeded default admin user.');
       }
 
-      const salesUser = await this.userRepository.findOneBy({ email: 'sales@servertechcentral.com' });
+      const salesUser = await this.userRepository.findOneBy({ email: 'sales@teraformix.com' });
       if (!salesUser) {
         const salesPass = process.env.SEED_SALES_PASSWORD || 'password123';
         const passwordHash = await bcrypt.hash(salesPass, 10);
         const newSalesUser = this.userRepository.create({
           name: 'Alex Sales',
-          email: 'sales@servertechcentral.com',
+          email: 'sales@teraformix.com',
           passwordHash,
           role: UserRole.SALESPERSON,
           target: 50000,

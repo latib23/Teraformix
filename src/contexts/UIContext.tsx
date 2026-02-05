@@ -13,7 +13,7 @@ interface UIContextType {
   quoteModalData: string;
   openQuoteModal: (prefillData?: string) => void;
   closeQuoteModal: () => void;
-  
+
   toasts: ToastMessage[];
   showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: number) => void;
@@ -39,7 +39,7 @@ export const UIProvider = ({ children }: React.PropsWithChildren<{}>) => {
   const showToast = useCallback((message: string, type: 'success' | 'info' | 'error' = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
-    
+
     // Auto remove after 3 seconds
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
@@ -59,19 +59,19 @@ export const UIProvider = ({ children }: React.PropsWithChildren<{}>) => {
       }
     };
 
-    window.addEventListener('stc-toast', handleToastEvent);
-    return () => window.removeEventListener('stc-toast', handleToastEvent);
+    window.addEventListener('tfx-toast', handleToastEvent);
+    return () => window.removeEventListener('tfx-toast', handleToastEvent);
   }, [showToast]);
 
   return (
-    <UIContext.Provider value={{ 
-      isQuoteModalOpen, 
-      quoteModalData, 
-      openQuoteModal, 
-      closeQuoteModal, 
-      toasts, 
-      showToast, 
-      removeToast 
+    <UIContext.Provider value={{
+      isQuoteModalOpen,
+      quoteModalData,
+      openQuoteModal,
+      closeQuoteModal,
+      toasts,
+      showToast,
+      removeToast
     }}>
       {children}
     </UIContext.Provider>

@@ -59,7 +59,7 @@ const CartPage = () => {
     doc.setFontSize(18);
     doc.setTextColor('#FFFFFF');
     doc.setFont("helvetica", "bold");
-    doc.text(content.settings.logoText || "SERVER TECH CENTRAL", 14, 20);
+    doc.text(content.settings.logoText || "TERAFORMIX", 14, 20);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text("Enterprise Hardware Reseller", 14, 26);
@@ -94,7 +94,7 @@ const CartPage = () => {
     let currentY = 55 + (addressLines.length * 5);
     doc.text(`Phone: ${content.general.phone}`, 14, currentY);
     doc.text(`Email: ${content.general.email}`, 14, currentY + 5);
-    doc.text(`Web: servertechcentral.com`, 14, currentY + 10);
+    doc.text(`Web: teraformix.com`, 14, currentY + 10);
 
     // --- Table ---
     const tableBody = cart.map((item, index) => [

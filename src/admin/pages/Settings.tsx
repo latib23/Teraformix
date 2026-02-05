@@ -45,7 +45,7 @@ const Settings = () => {
         favicon: content.settings.favicon || '',
         faviconDarkUrl: content.settings.faviconDarkUrl || '',
         logoUrl: content.settings.logoUrl || '',
-        logoText: content.settings.logoText || 'SERVER TECH CENTRAL',
+        logoText: content.settings.logoText || 'TERAFORMIX',
         activeTheme: content.settings.activeTheme || 'none'
       });
     }
@@ -66,7 +66,7 @@ const Settings = () => {
     }
 
     let storedKey = '';
-    try { storedKey = localStorage.getItem('stc_gemini_api_key') || ''; } catch (_e) { void _e; }
+    try { storedKey = localStorage.getItem('tfx_gemini_api_key') || ''; } catch (_e) { void _e; }
     setGeminiKey(storedKey);
     setHomeLogos(((content.home as any)?.partnerLogos) || []);
     setPaymentLogos(((content.footer as any)?.paymentLogos) || []);
@@ -77,7 +77,7 @@ const Settings = () => {
       setIsSaving(true);
       setSaveSuccess(false);
 
-      try { localStorage.setItem('stc_gemini_api_key', geminiKey); } catch (_e) { void _e; }
+      try { localStorage.setItem('tfx_gemini_api_key', geminiKey); } catch (_e) { void _e; }
 
       await updateContent({
         settings,
@@ -390,7 +390,7 @@ const Settings = () => {
                   value={settings.siteTitle}
                   onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
                   className="flex-grow border border-gray-300 bg-white rounded p-2 text-sm focus:ring-2 focus:ring-navy-900 outline-none"
-                  placeholder="Server Tech Central"
+                  placeholder="Teraformix"
                 />
               </div>
               <p className="text-xs text-gray-400 mt-1">This appears in Google Search results and browser tabs.</p>
@@ -513,7 +513,7 @@ const Settings = () => {
                 value={settings.logoText}
                 onChange={(e) => setSettings({ ...settings, logoText: e.target.value })}
                 className="w-full border border-gray-300 bg-white rounded p-2 text-sm focus:ring-2 focus:ring-navy-900 outline-none"
-                placeholder="SERVER TECH CENTRAL"
+                placeholder="TERAFORMIX"
               />
             </div>
 
@@ -628,7 +628,7 @@ const Settings = () => {
                   onChange={(e) => setPayment(prev => ({ ...prev, bankInstructions: e.target.value }))}
                   rows={4}
                   className="w-full border border-gray-300 bg-white rounded p-2 text-sm focus:ring-2 focus:ring-navy-900 outline-none font-mono"
-                  placeholder={`Beneficiary: Server Tech Central Inc.\nBank: Example Bank\nAccount: 123456789\nRouting: 012345678\nSWIFT: EXAMPUS3M`}
+                  placeholder={`Beneficiary: Teraformix Inc.\nBank: Example Bank\nAccount: 123456789\nRouting: 012345678\nSWIFT: EXAMPUS3M`}
                 />
                 <p className="text-xs text-gray-500 mt-1">Shown during checkout when Bank Transfer is enabled.</p>
               </div>

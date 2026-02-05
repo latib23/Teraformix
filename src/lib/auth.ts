@@ -1,10 +1,10 @@
 
 import { getApiBase } from './api';
 
-export const AUTH_TOKEN_KEY = 'stc_auth_token';
-export const AUTH_ROLE_KEY = 'stc_auth_role';
-export const AUTH_USER_KEY = 'stc_auth_user';
-export const AUTH_USER_ID_KEY = 'stc_auth_user_id';
+export const AUTH_TOKEN_KEY = 'tfx_auth_token';
+export const AUTH_ROLE_KEY = 'tfx_auth_role';
+export const AUTH_USER_KEY = 'tfx_auth_user';
+export const AUTH_USER_ID_KEY = 'tfx_auth_user_id';
 
 const safeSetItem = (k: string, v: string) => { try { if (typeof localStorage !== 'undefined') localStorage.setItem(k, v); } catch (_e) { void _e; } };
 const safeGetItem = (k: string): string | null => { try { if (typeof localStorage !== 'undefined') return localStorage.getItem(k); } catch (_e) { void _e; } return null; };

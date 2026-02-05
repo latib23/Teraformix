@@ -273,7 +273,7 @@ async function bootstrap() {
 
   // Setup Swagger
   const config = new DocumentBuilder()
-    .setTitle('Server Tech Central B2B API')
+    .setTitle('Teraformix B2B API')
     .setDescription('Enterprise Hardware Reseller API')
     .setVersion('1.0')
     .addBearerAuth()
@@ -342,7 +342,7 @@ async function bootstrap() {
         const origin = `${proto}://${host}`;
         const productUrl = `${origin}/product/${encodeURIComponent(String((p as any).sku))}`;
         const settings = (await cms.getContent('settings')) || {};
-        const siteName = String((settings as any)?.siteTitle || 'Server Tech Central');
+        const siteName = String((settings as any)?.siteTitle || 'Teraformix');
         const a: any = (p as any).attributes || {};
         const s: any = (p as any).schema || {};
         const schemaData: any = {
@@ -385,7 +385,7 @@ async function bootstrap() {
 
         };
         const img = String((p as any).image || '');
-        const defaultOg = 'https://servertechcentral.com/og-default.jpg';
+        const defaultOg = 'https://teraformix.com/og-default.jpg';
         schemaData.image = img && !img.startsWith('data:') ? [img] : [defaultOg];
         if (s.gtin13 || a.__schema_gtin13) schemaData.gtin13 = String(s.gtin13 || a.__schema_gtin13);
         if (s.gtin14 || a.__schema_gtin14) schemaData.gtin14 = String(s.gtin14 || a.__schema_gtin14);
@@ -440,7 +440,7 @@ async function bootstrap() {
             html = html.replace('</head>', `${clarityScript}</head>`);
           }
         } catch (e) { void 0; }
-        const pageTitle = `${(p as any).name} | Server Tech Central`;
+        const pageTitle = `${(p as any).name} | Teraformix`;
         const pageDesc = String((p as any).description || `${(p as any).brand || ''} ${(p as any).sku || ''}`).slice(0, 160).replace(/"/g, '');
         html = html.replace(/<title>[^<]*<\u002Ftitle>/i, `<title>${pageTitle}<\u002Ftitle>`);
         const canonicalTag = `<link rel="canonical" href="${productUrl}">`;
@@ -530,7 +530,7 @@ async function bootstrap() {
       const origin = `${proto}://${host}`;
       const settingsPromise = cms.getContent('settings');
       return Promise.resolve(settingsPromise).then((settings: any) => {
-        const siteName = String(settings?.siteTitle || 'Server Tech Central');
+        const siteName = String(settings?.siteTitle || 'Teraformix');
         const org: any = {
           '@context': 'https://schema.org',
           '@type': 'Organization',
@@ -579,7 +579,7 @@ async function bootstrap() {
             ? 'Product Details'
             : pth.startsWith('/blog')
               ? 'Blog'
-              : 'Server Tech Central';
+              : 'Teraformix';
         html = html.replace('<body>', `<body><noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1></noscript>`);
         const ssr404 = `
           <section id="ssr-404" class="container mx-auto px-4 py-16">

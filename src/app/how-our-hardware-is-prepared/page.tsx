@@ -45,9 +45,9 @@ const HowHardwareIsPrepared = () => {
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
             <SEOHead
-                title="How Our Hardware Is Prepared | Server Tech Central"
+                title="How Our Hardware Is Prepared | Teraformix"
                 description="Learn about our rigorous 4-step process: Inspection, Testing, Validation, and Packaging. We ensure every server part meets enterprise standards."
-                canonicalUrl="https://servertechcentral.com/how-our-hardware-is-prepared"
+                canonicalUrl="https://teraformix.com/how-our-hardware-is-prepared"
             />
 
             <Header />

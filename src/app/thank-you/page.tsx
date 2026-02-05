@@ -112,7 +112,7 @@ const ThankYouPage = () => {
       doc.setFontSize(18);
       doc.setTextColor('#FFFFFF');
       doc.setFont('helvetica', 'bold');
-      doc.text('SERVER TECH CENTRAL', 14, 20);
+      doc.text('TERAFORMIX', 14, 20);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text('Enterprise Hardware Reseller', 14, 26);
@@ -325,7 +325,7 @@ const ThankYouPage = () => {
                   </div>
                   <div>
                      <p className="text-xs text-gray-500 font-bold uppercase">Account Manager</p>
-                     <p className="text-sm font-bold text-navy-900">sales@servertechcentral.com</p>
+                     <p className="text-sm font-bold text-navy-900">sales@teraformix.com</p>
                   </div>
                </div>
             </div>

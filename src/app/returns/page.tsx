@@ -11,9 +11,9 @@ const ReturnsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead 
-        title="Return Policy | Server Tech Central"
+        title="Return Policy | Teraformix"
         description="Review our return and RMA policy, timelines, and terms."
-        canonicalUrl="https://servertechcentral.com/returns"
+        canonicalUrl="https://teraformix.com/returns"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

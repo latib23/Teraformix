@@ -21,9 +21,9 @@ export async function pingIndexNow(urls: string | string[]) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json; charset=utf-8' },
                 body: JSON.stringify({
-                    host: 'servertechcentral.com',
+                    host: 'teraformix.com',
                     key: key,
-                    keyLocation: `https://servertechcentral.com/${key}.txt`,
+                    keyLocation: `https://teraformix.com/${key}.txt`,
                     urlList: urlList,
                 }),
             });

@@ -286,7 +286,7 @@ const CategoryManager = () => {
                                     value={formData.seoTitle}
                                     onChange={handleInputChange}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-navy-900 outline-none"
-                                    placeholder="e.g. Enterprise Servers | Dell & HPE | Server Tech Central"
+                                    placeholder="e.g. Enterprise Servers | Dell & HPE | Teraformix"
                                 />
                             </div>
                             <div>

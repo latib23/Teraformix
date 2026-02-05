@@ -21,9 +21,9 @@ const SitemapPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead
-        title="Sitemap | Server Tech Central"
-        description="HTML Sitemap for Server Tech Central. Browse all categories and pages."
-        canonicalUrl="https://servertechcentral.com/sitemap"
+        title="Sitemap | Teraformix"
+        description="HTML Sitemap for Teraformix. Browse all categories and pages."
+        canonicalUrl="https://teraformix.com/sitemap"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">

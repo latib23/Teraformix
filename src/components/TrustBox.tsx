@@ -53,10 +53,10 @@ const TrustBox = () => {
             data-style-height="20px"
             data-style-width="100%"
             data-theme="dark"
-            data-href="https://www.trustpilot.com/review/servertechcentral.com"
+            data-href="https://www.trustpilot.com/review/teraformix.com"
             data-token="ba4f6bff-2e90-4115-8e89-c0843b6eb97d"
         >
-            <a href="https://www.trustpilot.com/review/servertechcentral.com" target="_blank" rel="noopener">Trustpilot</a>
+            <a href="https://www.trustpilot.com/review/teraformix.com" target="_blank" rel="noopener">Trustpilot</a>
         </div>
     );
 };

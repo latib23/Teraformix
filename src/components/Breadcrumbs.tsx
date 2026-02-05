@@ -21,13 +21,13 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://servertechcentral.com"
+        "item": "https://teraformix.com"
       },
       ...items.map((item, index) => ({
         "@type": "ListItem",
         "position": index + 2,
         "name": item.label,
-        "item": `https://servertechcentral.com${item.path}`
+        "item": `https://teraformix.com${item.path}`
       }))
     ]
   };

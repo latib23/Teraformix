@@ -47,9 +47,9 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SEOHead
-        title="Contact Us | Server Tech Central"
-        description="Get in touch with Server Tech Central for sales and support."
-        canonicalUrl="https://servertechcentral.com/contact"
+        title="Contact Us | Teraformix"
+        description="Get in touch with Teraformix for sales and support."
+        canonicalUrl="https://teraformix.com/contact"
       />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-12">
@@ -93,7 +93,7 @@ const ContactPage = () => {
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-              <h3 className="text-xl font-bold text-navy-900 mb-4">About Server Tech Central</h3>
+              <h3 className="text-xl font-bold text-navy-900 mb-4">About Teraformix</h3>
               <div className="prose prose-slate max-w-none text-gray-700 leading-relaxed text-sm">
                 {text.split('\n').map((line: string, i: number) => {
                   if (line.startsWith('## ')) return <h4 key={i} className="text-lg font-bold text-navy-800 mt-4 mb-2">{line.replace('## ', '')}</h4>;
