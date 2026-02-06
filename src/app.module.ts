@@ -353,20 +353,7 @@ class SpaController {
     res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
   }
 
-  @Get(['/admin', '/admin/*', 'cart', 'checkout', 'upload-bom', 'thank-you', 'login', 'register', 'account', 'configurator', '404'])
-  async genericPages(@Req() req: any, @Res() res: Response) {
-    if (req.url === '/404') {
-      res.status(404);
-    }
-    try {
-      const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
-      const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const footerHtml = await this.getFooterHtml();
-      $('body').prepend(`<noscript>${footerHtml}</noscript>`);
-      return sendHtml(req, res, $.html());
-    } catch (_e) { void _e; }
-    res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
-  }
+
 
 
 
@@ -745,17 +732,7 @@ class SpaController {
     res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
   }
 
-  @Get('products')
-  async productsRoot(@Req() req: any, @Res() res: Response) {
-    try {
-      const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
-      const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
-      const footerHtml = await this.getFooterHtml();
-      $('body').prepend(`<noscript>${footerHtml}</noscript>`);
-      return sendHtml(req, res, $.html());
-    } catch (_e) { void _e; }
-    res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
-  }
+
 
   @Get('privacy')
   async privacy(@Req() req: any, @Res() res: Response) {
@@ -1502,8 +1479,78 @@ class SpaController {
       return '';
     }
   }
-}
 
+  @Get('*')
+  async catchAll(@Req() req: any, @Res() res: Response) {
+    // Skip API and Uploads to let Nest handle 404s for them distinctively if needed, 
+    // or let them fall through to global 404.
+    // Actually, if I catch '*', I am the handler.
+    if (req.url.startsWith('/api') || req.url.startsWith('/uploads')) {
+      // Allow standard NestJS 404 response for API/Assets
+      throw new NotFoundException();
+    }
+
+    try {
+      const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
+      const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
+
+      // 1. Generic Meta Injection (SSR-like Fallback)
+      const proto = process.env.NODE_ENV === 'production' ? 'https' : ((req.headers['x-forwarded-proto'] as string) || req.protocol || 'http');
+      const rawHost = req.get('host'); const host = rawHost.replace(/^www\./, '');
+      const origin = `${proto}://${host}`;
+      const settings = await this.cmsService.getContent('settings');
+      const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Teraformix';
+      const siteDesc = (settings && settings.siteDescription) ? String(settings.siteDescription) : 'Enterprise Hardware Reseller';
+
+      // Inject Schema (Organization & Website) - moved from main.ts
+      const org: any = {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: siteName,
+        url: origin
+      };
+      const website: any = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: siteName,
+        url: origin,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${origin}/search?q={search_term_string}`,
+          'query-input': 'required name=search_term_string'
+        }
+      };
+      $('head').append(`<script type="application/ld+json">${JSON.stringify(org)}</script>`);
+      $('head').append(`<script type="application/ld+json">${JSON.stringify(website)}</script>`);
+
+      // 2. Footer Injection
+      const footerHtml = await this.getFooterHtml();
+
+      // 3. NoScript H1 Fallback
+      const pth = req.path || req.url || '';
+      const noscriptH1 = pth.startsWith('/category')
+        ? 'Enterprise Servers & Storage Solutions'
+        : pth.startsWith('/product')
+          ? 'Product Details'
+          : pth.startsWith('/blog')
+            ? 'Blog'
+            : 'Teraformix';
+
+      $('body').prepend(`<noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1>${footerHtml}</noscript>`);
+
+      // 4. Send Response (200 OK)
+      // We purposefully send 200 OK because this is an SPA.
+      // If the route is technically "Not Found" in the React App router, the React App will show its 404 page.
+      // But for the server, it successfully served the App entry point.
+      return sendHtml(req, res, $.html());
+    } catch (_e) { void _e; }
+
+    // Fallback if anything fails
+    res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
+  }
+
+
+}
 
 @Module({
   imports: [

@@ -18,6 +18,7 @@ async function bootstrap() {
   // Set global prefix with exclusions
   app.setGlobalPrefix('api', {
     exclude: [
+      { path: '*', method: RequestMethod.GET },
       { path: 'warranty', method: RequestMethod.GET },
       { path: 'health', method: RequestMethod.GET },
       { path: '/', method: RequestMethod.GET },
@@ -513,107 +514,7 @@ async function bootstrap() {
     next();
   });
 
-  // SPA fallback: serve index.html for non-API GET routes (exclude robots.txt and sitemap.xml)
-  app.use((req: any, res: any, next: any) => {
-    const path = req.path || req.url || '';
-    if (path.includes('warranty')) {
-      console.log(`[Middleware] Path: ${path}, Method: ${req.method}`);
-    }
-    if (req.method === 'GET' && (path === '/' || path === '')) return next();
-    const isApi = path.startsWith('/api');
-    const isAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|map|txt|xml)$/i.test(path);
-    const isSpecial = path === '/robots.txt' || path === '/sitemap.xml';
-    const isHandledRoute = path.startsWith('/product/') || path.startsWith('/category/') || path.startsWith('/landing') || path.startsWith('/products') || path.startsWith('/admin') || path.startsWith('/warranty') || path.startsWith('/contact') || path.startsWith('/configurator') || path.startsWith('/returns') || path.startsWith('/upload-bom') || path.startsWith('/cart') || path.startsWith('/checkout') || path.startsWith('/thank-you') || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/account') || path.startsWith('/about') || path.startsWith('/sitemap') || path.startsWith('/track') || path.startsWith('/privacy') || path.startsWith('/terms');
-    if (req.method === 'GET' && !isApi && !isAsset && !isSpecial && !isHandledRoute) {
-      const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
-      const rawHost = req.get('host');
-      const host = rawHost.replace(/^www\./, '');
-      const origin = `${proto}://${host}`;
-      const settingsPromise = cms.getContent('settings');
-      return Promise.resolve(settingsPromise).then((settings: any) => {
-        const siteName = String(settings?.siteTitle || 'Teraformix');
-        const org: any = {
-          '@context': 'https://schema.org',
-          '@type': 'Organization',
-          'name': siteName,
-          'url': origin
-        };
-        const website: any = {
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          'name': siteName,
-          'url': origin,
-          'potentialAction': {
-            '@type': 'SearchAction',
-            'target': `${origin}/search?q={search_term_string}`,
-            'query-input': 'required name=search_term_string'
-          }
-        };
-        const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
-        let html = readFileSync(indexHtmlPath, 'utf8');
-        try {
-          html = html.replace(/<link[^>]*rel=(?:"|')modulepreload(?:"|')[^>]*href=(?:"|')data:[^"']*(?:"|')[^>]*>/gi, '');
-          html = html.replace(/<script[^>]*type=(?:"|')importmap(?:"|')[^>]*>[\s\S]*?<\u002Fscript>/i, '');
-          const gaId = process.env.GA_MEASUREMENT_ID || '';
-          if (gaId) {
-            html = html.replace('</head>', `<script>window.__GA_ID__='${gaId}'</script></head>`);
-          }
-          const gtmId = process.env.GTM_CONTAINER_ID || '';
-          if (gtmId) {
-            const headInject = `<script>window.__GTM_ID__='${gtmId}';(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');</script>`;
-            const bodyNoscript = `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
-            html = html.replace('</head>', `${headInject}</head>`);
-            html = html.replace('<body>', `<body>${bodyNoscript}`);
-          }
-        } catch (e) { void 0; }
-        const scriptOrg = `<script type="application/ld+json">${JSON.stringify(org)}</script>`;
-        const scriptWeb = `<script type="application/ld+json">${JSON.stringify(website)}</script>`;
-        html = html.replace('</head>', `${scriptOrg}${scriptWeb}</head>`);
-        const assetBase = (process.env.ASSET_BASE_URL || '').trim();
-        if (assetBase) {
-          html = html.replace(/(href|src)=("|')\/assets\//gi, `$1=$2${assetBase.replace(/\/$/, '')}/assets/`);
-        }
-        const pth = req.path || req.url || '';
-        const noscriptH1 = pth.startsWith('/category')
-          ? 'Enterprise Servers & Storage Solutions'
-          : pth.startsWith('/product')
-            ? 'Product Details'
-            : pth.startsWith('/blog')
-              ? 'Blog'
-              : 'Teraformix';
-        html = html.replace('<body>', `<body><noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1></noscript>`);
-        const ssr404 = `
-          <section id="ssr-404" class="container mx-auto px-4 py-16">
-            <h1 class="text-3xl font-bold text-navy-900 mb-4">Page Not Found</h1>
-            <p class="text-gray-600 mb-6">The page you’re looking for doesn’t exist or may have moved.</p>
-            <div class="flex flex-wrap gap-3">
-              <a href="/" class="px-4 py-2 bg-action-600 text-white rounded">Go to Home</a>
-              <a href="/category" class="px-4 py-2 bg-white border border-gray-300 rounded text-navy-900">Browse Categories</a>
-              <a href="/sitemap" class="px-4 py-2 bg-white border border-gray-300 rounded text-navy-900">View Sitemap</a>
-            </div>
-          </section>
-        `;
-        html = html.replace('<body>', `<body><noscript>${ssr404}</noscript>`);
-        const isClientRoute = pth.startsWith('/admin') || pth.startsWith('/cart') || pth.startsWith('/checkout') || pth.startsWith('/login');
-        res.status(isClientRoute ? 200 : 404);
-        try {
-          const enc = String(req.headers?.['accept-encoding'] || req.headers?.['Accept-Encoding'] || '');
-          if (enc.toLowerCase().includes('gzip')) {
-            const buf = gzipSync(Buffer.from(html, 'utf8'));
-            res.setHeader('Content-Encoding', 'gzip');
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            res.setHeader('Vary', 'Accept-Encoding');
-            return res.end(buf);
-          }
-        } catch (_e) { void _e; }
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.send(html);
-      }).catch(() => {
-        return res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
-      });
-    }
-    next();
-  });
+
 
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on port: ${port}`);
