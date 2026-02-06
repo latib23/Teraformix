@@ -18,7 +18,6 @@ async function bootstrap() {
   // Set global prefix with exclusions
   app.setGlobalPrefix('api', {
     exclude: [
-      { path: '*', method: RequestMethod.GET },
       { path: 'warranty', method: RequestMethod.GET },
       { path: 'health', method: RequestMethod.GET },
       { path: '/', method: RequestMethod.GET },
@@ -515,6 +514,75 @@ async function bootstrap() {
   });
 
 
+
+  // SPA fallback and SEO handling
+  app.use((req: any, res: any, next: any) => {
+    const path = req.path || req.url || '';
+    if (req.method !== 'GET') return next();
+
+    // 1. API routes - let Nest handle them
+    if (path.startsWith('/api')) return next();
+
+    // 2. Assets - let ServeStatic handle them
+    if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|map|txt|xml|json)$/i.test(path)) return next();
+    if (path === '/robots.txt' || path === '/sitemap.xml') return next();
+
+    // 3. Known Routes that have specific Backend Controllers (SpaController)
+    // We let these fall through to the Controller so they get their specific SEO/Redirect logic
+    // We only check the prefix/pattern to be safe
+    const handledPrefixes = [
+      // SpaController specific routes (excluded from global prefix)
+      '/product/', '/category/', '/landing', '/warranty', '/returns', '/contact',
+      '/privacy', '/terms', '/sitemap', '/about'
+    ];
+
+    const isHandledByController = handledPrefixes.some(p => path.startsWith(p));
+
+    if (isHandledByController) {
+      return next();
+    }
+
+    // 4. Everything else (Configurator, Login, Cart, Random paths)
+    // Serve Generic SPA Index
+    const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+    const rawHost = req.get('host');
+    const host = rawHost.replace(/^www\./, '');
+    const origin = `${proto}://${host}`;
+
+    // Fetch settings for basic meta
+    const settingsPromise = cms.getContent('settings');
+
+    Promise.resolve(settingsPromise).then((settings: any) => {
+      const siteName = String(settings?.siteTitle || 'Teraformix');
+      const org: any = { '@context': 'https://schema.org', '@type': 'Organization', 'name': siteName, 'url': origin };
+      const website: any = { '@context': 'https://schema.org', '@type': 'WebSite', 'name': siteName, 'url': origin };
+
+      const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
+      let html = readFileSync(indexHtmlPath, 'utf8');
+
+      // Basic Replacements
+      try {
+        const gaId = process.env.GA_MEASUREMENT_ID || '';
+        if (gaId) html = html.replace('</head>', `<script>window.__GA_ID__='${gaId}'</script></head>`);
+
+        html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(org)}</script><script type="application/ld+json">${JSON.stringify(website)}</script></head>`);
+      } catch (e) { void 0; }
+
+      // Generic Title/headers based on path for nicer UX before React hydration
+      let noscriptH1 = 'Teraformix';
+      if (path.includes('configurator')) noscriptH1 = 'Server Configurator';
+      else if (path.includes('cart')) noscriptH1 = 'Shopping Cart';
+      else if (path.includes('login')) noscriptH1 = 'Login';
+
+      html = html.replace('<body>', `<body><noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1></noscript>`);
+
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    }).catch(() => {
+      // Ultimate fallback
+      res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
+    });
+  });
 
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on port: ${port}`);
