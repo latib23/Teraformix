@@ -35,16 +35,31 @@ const Hero = () => {
   return (
     <div className="relative w-full min-h-[700px] flex items-center bg-navy-950 overflow-hidden">
 
-      {/* Background Effect - subtle geometric overlay */}
+      {/* Background Effect - Video with Overlays */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-navy-950 opacity-90"></div>
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-server-room-with-blue-lights-1748-large.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        {/* Dark Overlay for Readability */}
+        <div className="absolute inset-0 bg-navy-950/80"></div>
+
         {/* Diagonal shape overlay */}
         <div className="absolute top-0 right-0 w-2/3 h-full bg-navy-900 transform -skew-x-12 translate-x-32 z-0 hidden lg:block opacity-50"></div>
         <div className="absolute top-0 right-0 w-1/2 h-full bg-navy-800 transform -skew-x-12 translate-x-64 z-0 hidden lg:block opacity-30"></div>
 
-        {/* Subtle Image Blend */}
+        {/* Subtle Image Blend (Fallback/Texture) */}
         {heroImage && (
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay">
+          <div className="absolute inset-0 opacity-10 mix-blend-overlay">
             <Image
               src={heroImage}
               alt="Background"
