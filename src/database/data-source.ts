@@ -24,6 +24,6 @@ export default new DataSource({
   ssl: isProduction ? { rejectUnauthorized: false } : false,
   entities: [User, Company, Product, Quote, Order, ContentBlock],
   migrations: ['dist/migrations/*.js', 'src/migrations/*.ts'],
-  synchronize: false,
+  synchronize: true,
   logging: false,
 });

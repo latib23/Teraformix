@@ -3,7 +3,7 @@
 ## ✅ What We Fixed
 
 ### 1. Created a Professional Favicon
-- Generated a clean "STC" logo favicon in navy blue (#1A2942)
+- Generated a clean "Teraformix" logo favicon in navy blue (#1A2942)
 - Saved as `public/favicon.png` and `public/favicon.ico`
 - Created Apple touch icon at `public/apple-touch-icon.png`
 
@@ -26,26 +26,26 @@ Modified `src/components/Image.tsx` to use `/favicon.png` as fallback for missin
 
 1. **Deploy to Production**
    - Push these changes to your production server
-   - Ensure `https://servertechcentral.com/favicon.png` is publicly accessible
-   - Verify `https://servertechcentral.com/favicon.ico` returns the icon
+   - Ensure `https://teraformix.com/favicon.png` is publicly accessible
+   - Verify `https://teraformix.com/favicon.ico` returns the icon
 
 2. **Test Favicon Accessibility**
    ```bash
-   curl -I https://servertechcentral.com/favicon.png
-   curl -I https://servertechcentral.com/favicon.ico
+   curl -I https://teraformix.com/favicon.png
+   curl -I https://teraformix.com/favicon.ico
    ```
    Both should return `200 OK`
 
 3. **Request Google to Re-crawl**
    - Go to [Google Search Console](https://search.google.com/search-console)
-   - Select your property: servertechcentral.com
+   - Select your property: teraformix.com
    - Use "URL Inspection" tool
-   - Enter: `https://servertechcentral.com`
+   - Enter: `https://teraformix.com`
    - Click "Request Indexing"
 
 4. **Submit Sitemap** (if not already done)
    - In Google Search Console, go to Sitemaps
-   - Submit: `https://servertechcentral.com/sitemap.xml`
+   - Submit: `https://teraformix.com/sitemap.xml`
 
 ### Technical Requirements (✅ Already Met):
 
@@ -78,18 +78,18 @@ Modified `src/components/Image.tsx` to use `/favicon.png` as fallback for missin
 
 ### Verify Favicon is Working:
 
-1. Open your site: `https://servertechcentral.com`
-2. Check browser tab - should show "STC" icon
-3. Test favicon directly: `https://servertechcentral.com/favicon.png`
+1. Open your site: `https://teraformix.com`
+2. Check browser tab - should show "Teraformix" icon
+3. Test favicon directly: `https://teraformix.com/favicon.png`
 4. Test on mobile devices
-5. Check Google preview: `site:servertechcentral.com` in Google search
+5. Check Google preview: `site:teraformix.com` in Google search
 
 ### Troubleshooting:
 
 **If favicon still not showing in Google after 2 weeks:**
 
 1. Verify no `robots.txt` blocks:
-   - Check: `https://servertechcentral.com/robots.txt`
+   - Check: `https://teraformix.com/robots.txt`
    - Ensure it doesn't block `/favicon.png` or `/favicon.ico`
 
 2. Check HTTP headers:
@@ -102,7 +102,7 @@ Modified `src/components/Image.tsx` to use `/favicon.png` as fallback for missin
 
 4. Use Google's Rich Results Test:
    - Visit: https://search.google.com/test/rich-results
-   - Enter: `https://servertechcentral.com`
+   - Enter: `https://teraformix.com`
    - Check for any errors
 
 ### Additional Optimization:
@@ -133,14 +133,14 @@ And add to `.htaccess` or server config for caching:
 ## 🔍 Monitoring
 
 After deployment, monitor these URLs:
-- Main site: https://servertechcentral.com
-- Favicon PNG: https://servertechcentral.com/favicon.png
-- Favicon ICO: https://servertechcentral.com/favicon.ico
-- Apple icon: https://servertechcentral.com/apple-touch-icon.png
+- Main site: https://teraformix.com
+- Favicon PNG: https://teraformix.com/favicon.png
+- Favicon ICO: https://teraformix.com/favicon.ico
+- Apple icon: https://teraformix.com/apple-touch-icon.png
 
 Check Google Search results weekly:
-- Search: `site:servertechcentral.com`
-- Look for the STC favicon next to your search results
+- Search: `site:teraformix.com`
+- Look for the Teraformix favicon next to your search results
 
 ---
 

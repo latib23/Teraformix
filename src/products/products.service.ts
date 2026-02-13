@@ -166,7 +166,7 @@ export class ProductsService implements OnModuleInit {
       'Reliable and robust. We have been running this for 3 months now with zero downtime.',
       'Excellent value for the price. Hard to beat this level of performance in this budget.',
       'The compatibility was spot on. Plug and play with our existing infrastructure.',
-      'Great customer support from STC when we had questions about the firmware version.',
+      'Great customer support from Teraformix when we had questions about the firmware version.',
       'Packaging was very secure. Electrostatic safe and well-padded.',
       'Performance exceeds the datasheet specs in our real-world testing.',
       'Highly recommend for any data center expansion project.',
@@ -183,7 +183,7 @@ export class ProductsService implements OnModuleInit {
       'Build quality is top-notch, feels very premium and durable.',
       'Surprising performance benchmarks for this price point.',
       'Essential for our high-availability setup.',
-      'STC is now our go-to for all enterprise hardware needs.',
+      'Teraformix is now our go-to for all enterprise hardware needs.',
       'No issues during the 48-hour burn-in test.'
     ];
 

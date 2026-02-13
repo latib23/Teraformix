@@ -161,7 +161,7 @@ const CartPage = () => {
       doc.text(term, 14, termsY + (i * 4));
     });
 
-    doc.save(`STC_Quote_${quoteNum}.pdf`);
+    doc.save(`Teraformix_Quote_${quoteNum}.pdf`);
   };
 
   if (cart.length === 0) {

@@ -4,6 +4,7 @@ import { ArrowRight, Server, HardDrive, Network, Settings, ChevronRight } from '
 import { useGlobalContent } from '../contexts/GlobalContent';
 import { useUI } from '../contexts/UIContext';
 import Image from './Image';
+const HardwareAnimation = lazy(() => import('./HardwareAnimation'));
 
 const Hero = () => {
   const { content } = useGlobalContent();
@@ -35,23 +36,17 @@ const Hero = () => {
   return (
     <div className="relative w-full min-h-[700px] flex items-center bg-navy-950 overflow-hidden">
 
-      {/* Background Effect - Video with Overlays */}
-      <div className="absolute inset-0 z-0">
-        {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-server-room-with-blue-lights-1748-large.mp4" type="video/mp4" />
-          </video>
+      {/* Background Effect - Computer Hardware Animation */}
+      <div className="absolute inset-0 z-0 bg-navy-950">
+        {/* Hardware Animation */}
+        <div className="absolute inset-0 w-full h-full">
+          <Suspense fallback={<div className="bg-navy-950 w-full h-full" />}>
+            <HardwareAnimation />
+          </Suspense>
         </div>
 
         {/* Dark Overlay for Readability */}
-        <div className="absolute inset-0 bg-navy-950/80"></div>
+        <div className="absolute inset-0 bg-navy-950/80 pointer-events-none"></div>
 
         {/* Diagonal shape overlay */}
         <div className="absolute top-0 right-0 w-2/3 h-full bg-navy-900 transform -skew-x-12 translate-x-32 z-0 hidden lg:block opacity-50"></div>

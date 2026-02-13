@@ -46,7 +46,7 @@ export class AirtableService {
                     this.logger.error('Invalid Forms Base ID', e);
                 }
             } else {
-                // Fallback if user put name "STC Leads" but meant ID, or if we need to use same base
+                // Fallback if user put name "Leads" but meant ID, or if we need to use same base
                 if (baseId) {
                     this.formsBase = Airtable.base(baseId);
                     this.logger.log(`Using Default Base for Forms: ${baseId.slice(0, 8)}...`);
