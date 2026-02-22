@@ -287,7 +287,7 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead
         title={metadata.title}
         description={metadata.description}
@@ -298,14 +298,14 @@ const CategoryPage = () => {
       <div ref={topRef} />
 
       {/* Top SEO Content Block */}
-      <div className="bg-white border-b border-gray-200 py-10">
+      <div className="bg-navy-900 border-b border-navy-800 py-10">
         <div className="container mx-auto px-4 max-w-12xl">
-          <h2 className="text-2xl font-bold text-navy-900">
+          <h2 className="text-2xl font-bold text-white">
             {metadata.h1}
           </h2>
 
           {metadata.text && (
-            <p className="text-gray-500 mt-1 max-w-3xl whitespace-pre-line">
+            <p className="text-gray-400 mt-1 max-w-3xl whitespace-pre-line">
               {metadata.text}
             </p>
           )}
@@ -339,14 +339,14 @@ const CategoryPage = () => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm sticky top-24">
-              <h3 className="font-bold text-navy-900 mb-4">Filters</h3>
+            <div className="bg-navy-900 p-6 rounded-lg border border-navy-800 sticky top-24">
+              <h3 className="font-bold text-white mb-4">Filters</h3>
 
               <div className="space-y-6">
 
                 {/* Dynamic Categories Filter */}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Category</h4>
+                  <h4 className="text-sm font-semibold text-gray-200 mb-2">Category</h4>
                   <div className="space-y-2">
                     {content.categories
                       .filter(c => c.isActive)
@@ -358,9 +358,9 @@ const CategoryPage = () => {
                             name="category_filter"
                             checked={searchQuery.toLowerCase() === cat.id.toLowerCase() || searchQuery.toLowerCase() === cat.name.toLowerCase()}
                             onChange={() => handleCategoryClick(cat.id)}
-                            className="rounded-full border-gray-300 text-action-600 focus:ring-action-500 cursor-pointer"
+                            className="rounded-full border-navy-700 text-action-500 focus:ring-action-500 cursor-pointer bg-navy-800"
                           />
-                          <span className="ml-2 text-sm text-gray-600 group-hover:text-navy-900">{cat.name}</span>
+                          <span className="ml-2 text-sm text-gray-400 group-hover:text-white">{cat.name}</span>
                         </label>
                       ))}
                     <label className="flex items-center group cursor-pointer">
@@ -369,9 +369,9 @@ const CategoryPage = () => {
                         name="category_filter"
                         checked={searchQuery === ''}
                         onChange={() => navigate('/category')}
-                        className="rounded-full border-gray-300 text-action-600 focus:ring-action-500 cursor-pointer"
+                        className="rounded-full border-navy-700 text-action-500 focus:ring-action-500 cursor-pointer bg-navy-800"
                       />
-                      <span className="ml-2 text-sm text-gray-600 group-hover:text-navy-900">All Products</span>
+                      <span className="ml-2 text-sm text-gray-400 group-hover:text-white">All Products</span>
                     </label>
                     {content.categories.filter(c => c.isActive).length > 4 && (
                       <button
@@ -385,7 +385,7 @@ const CategoryPage = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Brand</h4>
+                  <h4 className="text-sm font-semibold text-gray-200 mb-2">Brand</h4>
                   <div className="space-y-2">
                     {availableBrands.length > 0 ? (
                       <>
@@ -404,9 +404,9 @@ const CategoryPage = () => {
                                   }
                                   setPage(1); // Reset to first page
                                 }}
-                                className="rounded border-gray-300 text-action-600 focus:ring-action-500 cursor-pointer"
+                                className="rounded border-navy-700 text-action-500 focus:ring-action-500 cursor-pointer bg-navy-800"
                               />
-                              <span className="ml-2 text-sm text-gray-600 group-hover:text-navy-900">{brand}</span>
+                              <span className="ml-2 text-sm text-gray-400 group-hover:text-white">{brand}</span>
                             </label>
                           ))}
                         {availableBrands.length > 4 && (
@@ -419,13 +419,13 @@ const CategoryPage = () => {
                         )}
                       </>
                     ) : (
-                      <p className="text-xs text-gray-400">No brands available</p>
+                      <p className="text-xs text-gray-500">No brands available</p>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-200 mb-2">
                     {isStorageCategory ? 'Capacity' : 'Specifications'}
                   </h4>
                   <div className="space-y-2">
@@ -446,9 +446,9 @@ const CategoryPage = () => {
                                   }
                                   setPage(1); // Reset to first page
                                 }}
-                                className="rounded border-gray-300 text-action-600 focus:ring-action-500 cursor-pointer"
+                                className="rounded border-navy-700 text-action-500 focus:ring-action-500 cursor-pointer bg-navy-800"
                               />
-                              <span className="ml-2 text-sm text-gray-600 group-hover:text-navy-900">{capacity}</span>
+                              <span className="ml-2 text-sm text-gray-400 group-hover:text-white">{capacity}</span>
                             </label>
                           ))}
                         {availableCapacities.length > 4 && (
@@ -474,7 +474,7 @@ const CategoryPage = () => {
                   setPage(1);
                   navigate('/category');
                 }}
-                className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold rounded transition"
+                className="w-full mt-6 py-2 bg-navy-800 hover:bg-navy-700 text-gray-300 text-sm font-semibold rounded transition border border-navy-700"
               >
                 Reset Filters
               </button>
@@ -484,8 +484,8 @@ const CategoryPage = () => {
           {/* Product Grid */}
           <div className="flex-grow">
             <div className="flex justify-between items-center mb-6">
-              <span className="text-sm text-gray-500 font-medium">Showing {productList.length} of {total} Results</span>
-              <select value={sort} onChange={(e) => { const v = e.target.value as any; setSort(v); setPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="border-gray-300 rounded text-sm py-1.5 pl-3 pr-8 bg-white text-navy-900 focus:ring-navy-900 focus:border-navy-900 shadow-sm cursor-pointer">
+              <span className="text-sm text-gray-400 font-medium">Showing {productList.length} of {total} Results</span>
+              <select value={sort} onChange={(e) => { const v = e.target.value as any; setSort(v); setPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="border-navy-700 rounded text-sm py-1.5 pl-3 pr-8 bg-navy-900 text-white focus:ring-action-500 focus:border-action-500 cursor-pointer">
                 <option value="featured">Sort by: Featured</option>
                 <option value="price_asc">Price: Low to High</option>
                 <option value="price_desc">Price: High to Low</option>
@@ -494,7 +494,7 @@ const CategoryPage = () => {
 
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy-900"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-action-500"></div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -503,9 +503,9 @@ const CategoryPage = () => {
                     <ProductCard key={product.id} product={product} />
                   ))
                 ) : (
-                  <div className="col-span-3 text-center py-20 text-gray-500 bg-white rounded-lg border border-gray-200">
-                    <p className="text-lg font-medium">No products found matching "{searchQuery}"</p>
-                    <p className="text-sm mt-2">Try checking your spelling or using a different keyword.</p>
+                  <div className="col-span-3 text-center py-20 text-gray-400 bg-navy-900 rounded-lg border border-navy-800">
+                    <p className="text-lg font-medium text-gray-300">No products found matching "{searchQuery}"</p>
+                    <p className="text-sm mt-2 text-gray-500">Try checking your spelling or using a different keyword.</p>
                   </div>
                 )}
               </div>
@@ -514,9 +514,9 @@ const CategoryPage = () => {
             {total > PAGE_SIZE && (
               <div className="mt-12 flex justify-center">
                 <nav className="flex gap-2">
-                  <button onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={page === 1} className="px-4 py-2 border border-gray-300 rounded text-sm font-medium hover:bg-gray-50 disabled:opacity-50">Previous</button>
-                  <span className="px-4 py-2 bg-navy-900 text-white rounded text-sm font-medium">Page {page} of {Math.max(1, Math.ceil(total / PAGE_SIZE))}</span>
-                  <button onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={page >= Math.ceil(total / PAGE_SIZE)} className="px-4 py-2 border border-gray-300 rounded text-sm font-medium hover:bg-gray-50 disabled:opacity-50">Next</button>
+                  <button onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={page === 1} className="px-4 py-2 border border-navy-700 rounded text-sm font-medium text-gray-300 hover:bg-navy-800 disabled:opacity-50 bg-navy-900">Previous</button>
+                  <span className="px-4 py-2 bg-action-600 text-white rounded text-sm font-medium">Page {page} of {Math.max(1, Math.ceil(total / PAGE_SIZE))}</span>
+                  <button onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={page >= Math.ceil(total / PAGE_SIZE)} className="px-4 py-2 border border-navy-700 rounded text-sm font-medium text-gray-300 hover:bg-navy-800 disabled:opacity-50 bg-navy-900">Next</button>
                 </nav>
               </div>
             )}

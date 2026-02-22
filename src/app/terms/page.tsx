@@ -12,7 +12,7 @@ const TermsOfSalePage = () => {
     "## Terms of Sale\n\nInformation not available. Please contact support.";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead 
         title="Terms of Sale | Teraformix"
         description="Review our terms of sale, warranty information, and return policies."

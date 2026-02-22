@@ -65,7 +65,7 @@ const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <div className="flex flex-col items-center gap-4">
       <div className="w-10 h-10 border-4 border-navy-200 border-t-navy-900 rounded-full animate-spin"></div>
-      <div className="text-sm font-semibold text-navy-900">Loading Server Tech Central...</div>
+      <div className="text-sm font-semibold text-navy-900">Loading Teraformix...</div>
     </div>
   </div>
 );

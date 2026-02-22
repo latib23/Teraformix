@@ -166,14 +166,14 @@ const CartPage = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Header />
         <div className="flex-grow container mx-auto px-4 py-20 flex flex-col items-center justify-center text-center">
-          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-6">
-            <ShoppingBag className="w-10 h-10 text-gray-400" />
+          <div className="w-20 h-20 bg-navy-800 border border-navy-700 rounded-full flex items-center justify-center mb-6">
+            <ShoppingBag className="w-10 h-10 text-gray-500" />
           </div>
-          <h1 className="text-2xl font-bold text-navy-900 mb-2">Your Cart is Empty</h1>
-          <p className="text-gray-500 mb-8 max-w-md">Looks like you haven't added any enterprise hardware to your quote yet.</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Your Cart is Empty</h1>
+          <p className="text-gray-400 mb-8 max-w-md">Looks like you haven't added any enterprise hardware to your quote yet.</p>
           <Link to="/category" className="bg-action-600 hover:bg-action-500 text-white px-6 py-3 rounded font-bold transition">
             Browse Inventory
           </Link>
@@ -184,35 +184,35 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Header />
       <div className="container mx-auto px-4 py-10 flex-grow">
-        <h1 className="text-3xl font-bold text-navy-900 mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Cart Table */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-navy-900 rounded-lg border border-navy-800 overflow-hidden">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-navy-800 border-b border-navy-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Product</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Qty</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Total</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-navy-800">
                   {cart.map((item) => (
                     <tr key={item.id}>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="h-16 w-16 flex-shrink-0 border border-gray-200 rounded overflow-hidden bg-white flex items-center justify-center">
+                          <div className="h-16 w-16 flex-shrink-0 border border-navy-700 rounded overflow-hidden bg-navy-800 flex items-center justify-center">
                             <img className="h-full w-full object-contain" src={item.image} alt={item.name} />
                           </div>
                           <div className="ml-4">
-                            <Link to={`/product/${item.sku}`} className="text-sm font-medium text-navy-900 hover:text-action-600 transition line-clamp-1">
+                            <Link to={`/product/${item.sku}`} className="text-sm font-medium text-gray-200 hover:text-action-400 transition line-clamp-1">
                               {item.name}
                             </Link>
                             <div className="text-xs text-gray-500 font-mono mt-0.5">MPN: {item.sku}</div>
@@ -232,14 +232,14 @@ const CartPage = () => {
                               const maxStock = typeof item.stockLevel === 'number' && item.stockLevel > 0 ? item.stockLevel : 999;
                               updateQuantity(item.id, Math.min(newQty, maxStock));
                             }}
-                            className="w-16 border border-gray-300 rounded text-center text-sm py-1 bg-white text-navy-900 focus:ring-2 focus:ring-navy-900 outline-none"
+                            className="w-16 border border-navy-700 rounded text-center text-sm py-1 bg-navy-800 text-white focus:ring-2 focus:ring-action-500 outline-none"
                           />
                           {typeof item.stockLevel === 'number' && item.stockLevel > 0 && (
                             <span className="text-xs text-gray-500">Max: {item.stockLevel}</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right text-sm font-semibold text-navy-900">
+                      <td className="px-6 py-4 text-right text-sm font-semibold text-white">
                         ${(item.price * item.quantity).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -267,12 +267,12 @@ const CartPage = () => {
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Link to="/category" className="text-navy-700 font-medium hover:text-navy-900 flex items-center gap-2 text-sm">
+              <Link to="/category" className="text-gray-400 font-medium hover:text-white flex items-center gap-2 text-sm">
                 <ArrowLeft className="w-4 h-4" /> Continue Shopping
               </Link>
               <button
                 onClick={handleDownloadQuote}
-                className="flex items-center gap-2 text-sm bg-white border border-gray-300 px-5 py-2.5 rounded shadow-sm hover:bg-gray-50 text-navy-900 font-bold transition w-full sm:w-auto justify-center"
+                className="flex items-center gap-2 text-sm bg-navy-900 border border-navy-800 px-5 py-2.5 rounded hover:bg-navy-800 text-gray-200 font-bold transition w-full sm:w-auto justify-center"
               >
                 <FileText className="w-4 h-4 text-red-600" /> Download Official Quote (PDF)
               </button>
@@ -281,29 +281,29 @@ const CartPage = () => {
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
-              <h2 className="text-lg font-bold text-navy-900 mb-4">Order Summary</h2>
-              <div className="space-y-3 text-sm border-b border-gray-200 pb-4 mb-4">
+            <div className="bg-navy-900 rounded-lg border border-navy-800 p-6 sticky top-24">
+              <h2 className="text-lg font-bold text-white mb-4">Order Summary</h2>
+              <div className="space-y-3 text-sm border-b border-navy-800 pb-4 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold text-navy-900">${cartTotal.toLocaleString()}</span>
+                  <span className="text-gray-400">Subtotal</span>
+                  <span className="font-semibold text-white">${cartTotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping Estimate</span>
+                  <span className="text-gray-400">Shipping Estimate</span>
                   <span className="text-gray-500 italic">Calculated at checkout</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
+                  <span className="text-gray-400">Tax</span>
                   <span className="text-gray-500 italic">--</span>
                 </div>
               </div>
-              <div className="flex justify-between text-lg font-bold text-navy-900 mb-6">
+              <div className="flex justify-between text-lg font-bold text-white mb-6">
                 <span>Total</span>
                 <span>${cartTotal.toLocaleString()}</span>
               </div>
               <Link
                 to="/checkout"
-                className="block w-full text-center bg-action-600 hover:bg-action-500 text-white font-bold py-3 rounded shadow-sm transition"
+                className="block w-full text-center bg-action-600 hover:bg-action-500 text-white font-bold py-3 rounded transition"
               >
                 Proceed to Checkout
               </Link>

@@ -38,9 +38,9 @@ const CustomerLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Header />
-      
+
       <main className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-8">
@@ -58,8 +58,8 @@ const CustomerLoginPage = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -72,8 +72,8 @@ const CustomerLoginPage = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -83,8 +83,8 @@ const CustomerLoginPage = () => {
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading}
                 className="w-full bg-navy-900 hover:bg-navy-800 text-white font-bold py-3 rounded-lg shadow transition flex items-center justify-center gap-2"
               >

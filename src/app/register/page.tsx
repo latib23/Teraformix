@@ -45,7 +45,7 @@ const CustomerRegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Header />
       
       <main className="flex-grow flex items-center justify-center px-4 py-12">

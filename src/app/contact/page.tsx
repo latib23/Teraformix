@@ -45,7 +45,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead
         title="Contact Us | Teraformix"
         description="Get in touch with Teraformix for sales and support."

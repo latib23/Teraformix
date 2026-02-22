@@ -100,14 +100,14 @@ const ShippingTimer = React.memo(() => {
   if (!timeLeft) return null;
 
   return (
-    <div className="bg-blue-50 border border-blue-100 rounded-md p-3 mb-6 flex items-start gap-3">
-      <Clock className="w-5 h-5 mt-0.5 text-blue-600 flex-shrink-0" />
+    <div className="bg-navy-800 border border-navy-700 rounded-md p-3 mb-6 flex items-start gap-3">
+      <Clock className="w-5 h-5 mt-0.5 text-action-500 flex-shrink-0" />
       <div>
-        <div className="text-sm font-bold text-navy-900 leading-tight">
+        <div className="text-sm font-bold text-white leading-tight">
           Order within {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{timeLeft.hours} hr {timeLeft.minutes} min
         </div>
-        <div className="text-xs text-blue-700 font-medium mt-1">
-          for shipping <span className="font-bold underline decoration-blue-300 decoration-2 underline-offset-2">{timeLeft.label === 'Today' ? 'today' : `on ${timeLeft.label}`}</span> (Texas Time).
+        <div className="text-xs text-gray-400 font-medium mt-1">
+          for shipping <span className="font-bold text-action-400">{timeLeft.label === 'Today' ? 'today' : `on ${timeLeft.label}`}</span> (Texas Time).
         </div>
       </div>
     </div>
@@ -352,7 +352,7 @@ const ProductPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-navy-950 text-gray-200">
       {/* Stock Availability Quote Modal */}
       {isStockQuoteModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
@@ -602,7 +602,7 @@ const ProductPage = () => {
       />
 
       <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-gray-200">
 
           {/* Col 1 & 2 Wrapper (9 spans) */}
           <div className="lg:col-span-9 space-y-6">
@@ -610,11 +610,11 @@ const ProductPage = () => {
 
               {/* Col 1: Gallery (4 spans) */}
               <div className="lg:col-span-4 space-y-4">
-                <div className="border border-gray-200 rounded-lg p-2 bg-white flex items-center justify-center h-full max-h-[320px]">
+                <div className="border border-navy-800 rounded-lg p-4 bg-navy-900 flex items-center justify-center h-full max-h-[320px]">
                   <Image
                     src={product.image}
                     alt={`${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} Enterprise ${product.category || 'Hardware'} - New Condition - In Stock at Teraformix`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain mix-blend-normal"
                     width={500}
                     height={500}
                     priority={true}
@@ -623,24 +623,24 @@ const ProductPage = () => {
 
                 {/* Trust Badges & Quick Benefits */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                    <Truck className="w-5 h-5 mx-auto mb-1 text-action-600" />
-                    <p className="text-xs font-semibold text-navy-900">Free Shipping</p>
+                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
+                    <Truck className="w-5 h-5 mx-auto mb-1 text-action-500" />
+                    <p className="text-xs font-semibold text-white">Free Shipping</p>
                     <p className="text-[10px] text-gray-500">Ground Delivery</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                    <Shield className="w-5 h-5 mx-auto mb-1 text-action-600" />
-                    <p className="text-xs font-semibold text-navy-900">3-Year Warranty</p>
+                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
+                    <Shield className="w-5 h-5 mx-auto mb-1 text-action-500" />
+                    <p className="text-xs font-semibold text-white">3-Year Warranty</p>
                     <p className="text-[10px] text-gray-500">Advanced Replace</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                    <ShieldCheck className="w-5 h-5 mx-auto mb-1 text-action-600" />
-                    <p className="text-xs font-semibold text-navy-900">ISO Certified</p>
+                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
+                    <ShieldCheck className="w-5 h-5 mx-auto mb-1 text-action-500" />
+                    <p className="text-xs font-semibold text-white">ISO Certified</p>
                     <p className="text-[10px] text-gray-500">Quality Assured</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                    <CheckCircle className="w-5 h-5 mx-auto mb-1 text-action-600" />
-                    <p className="text-xs font-semibold text-navy-900">Genuine OEM</p>
+                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
+                    <CheckCircle className="w-5 h-5 mx-auto mb-1 text-action-500" />
+                    <p className="text-xs font-semibold text-white">Genuine OEM</p>
                     <p className="text-[10px] text-gray-500">Verified Parts</p>
                   </div>
                 </div>
@@ -650,7 +650,7 @@ const ProductPage = () => {
 
               {/* Col 2: Info & Specs (5 spans) */}
               <div className="lg:col-span-5">
-                <h1 className="text-3xl font-bold text-navy-900 mb-2 leading-tight">{product.name}</h1>
+                <h1 className="text-3xl font-bold text-white mb-2 leading-tight">{product.name}</h1>
 
                 {/* Reviews Summary */}
                 <div className="flex items-center gap-4 mb-4">
@@ -665,9 +665,9 @@ const ProductPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-mono">MPN: {product.sku}</span>
+                  <span className="bg-navy-800 text-gray-400 px-2 py-1 rounded text-xs font-mono border border-navy-700">MPN: {product.sku}</span>
                   {product.stockStatus === 'IN_STOCK' ? (
-                    <span className="text-action-600 text-sm font-medium flex items-center gap-1">
+                    <span className="text-action-400 text-sm font-medium flex items-center gap-1">
                       <CheckCircle className="w-4 h-4" /> In Stock{typeof product.stockLevel === 'number' ? ` • ${product.stockLevel} units` : ''}
                     </span>
                   ) : (
@@ -678,21 +678,21 @@ const ProductPage = () => {
                 </div>
 
                 {/* Purchase Orders & Net Terms Banner */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg p-4 mb-6 shadow-md">
+                <div className="bg-gradient-to-r from-action-900/30 to-navy-800 border border-action-500/20 rounded-lg p-4 mb-6">
                   <div className="flex items-start gap-3">
-                    <FileText className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <FileText className="w-5 h-5 mt-0.5 flex-shrink-0 text-action-500" />
                     <div>
-                      <h3 className="font-bold text-sm mb-1">We Accept Purchase Orders</h3>
-                      <p className="text-xs text-blue-100 leading-relaxed">
+                      <h3 className="font-bold text-sm mb-1 text-white">We Accept Purchase Orders</h3>
+                      <p className="text-xs text-gray-400 leading-relaxed">
                         Net 30/60/90 terms available for Fortune 500 and eligible companies.
-                        <a href="/contact" className="underline hover:text-white ml-1 font-semibold">Apply now →</a>
+                        <a href="/contact" className="underline text-action-400 hover:text-action-300 ml-1 font-semibold">Apply now →</a>
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="border-b border-gray-200 mb-4" role="tablist">
+                <div className="border-b border-navy-800 mb-4" role="tablist">
                   <div className="flex space-x-6">
                     {['Description', 'Specs', 'Compatibility', 'Warranty'].map(tab => (
                       <button
@@ -701,9 +701,9 @@ const ProductPage = () => {
                         aria-selected={activeTab === tab.toLowerCase()}
                         aria-controls={`${tab.toLowerCase()}-panel`}
                         onClick={() => setActiveTab(tab.toLowerCase())}
-                        className={`py-2 text-sm font-medium border-b-2 transition focus:outline-none focus:text-navy-900 ${activeTab === tab.toLowerCase()
-                          ? 'border-navy-900 text-navy-900'
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                        className={`py-2 text-sm font-medium border-b-2 transition focus:outline-none ${activeTab === tab.toLowerCase()
+                          ? 'border-action-500 text-white'
+                          : 'border-transparent text-gray-500 hover:text-gray-300'
                           }`}
                       >
                         {tab}
@@ -712,18 +712,18 @@ const ProductPage = () => {
                   </div>
                 </div>
 
-                <article className="text-gray-600 text-sm leading-relaxed mb-2 min-h-[50px]" role="tabpanel" id={`${activeTab}-panel`}>
+                <article className="text-gray-400 text-sm leading-relaxed mb-2 min-h-[50px]" role="tabpanel" id={`${activeTab}-panel`}>
                   {activeTab === 'description' && (
-                    <div itemProp="description" className="prose prose-sm max-w-none text-gray-600">
+                    <div itemProp="description" className="prose prose-sm max-w-none text-gray-400">
                       <p>{product.description}</p>
                       <p className="mt-4">
-                        <strong>Deployment Ready:</strong> This unit is fully initialized and cleared of any previous configuration.
+                        <strong className="text-gray-200">Deployment Ready:</strong> This unit is fully initialized and cleared of any previous configuration.
                         It ships with our "Plug-and-Protect" guarantee, ensuring it mounts directly into standard 19-inch racks (rails may be sold separately).
                       </p>
                     </div>
                   )}
                   {activeTab === 'specs' && (
-                    <table className="w-full text-left">
+                    <table className="w-full text-left text-gray-300">
                       <tbody>
                         {/* Standard Specs */}
                         {/* Standard Specs - Logic to show only first 4 unless expanded */}
@@ -749,9 +749,9 @@ const ProductPage = () => {
                                   displayValue = JSON.stringify(value);
                                 }
                                 return (
-                                  <tr key={key} className="border-b border-gray-100">
-                                    <th scope="row" className="py-2 font-semibold text-gray-700 w-1/3">{key}</th>
-                                    <td className="py-2 text-gray-600">{displayValue}</td>
+                                  <tr key={key} className="border-b border-navy-800">
+                                    <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">{key}</th>
+                                    <td className="py-2 text-gray-400">{displayValue}</td>
                                   </tr>
                                 );
                               })}
@@ -778,22 +778,22 @@ const ProductPage = () => {
                         })()}
                         {/* Add Physical Specs if available */}
                         {product.weight && (
-                          <tr className="border-b border-gray-100">
-                            <th scope="row" className="py-2 font-semibold text-gray-700 w-1/3">Weight</th>
-                            <td className="py-2 text-gray-600">{product.weight}</td>
+                          <tr className="border-b border-navy-800">
+                            <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">Weight</th>
+                            <td className="py-2 text-gray-400">{product.weight}</td>
                           </tr>
                         )}
                         {product.dimensions && (
-                          <tr className="border-b border-gray-100">
-                            <th scope="row" className="py-2 font-semibold text-gray-700 w-1/3">Dimensions</th>
-                            <td className="py-2 text-gray-600">{product.dimensions}</td>
+                          <tr className="border-b border-navy-800">
+                            <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">Dimensions</th>
+                            <td className="py-2 text-gray-400">{product.dimensions}</td>
                           </tr>
                         )}
                       </tbody>
                     </table>
                   )}
                   {activeTab === 'compatibility' && (
-                    <div className="prose prose-sm max-w-none text-gray-600">
+                    <div className="prose prose-sm max-w-none text-gray-400">
                       {product.compatibility ? (
                         <p className="whitespace-pre-line">{product.compatibility}</p>
                       ) : (
@@ -802,7 +802,7 @@ const ProductPage = () => {
                     </div>
                   )}
                   {activeTab === 'warranty' && (
-                    <div className="prose prose-sm max-w-none text-gray-600">
+                    <div className="prose prose-sm max-w-none text-gray-400">
                       {product.warranty ? (
                         <p>{product.warranty}</p>
                       ) : (
@@ -816,7 +816,7 @@ const ProductPage = () => {
                 </article>
 
                 <div className="flex gap-4 text-xs text-gray-500 mt-4">
-                  <a href="/warranty" className="flex items-center gap-1 hover:text-action-600 transition hover:underline">
+                  <a href="/warranty" className="flex items-center gap-1 hover:text-action-400 transition hover:underline">
                     <Shield className="w-4 h-4" /> 3-Year Warranty
                   </a>
                 </div>
@@ -824,20 +824,20 @@ const ProductPage = () => {
             </div>
 
             {/* Hardware Prep Highlight (Moved) */}
-            <div className="bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200 shadow-md rounded-lg p-6 relative overflow-hidden group">
+            <div className="bg-navy-900 border border-navy-800 rounded-lg p-6 relative overflow-hidden group">
               <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <ShieldCheck className="w-24 h-24 text-blue-700" />
+                <ShieldCheck className="w-24 h-24 text-action-500" />
               </div>
 
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm text-blue-700">
+                  <div className="p-2 bg-navy-800 rounded-lg border border-navy-700 text-action-500">
                     <Microscope className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-navy-900 text-lg">Quality Guaranteed</h3>
+                  <h3 className="font-bold text-white text-lg">Quality Guaranteed</h3>
                 </div>
 
-                <p className="text-sm text-navy-800 mb-4 leading-relaxed font-medium">
+                <p className="text-sm text-gray-400 mb-4 leading-relaxed font-medium">
                   We don't just ship parts; we certify them. See our rigorous 4-step process.
                 </p>
 
@@ -849,17 +849,17 @@ const ProductPage = () => {
                     { i: Package, l: "Pack" }
                   ].map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center gap-1">
-                      <div className="w-8 h-8 rounded-full bg-white border border-blue-200 flex items-center justify-center text-blue-700 shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-action-500">
                         <item.i className="w-3.5 h-3.5" />
                       </div>
-                      <span className="text-[10px] uppercase font-bold text-navy-900">{item.l}</span>
+                      <span className="text-[10px] uppercase font-bold text-gray-300">{item.l}</span>
                     </div>
                   ))}
                 </div>
 
                 <a
                   href="/how-our-hardware-is-prepared"
-                  className="block w-full text-center py-2.5 bg-white border border-blue-300 text-blue-800 font-bold rounded hover:bg-blue-50 hover:border-blue-400 transition text-sm shadow-sm"
+                  className="block w-full text-center py-2.5 bg-action-600 border border-action-500 text-white font-bold rounded hover:bg-action-500 transition text-sm"
                 >
                   View Preparation Process
                 </a>
@@ -875,8 +875,8 @@ const ProductPage = () => {
               if (uniqueLogos.length === 0) return null;
 
               return (
-                <div className="mt-8 pt-8 border-t border-gray-100">
-                  <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">
+                <div className="mt-8 pt-8 border-t border-navy-800">
+                  <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">
                     Trusted by Industry Leaders
                   </p>
                   <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 px-4">
@@ -902,17 +902,17 @@ const ProductPage = () => {
             <div className="sticky top-24 space-y-4">
 
               {/* Card 1: Main Buy Box */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 shadow-lg">
+              <div className="bg-navy-900 border border-navy-800 rounded-lg p-6 shadow-2xl">
                 <div className="mb-4">
                   {product.showPrice ? (
                     <>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-gray-500 text-sm font-medium">Your Price</span>
                       </div>
-                      <span className="text-3xl font-bold text-navy-900">${product.price.toLocaleString()}</span>
+                      <span className="text-3xl font-bold text-white">${product.price.toLocaleString()}</span>
                     </>
                   ) : (
-                    <span className="text-2xl font-bold text-action-600 block">Request for Quote</span>
+                    <span className="text-2xl font-bold text-action-500 block">Request for Quote</span>
                   )}
                 </div>
 
@@ -920,17 +920,17 @@ const ProductPage = () => {
                 <ShippingTimer />
 
                 <div className="mb-6 space-y-3 text-sm">
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-400">
                     <span>Availability:</span>
                     {product.stockStatus === 'IN_STOCK' ? (
-                      <span className="font-semibold text-action-600">In Stock{typeof product.stockLevel === 'number' ? ` • ${product.stockLevel} units` : ''}</span>
+                      <span className="font-semibold text-action-500">In Stock{typeof product.stockLevel === 'number' ? ` • ${product.stockLevel} units` : ''}</span>
                     ) : (
                       <span className="font-semibold text-alert-500">Backordered</span>
                     )}
                   </div>
-                  <div className="flex justify-between text-gray-600 items-center">
+                  <div className="flex justify-between text-gray-400 items-center">
                     <span>Shipping:</span>
-                    <span className="font-bold text-action-600 bg-action-100 px-2 py-0.5 rounded border border-action-200 flex items-center gap-1.5 shadow-sm">
+                    <span className="font-bold text-action-400 bg-action-500/10 px-2 py-0.5 rounded border border-action-500/20 flex items-center gap-1.5">
                       <Truck className="w-3.5 h-3.5" /> Free Ground
                     </span>
                   </div>
@@ -941,11 +941,11 @@ const ProductPage = () => {
                     <>
                       {/* Quantity Selector */}
                       <div className="mb-4">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Quantity</label>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            className="w-10 h-10 border border-gray-300 rounded hover:bg-gray-50 font-bold text-gray-700"
+                            className="w-10 h-10 border border-navy-700 rounded hover:bg-navy-800 font-bold text-gray-300 bg-navy-950"
                             aria-label="Decrease quantity"
                           >
                             −
@@ -960,14 +960,14 @@ const ProductPage = () => {
                               const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 999;
                               setQuantity(Math.min(Math.max(1, val), stockLevel));
                             }}
-                            className="w-20 text-center border border-gray-300 rounded py-2 font-semibold"
+                            className="w-20 text-center border border-navy-700 rounded py-2 font-semibold bg-navy-950 text-white"
                           />
                           <button
                             onClick={() => {
                               const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 999;
                               setQuantity(Math.min(quantity + 1, stockLevel));
                             }}
-                            className="w-10 h-10 border border-gray-300 rounded hover:bg-gray-50 font-bold text-gray-700"
+                            className="w-10 h-10 border border-navy-700 rounded hover:bg-navy-800 font-bold text-gray-300 bg-navy-950"
                             aria-label="Increase quantity"
                           >
                             +
@@ -991,7 +991,7 @@ const ProductPage = () => {
                   {product.showPrice && (
                     <button
                       onClick={() => setIsBeatQuoteModalOpen(true)}
-                      className="w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-800 font-bold py-3 px-4 rounded shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mb-2 flex items-center justify-center gap-2"
+                      className="w-full bg-navy-800 border border-navy-700 hover:bg-navy-700 text-white font-bold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-action-500 mb-2 flex items-center justify-center gap-2"
                     >
                       <DollarSign className="w-4 h-4" />
                       Beat this Price
@@ -999,7 +999,7 @@ const ProductPage = () => {
                   )}
                   <button
                     onClick={() => openQuoteModal(`${product.name} (SKU: ${product.sku})`)}
-                    className={`w-full font-semibold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy-500 ${product.showPrice ? 'bg-white border border-gray-300 hover:bg-gray-50 text-navy-900' : 'bg-action-600 hover:bg-action-500 text-white border border-transparent shadow-sm'}`}
+                    className={`w-full font-semibold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-action-500 ${product.showPrice ? 'bg-navy-950 border border-navy-700 hover:border-gray-500 text-gray-200' : 'bg-action-600 hover:bg-action-500 text-white border border-transparent shadow-sm'}`}
                     aria-label="Request Bulk Quote"
                   >
                     {product.showPrice ? "Request Bulk Quote" : "Get a Quote"}
@@ -1015,15 +1015,15 @@ const ProductPage = () => {
                         window.open('/contact', '_blank');
                       }
                     }}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-action-600 hover:text-action-700 hover:underline py-2"
+                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-action-400 hover:text-action-300 hover:underline py-2"
                   >
                     <MessageSquare className="w-4 h-4" /> Talk to an Engineer
                   </button>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-500 text-center">
+                <div className="mt-6 pt-6 border-t border-navy-800 text-xs text-gray-500 text-center">
                   <p className="mb-2">Need it faster? Call us.</p>
-                  <a href={`tel:${content.general.phone}`} className="font-bold text-navy-800 text-lg hover:underline" aria-label={`Call support at ${content.general.phone}`}>{content.general.phone}</a>
+                  <a href={`tel:${content.general.phone}`} className="font-bold text-white text-lg hover:underline" aria-label={`Call support at ${content.general.phone}`}>{content.general.phone}</a>
                 </div>
               </div>
 
@@ -1035,20 +1035,20 @@ const ProductPage = () => {
               </div>
 
               {/* Card 2: Compliance & Certification Badge (High Trust) */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
-                <h3 className="text-xs font-bold text-navy-900 uppercase mb-3 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-action-600" /> Verified Reseller
+              <div className="bg-navy-900 border border-navy-800 rounded-lg p-4 mt-6">
+                <h3 className="text-xs font-bold text-white uppercase mb-3 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-action-500" /> Verified Reseller
                 </h3>
-                <ul className="space-y-2 text-xs text-gray-600">
+                <ul className="space-y-2 text-xs text-gray-400">
                   <li className="flex items-start gap-2">
-                    <Award className="w-3 h-3 text-navy-600 mt-0.5" />
+                    <Award className="w-3 h-3 text-action-500 mt-0.5" />
                     <span>ISO 9001, 14001, 27001 Certified Facility</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Shield className="w-3 h-3 text-navy-600 mt-0.5" />
+                    <Shield className="w-3 h-3 text-action-500 mt-0.5" />
                     <span>Authorized Reseller: Cisco, Seagate, Fortinet</span>
                   </li>
-                  <li className="flex items-start gap-2 border-t border-gray-100 pt-2 mt-2 font-mono text-gray-600">
+                  <li className="flex items-start gap-2 border-t border-navy-800 pt-2 mt-2 font-mono text-gray-500">
                     <div className="flex flex-col">
                       <span>CAGE: {cageCode}</span>
                       <span>DUNS: {dunsNumber}</span>
@@ -1062,7 +1062,7 @@ const ProductPage = () => {
         </div>
 
         {/* --- EXTENDED SEO CONTENT --- */}
-        <section className="mt-4 border-t border-gray-200 pt-6">
+        <section className="mt-4 border-t border-navy-800 pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
             {/* Left Column: Technical Overview & Reviews */}
@@ -1071,13 +1071,13 @@ const ProductPage = () => {
               {/* Technical Deep Dive (NOW EDITABLE VIA ADMIN) */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <BookOpen className="w-5 h-5 text-action-600" />
-                  <h2 className="text-xl font-bold text-navy-900">{overviewTitle}</h2>
+                  <BookOpen className="w-5 h-5 text-action-500" />
+                  <h2 className="text-xl font-bold text-white">{overviewTitle}</h2>
                 </div>
-                <div className="prose prose-slate max-w-none text-gray-600 leading-relaxed bg-gray-50 p-6 rounded-lg border border-gray-100">
+                <div className="prose prose-invert max-w-none text-gray-400 leading-relaxed bg-navy-900 p-6 rounded-lg border border-navy-800">
                   <p className="whitespace-pre-line">{overviewText}</p>
-                  <h3 className="text-sm font-bold text-navy-900 mt-4 uppercase tracking-wide">Key Features</h3>
-                  <ul className="list-disc pl-5 space-y-1 mt-2">
+                  <h3 className="text-sm font-bold text-gray-200 mt-4 uppercase tracking-wide">Key Features</h3>
+                  <ul className="list-disc pl-5 space-y-1 mt-2 text-gray-400">
                     <li>OEM Genuine Component verified by certified technicians.</li>
                     <li>Clean serial number ready for service contract registration.</li>
                     <li>Electrostatic Discharge (ESD) safe packaging.</li>
@@ -1090,12 +1090,12 @@ const ProductPage = () => {
               <div id="reviews">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-action-600" />
-                    <h2 className="text-xl font-bold text-navy-900">Verified Buyer Reviews</h2>
+                    <MessageSquare className="w-5 h-5 text-action-500" />
+                    <h2 className="text-xl font-bold text-white">Verified Buyer Reviews</h2>
                   </div>
                   <button
                     onClick={() => setIsReviewModalOpen(true)}
-                    className="text-sm font-bold text-navy-900 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition"
+                    className="text-sm font-bold text-gray-300 border border-navy-700 px-4 py-2 rounded hover:bg-navy-800 transition"
                   >
                     Write a Review
                   </button>
@@ -1103,8 +1103,8 @@ const ProductPage = () => {
 
                 <div className="relative">
                   {shuffledReviews.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
-                      <p className="text-gray-600 italic mb-2">No reviews yet.</p>
+                    <div className="text-center py-8 bg-navy-900 rounded-lg border border-navy-800 border-dashed">
+                      <p className="text-gray-400 italic mb-2">No reviews yet.</p>
                       <p className="text-sm text-gray-500">Be the first to share your experience!</p>
                     </div>
                   ) : (
@@ -1133,7 +1133,7 @@ const ProductPage = () => {
                           const rating = parseFloat(review.ratingValue) || 5;
                           return (
                             <SwiperSlide key={idx}>
-                              <div className="review-card bg-gray-50 rounded-xl p-6 border border-gray-200 flex flex-col">
+                              <div className="review-card bg-navy-900 rounded-xl p-6 border border-navy-800 flex flex-col">
                                 {/* Stars */}
                                 <div className="flex text-yellow-400 mb-3">
                                   {Array.from({ length: 5 }).map((_, i) => (
@@ -1145,19 +1145,19 @@ const ProductPage = () => {
                                 </div>
 
                                 {/* Review Text */}
-                                <blockquote className="text-navy-900 font-medium italic mb-4 flex-grow text-sm md:text-base">
+                                <blockquote className="text-gray-300 font-medium italic mb-4 flex-grow text-sm md:text-base">
                                   "{review.reviewBody}"
                                 </blockquote>
 
                                 {/* Author Info */}
-                                <div className="mt-auto flex items-center gap-3 pt-3 border-t border-gray-100">
-                                  <div className="w-8 h-8 rounded-full bg-action-100 flex items-center justify-center text-action-700 font-bold text-xs">
+                                <div className="mt-auto flex items-center gap-3 pt-3 border-t border-navy-800">
+                                  <div className="w-8 h-8 rounded-full bg-action-500/20 flex items-center justify-center text-action-400 font-bold text-xs">
                                     {review.author.charAt(0)}
                                   </div>
                                   <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-navy-900">{review.author}</span>
+                                    <span className="text-sm font-bold text-white">{review.author}</span>
                                     <span className="text-xs text-gray-500 flex items-center gap-1">
-                                      <CheckCircle className="w-3 h-3 text-green-500" />
+                                      <CheckCircle className="w-3 h-3 text-action-500" />
                                       Verified • {review.datePublished}
                                     </span>
                                   </div>
@@ -1180,16 +1180,16 @@ const ProductPage = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-8">
                 {/* Product FAQ */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h3 className="font-bold text-navy-900 mb-4 text-lg">Product FAQ</h3>
+                <div className="bg-navy-900 border border-navy-800 rounded-lg p-6">
+                  <h3 className="font-bold text-white mb-4 text-lg">Product FAQ</h3>
                   <div className="space-y-4">
                     {productFaqs.map((faq, idx) => (
-                      <div key={idx} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                      <div key={idx} className="border-b border-navy-800 last:border-0 pb-4 last:pb-0">
                         <button
                           onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                           className="flex justify-between items-start w-full text-left group"
                         >
-                          <span className="text-sm font-semibold text-navy-800 group-hover:text-action-600 transition">{faq.q}</span>
+                          <span className="text-sm font-semibold text-gray-200 group-hover:text-action-400 transition">{faq.q}</span>
                           {openFaq === idx ? <ChevronUp className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />}
                         </button>
                         {openFaq === idx && (
@@ -1235,10 +1235,10 @@ const ProductPage = () => {
         </section>
 
         {/* SEO Mesh: Internal Linking Strategy */}
-        <section className="mt-20 border-t border-gray-200 pt-12">
+        <section className="mt-20 border-t border-navy-800 pt-12">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-navy-900">Frequently Bought Together</h2>
-            <Link to={categorySlug ? `/category/${categorySlug}` : '/category'} className="text-action-600 font-semibold hover:underline flex items-center gap-1 text-sm">
+            <h2 className="text-2xl font-bold text-white">Frequently Bought Together</h2>
+            <Link to={categorySlug ? `/category/${categorySlug}` : '/category'} className="text-action-400 font-semibold hover:underline flex items-center gap-1 text-sm">
               View All {product.category} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -1263,8 +1263,8 @@ const ProductPage = () => {
           </div>
 
           {/* Semantic Deep Links for Crawlers */}
-          <div className="mt-12 bg-gray-50 p-6 rounded-lg border border-gray-100 text-sm">
-            <h3 className="font-semibold text-navy-900 mb-3">Explore Related Categories</h3>
+          <div className="mt-12 bg-navy-900 p-6 rounded-lg border border-navy-800 text-sm">
+            <h3 className="font-semibold text-white mb-3">Explore Related Categories</h3>
             <div className="flex flex-wrap gap-3">
               {(() => {
                 const current = (product.category || '').toLowerCase();
@@ -1272,12 +1272,12 @@ const ProductPage = () => {
                 const max = 6;
                 const picks = others.slice(0, max);
                 return picks.length > 0 ? picks.map((c: any) => (
-                  <Link key={String(c.id)} to={`/category/${encodeURIComponent(String(c.id))}`} className="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-600 hover:text-action-600 hover:border-action-500 transition">
+                  <Link key={String(c.id)} to={`/category/${encodeURIComponent(String(c.id))}`} className="px-3 py-1 bg-navy-800 border border-navy-700 rounded-full text-gray-400 hover:text-action-400 hover:border-action-500 transition">
                     {c.name}
                   </Link>
                 )) : (
                   ['Servers', 'Storage', 'Networking'].slice(0, max).map((name, idx) => (
-                    <Link key={idx} to={`/category`} className="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-600 hover:text-action-600 hover:border-action-500 transition">
+                    <Link key={idx} to={`/category`} className="px-3 py-1 bg-navy-800 border border-navy-700 rounded-full text-gray-400 hover:text-action-400 hover:border-action-500 transition">
                       {name}
                     </Link>
                   ))

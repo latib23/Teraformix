@@ -43,7 +43,7 @@ const HowHardwareIsPrepared = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-navy-950 font-sans">
             <SEOHead
                 title="How Our Hardware Is Prepared | Teraformix"
                 description="Learn about our rigorous 4-step process: Inspection, Testing, Validation, and Packaging. We ensure every server part meets enterprise standards."

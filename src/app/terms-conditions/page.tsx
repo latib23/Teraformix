@@ -9,7 +9,7 @@ const TermsConditionsPage = () => {
   const text = (content as any).termsAndConditions?.content || '## Terms & Conditions\n\nInformation not available.';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead 
         title="Terms & Conditions | Teraformix"
         description="Read our terms and conditions governing the use of this site."

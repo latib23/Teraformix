@@ -173,7 +173,7 @@ const ThankYouPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-navy-950 flex flex-col font-sans">
       <Header />
 
       <main className="flex-grow relative">

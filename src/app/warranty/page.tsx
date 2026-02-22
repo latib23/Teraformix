@@ -16,10 +16,10 @@ const WarrantyPage = () => {
     const warrantyContent = content.warrantyPage?.content;
 
     return (
-        <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="bg-navy-950 min-h-screen flex flex-col">
             <Header />
             <main className="flex-grow py-12">
-<div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Header */}
                     <div className="text-center mb-12">

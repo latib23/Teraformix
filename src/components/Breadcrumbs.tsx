@@ -33,7 +33,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
   };
 
   return (
-    <nav aria-label="Breadcrumb" className="bg-gray-50 border-b border-gray-200 py-3">
+    <nav aria-label="Breadcrumb" className="bg-navy-950 border-b border-navy-800 py-3">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -41,20 +41,20 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
       <div className="container mx-auto px-4">
         <ol className="flex items-center space-x-2 text-xs text-gray-500">
           <li>
-            <Link to="/" className="hover:text-navy-900 flex items-center">
+            <Link to="/" className="hover:text-action-400 flex items-center transition-colors">
               <Home className="w-3 h-3" />
               <span className="sr-only">Home</span>
             </Link>
           </li>
           {items.map((item, index) => (
             <li key={index} className="flex items-center space-x-2">
-              <ChevronRight className="w-3 h-3 text-gray-400" />
+              <ChevronRight className="w-3 h-3 text-navy-700" />
               {index === items.length - 1 ? (
-                <span className="font-medium text-navy-900" aria-current="page">
+                <span className="font-medium text-gray-300" aria-current="page">
                   {item.label}
                 </span>
               ) : (
-                <Link to={item.path} className="hover:text-navy-900 transition-colors">
+                <Link to={item.path} className="hover:text-action-400 transition-colors">
                   {item.label}
                 </Link>
               )}

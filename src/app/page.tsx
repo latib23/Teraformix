@@ -117,10 +117,10 @@ const HomePage = () => {
                 <p className="text-sm text-gray-400 mb-6">Select a base platform to customize your build.</p>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <Link to="/configurator?model=dell-r740xd-lff" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">DELL POWEREDGE</Link>
-                  <Link to="/configurator?model=hpe-dl380-gen10" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">HPE PROLIANT</Link>
-                  <Link to="/configurator?model=cisco-c240-m5" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">CISCO UCS</Link>
-                  <Link to="/configurator" className="px-4 py-2 bg-action-600 border border-action-600 text-white text-xs font-bold text-center hover:bg-action-500 transition-colors">CUSTOM BOM</Link>
+                  <Link to="/configurator?model=dell-r760" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">DELL POWEREDGE</Link>
+                  <Link to="/configurator?model=hpe-dl380a-gen11" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">HPE PROLIANT</Link>
+                  <Link to="/configurator?model=supermicro-621c" className="px-4 py-2 bg-navy-950 border border-navy-800 text-xs font-bold text-center hover:bg-white hover:text-navy-900 transition-colors">SUPERMICRO</Link>
+                  <Link to="/configurator" className="px-4 py-2 bg-action-600 border border-action-600 text-white text-xs font-bold text-center hover:bg-action-500 transition-colors">VIEW ALL →</Link>
                 </div>
               </div>
 

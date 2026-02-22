@@ -9,7 +9,7 @@ const ReturnsPage = () => {
   const text = (content as any).returnPolicy?.content || '## Return Policy\n\nInformation not available.';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead 
         title="Return Policy | Teraformix"
         description="Review our return and RMA policy, timelines, and terms."

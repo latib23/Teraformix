@@ -57,7 +57,7 @@ const LandingPage = () => {
     try {
       (window as any).dataLayer = (window as any).dataLayer || [];
       (window as any).dataLayer.push({ event: 'cta_click', type, context });
-    } catch {}
+    } catch { }
   };
 
   const handleRequestQuote = () => {
@@ -66,9 +66,9 @@ const LandingPage = () => {
 
   if (!collection) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-navy-950">
         {showHeader ? (
-          <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}> 
+          <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}>
             <Header />
           </Suspense>
         ) : (
@@ -78,7 +78,7 @@ const LandingPage = () => {
           <h1 className="text-2xl font-bold text-navy-900">Collection Not Found</h1>
           <p className="text-gray-600 mt-2">This landing collection has not been configured yet.</p>
         </main>
-        <Suspense fallback={<div style={{ height: 200 }} />}> 
+        <Suspense fallback={<div style={{ height: 200 }} />}>
           <Footer />
         </Suspense>
       </div>
@@ -89,7 +89,7 @@ const LandingPage = () => {
     <div>
       <SEOHead title={`${collection.title} | Teraformix`} description={collection.description} />
       {showHeader ? (
-        <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}> 
+        <Suspense fallback={<div style={{ height: 64, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }} />}>
           <Header />
         </Suspense>
       ) : (
@@ -201,7 +201,7 @@ const LandingPage = () => {
 
         {Array.isArray(collection.logos) && collection.logos.length > 0 && (
           <section className="container mx-auto px-4 pb-12">
-              <h3 className="text-xs font-bold text-navy-900 uppercase tracking-wider mb-3">Trusted by Professionals</h3>
+            <h3 className="text-xs font-bold text-navy-900 uppercase tracking-wider mb-3">Trusted by Professionals</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 items-center">
               {collection.logos.map((l: any, idx: number) => (
                 <div key={idx} className="p-3 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow-sm hover:bg-action-50 hover:border-action-300 transition">
@@ -309,8 +309,8 @@ const LandingPage = () => {
           </div>
         </section>
       </main>
-      
-      <Suspense fallback={<div style={{ height: 200 }} />}> 
+
+      <Suspense fallback={<div style={{ height: 200 }} />}>
         <Footer />
       </Suspense>
     </div>

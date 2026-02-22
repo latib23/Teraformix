@@ -9,8 +9,8 @@ const AboutPage = () => {
   const text = (content as any).aboutPage?.content || '## About Us\n\nInformation not available.';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <SEOHead 
+    <div className="min-h-screen bg-navy-950 flex flex-col">
+      <SEOHead
         title="About Us | Teraformix"
         description="Learn about Teraformix and our mission to supply enterprise hardware."
         canonicalUrl="https://teraformix.com/about"

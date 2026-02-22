@@ -13,7 +13,7 @@ const PrivacyPolicyPage = () => {
     "## Privacy Policy\n\nInformation not available. Please contact support.";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead 
         title="Privacy Policy | Teraformix"
         description="Read our privacy policy to understand how we collect, use, and protect your data."

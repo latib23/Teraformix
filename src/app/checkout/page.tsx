@@ -1112,7 +1112,7 @@ const CheckoutPage = () => {
   const billingMeta = getCountryMeta(billingData.country);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-navy-950">
       <Header />
       <div className="container mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold text-navy-900 mb-8 text-center">Secure Checkout</h1>

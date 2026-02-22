@@ -11,7 +11,7 @@ const BlogListPage = () => {
   const posts = useMemo(() => (content.blogPosts || []).filter(p => p.isPublished), [content.blogPosts]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead
         title="Blog | Teraformix"
         description="Expert insights, guides, and news on enterprise hardware, servers, storage, and networking solutions."

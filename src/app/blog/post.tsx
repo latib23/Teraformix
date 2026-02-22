@@ -245,7 +245,7 @@ const BlogPostPage = () => {
 
   if (!post || !post.isPublished) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Header />
         <main className="flex-grow flex items-center justify-center py-20">
           <div className="text-center">
@@ -268,7 +268,7 @@ const BlogPostPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <SEOHead
         title={post.metaTitle || `${post.title} | Blog | Teraformix`}
         description={post.metaDescription || post.excerpt || post.title}

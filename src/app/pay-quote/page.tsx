@@ -189,7 +189,7 @@ const PayQuotePage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="min-h-screen bg-navy-950 py-12 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold text-navy-900 mb-2">Complete Your Payment</h1>
