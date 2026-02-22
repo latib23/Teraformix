@@ -560,6 +560,12 @@ async function bootstrap() {
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
       let html = readFileSync(indexHtmlPath, 'utf8');
 
+      // Strip problematic data: URI modulepreload links and importmap scripts (causes MIME type errors)
+      try {
+        html = html.replace(/<link[^>]*rel=(?:"|')modulepreload(?:"|')[^>]*href=(?:"|')data:[^"']*(?:"|')[^>]*>/gi, '');
+        html = html.replace(/<script[^>]*type=(?:"|')importmap(?:"|')[^>]*>[\s\S]*?<\/script>/i, '');
+      } catch (_e) { void _e; }
+
       // Basic Replacements
       try {
         const gaId = process.env.GA_MEASUREMENT_ID || '';
