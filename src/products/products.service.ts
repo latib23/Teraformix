@@ -23,7 +23,19 @@ export class ProductsService implements OnModuleInit {
       const firstItem = await this.productRepository.findOne({ where: {} });
       const needsUpdate = count === 0 || (firstItem && (!firstItem.category || !firstItem.brand));
 
-      if (needsUpdate) {
+      // Also check if any mock products are missing from the DB
+      let hasMissingProducts = false;
+      if (!needsUpdate && mockProducts.length > 0) {
+        const mockSkus = mockProducts.map(p => p.sku);
+        const existingProducts = await this.productRepository.find({ where: { sku: In(mockSkus) }, select: ['sku'] });
+        const existingSkus = new Set(existingProducts.map(p => p.sku));
+        hasMissingProducts = mockSkus.some(sku => !existingSkus.has(sku));
+        if (hasMissingProducts) {
+          this.logger.log(`Found ${mockSkus.filter(s => !existingSkus.has(s)).length} new products to seed.`);
+        }
+      }
+
+      if (needsUpdate || hasMissingProducts) {
         this.logger.log('Seeding/Updating Products table with rich mock data...');
 
         for (const p of mockProducts) {
