@@ -1,10 +1,11 @@
-import { IsEnum, IsNumber, IsOptional, IsString, IsArray, IsObject } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsArray, IsObject, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderStatus, PaymentMethod } from '../entities/order.entity';
 
 export class CreateOrderDto {
   @ApiProperty()
   @IsNumber()
+  @Min(0)
   total: number;
 
   @ApiProperty({ enum: PaymentMethod })
@@ -20,6 +21,11 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   paymentMethodId?: string; // Stripe PaymentMethod ID
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  paymentIntentId?: string;
 
   @ApiProperty()
   @IsArray()

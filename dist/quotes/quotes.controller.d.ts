@@ -6,9 +6,11 @@ import { BulkQuoteRequestDto } from './dto/bulk-quote-request.dto';
 import { BomUploadRequestDto } from './dto/bom-upload-request.dto';
 import { QuoteBeatingRequestDto } from './dto/quote-beating-request.dto';
 import { ContactRequestDto } from './dto/contact-request.dto';
+import { OrdersService } from '../orders/orders.service';
 export declare class QuotesController {
     private readonly quotesService;
-    constructor(quotesService: QuotesService);
+    private readonly ordersService;
+    constructor(quotesService: QuotesService, ordersService: OrdersService);
     findAll(): Promise<import("./entities/quote.entity").Quote[]>;
     requestQuote(body: any): {
         message: string;
@@ -64,7 +66,7 @@ export declare class QuotesController {
         referenceNumber: string;
         status: QuoteStatus;
         createdAt: Date;
-        total: any;
+        total: number;
         paymentTerms: string;
         items: any;
         customer: {

@@ -29,8 +29,9 @@ const product_entity_1 = require("../products/entities/product.entity");
 const shipping_service_1 = require("../shipping/shipping.service");
 const airtable_service_1 = require("./airtable.service");
 const xero_service_1 = require("./xero.service");
+const security_1 = require("../lib/security");
 let OrdersService = class OrdersService {
-    constructor(orderRepository, companyRepository, userRepository, productRepository, configService, privatenotificationsService, notificationsService, shippingService, airtableService, xeroService) {
+    constructor(orderRepository, companyRepository, userRepository, productRepository, configService, notificationsService, shippingService, airtableService, xeroService) {
         this.orderRepository = orderRepository;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
@@ -53,9 +54,13 @@ let OrdersService = class OrdersService {
         if (!this.stripe) {
             throw new common_1.BadRequestException('Stripe not configured');
         }
+        const amount = Math.round(Number(amountInCents || 0));
+        if (!Number.isSafeInteger(amount) || amount < 50) {
+            throw new common_1.BadRequestException('Invalid payment amount');
+        }
         try {
             const intent = await this.stripe.paymentIntents.create({
-                amount: amountInCents,
+                amount,
                 currency,
                 capture_method: 'manual',
                 automatic_payment_methods: { enabled: true },
@@ -68,19 +73,41 @@ let OrdersService = class OrdersService {
             throw new common_1.BadRequestException(msg);
         }
     }
+    async getPaymentIntent(paymentIntentId) {
+        if (!this.stripe) {
+            throw new common_1.BadRequestException('Stripe not configured');
+        }
+        const id = String(paymentIntentId || '').trim();
+        if (!id.startsWith('pi_')) {
+            throw new common_1.BadRequestException('Invalid payment intent');
+        }
+        try {
+            return await this.stripe.paymentIntents.retrieve(id);
+        }
+        catch (e) {
+            throw new common_1.BadRequestException(String((e === null || e === void 0 ? void 0 : e.message) || 'Unable to verify payment'));
+        }
+    }
     async calculateAmountCents(items, address, serviceCode) {
         if (!Array.isArray(items) || items.length === 0) {
             throw new common_1.BadRequestException('Items are required');
         }
-        const skus = items.map(i => i.sku);
+        const skus = items.map(i => String(i.sku || '').trim()).filter(Boolean);
+        if (skus.length !== items.length) {
+            throw new common_1.BadRequestException('Every order item must include a SKU');
+        }
         const products = await this.productRepository.find({ where: { sku: (0, typeorm_2.In)(skus) } });
         const priceBySku = new Map(products.map(p => [p.sku, Number(p.basePrice)]));
         let subtotal = 0;
         for (const i of items) {
-            const price = priceBySku.get(i.sku);
-            if (!price)
-                throw new common_1.BadRequestException(`Unknown SKU: ${i.sku}`);
-            const qty = Math.max(1, Number(i.quantity || 1));
+            const sku = String(i.sku || '').trim();
+            const price = priceBySku.get(sku);
+            if (!Number.isFinite(price))
+                throw new common_1.BadRequestException(`Unknown SKU: ${sku}`);
+            const qty = Number(i.quantity);
+            if (!Number.isSafeInteger(qty) || qty < 1 || qty > 1000) {
+                throw new common_1.BadRequestException(`Invalid quantity for SKU: ${sku}`);
+            }
             subtotal += price * qty;
         }
         let shipmentCost = 0;
@@ -98,35 +125,138 @@ let OrdersService = class OrdersService {
             }
         }
         const total = subtotal + shipmentCost;
-        return Math.round(total * 100);
+        const cents = Math.round(total * 100);
+        if (!Number.isSafeInteger(cents) || cents < 50) {
+            throw new common_1.BadRequestException('Invalid order total');
+        }
+        return cents;
+    }
+    async buildServerPricedItems(items) {
+        const normalized = items.map((i) => ({
+            sku: String(i.sku || '').trim(),
+            quantity: Number(i.quantity),
+        }));
+        const skus = normalized.map((i) => i.sku);
+        const products = await this.productRepository.find({ where: { sku: (0, typeorm_2.In)(skus) } });
+        const productBySku = new Map(products.map((p) => [p.sku, p]));
+        return normalized.map((item) => {
+            const product = productBySku.get(item.sku);
+            if (!product)
+                throw new common_1.BadRequestException(`Unknown SKU: ${item.sku}`);
+            return {
+                id: product.id,
+                sku: (0, security_1.sanitizePlainText)(product.sku, 120),
+                name: (0, security_1.sanitizePlainText)(product.name, 200),
+                price: Number(product.basePrice),
+                basePrice: Number(product.basePrice),
+                quantity: item.quantity,
+            };
+        });
+    }
+    getOrderRateAddress(shippingAddress) {
+        const ship = shippingAddress || {};
+        return {
+            postalCode: String(ship.postalCode || ship.zip || '').trim(),
+            country: String(ship.country || 'US').trim(),
+            city: String(ship.city || '').trim(),
+            state: String(ship.state || '').trim(),
+        };
+    }
+    sanitizeOrderAddress(input) {
+        const allowed = [
+            'firstName',
+            'lastName',
+            'company',
+            'street',
+            'city',
+            'state',
+            'zip',
+            'postalCode',
+            'country',
+            'phone',
+            'email',
+            'shippingCost',
+            'shipmentService',
+            'shipmentServiceCode',
+        ];
+        const output = {};
+        for (const key of allowed) {
+            const value = input === null || input === void 0 ? void 0 : input[key];
+            if (value === undefined || value === null)
+                continue;
+            if (key === 'shippingCost') {
+                const cost = Number(value);
+                if (Number.isFinite(cost) && cost >= 0)
+                    output[key] = cost;
+                continue;
+            }
+            const limit = key === 'email' ? 254 : key === 'street' ? 200 : 120;
+            const text = (0, security_1.sanitizePlainText)(value, limit);
+            if (text)
+                output[key] = key === 'email' ? text.toLowerCase() : text;
+        }
+        return output;
     }
     async create(createOrderDto, creatorId) {
         var _a;
         let company = null;
         let salesperson = null;
+        let creator = null;
         if (createOrderDto.companyId) {
             company = await this.companyRepository.findOneBy({ id: createOrderDto.companyId });
         }
         if (creatorId) {
-            const creator = await this.userRepository.findOneBy({ id: creatorId });
+            creator = await this.userRepository.findOneBy({ id: creatorId });
             if (!creator)
                 throw new common_1.NotFoundException('Creator user not found');
-            if (creator.role === 'SALESPERSON') {
+            if (creator.role === user_entity_1.UserRole.SALESPERSON) {
                 salesperson = creator;
             }
         }
-        const order = this.orderRepository.create(Object.assign(Object.assign({}, createOrderDto), { company,
-            salesperson, status: createOrderDto.status || order_entity_1.OrderStatus.PROCESSING }));
+        const requestedStatus = creator && [user_entity_1.UserRole.SUPER_ADMIN, user_entity_1.UserRole.SALESPERSON].includes(creator.role)
+            ? createOrderDto.status
+            : undefined;
+        const shippingAddress = this.sanitizeOrderAddress(createOrderDto.shippingAddress || {});
+        const billingAddress = this.sanitizeOrderAddress(createOrderDto.billingAddress || {});
+        const serviceCode = String(shippingAddress.shipmentServiceCode ||
+            shippingAddress.serviceCode ||
+            createOrderDto.serviceCode ||
+            '').trim() || undefined;
+        const expectedAmountCents = await this.calculateAmountCents(createOrderDto.items, this.getOrderRateAddress(shippingAddress), serviceCode);
+        const serverItems = await this.buildServerPricedItems(createOrderDto.items);
+        const serverTotal = Number((expectedAmountCents / 100).toFixed(2));
+        const order = this.orderRepository.create({
+            items: serverItems,
+            total: serverTotal,
+            paymentMethod: createOrderDto.paymentMethod,
+            poNumber: createOrderDto.poNumber ? (0, security_1.sanitizePlainText)(createOrderDto.poNumber, 80) : undefined,
+            shippingAddress,
+            billingAddress,
+            company,
+            salesperson,
+            status: requestedStatus || order_entity_1.OrderStatus.PROCESSING,
+        });
         if (createOrderDto.paymentMethod === order_entity_1.PaymentMethod.STRIPE) {
+            const intent = await this.getPaymentIntent(createOrderDto.paymentIntentId);
+            if (intent.status !== 'requires_capture' && intent.status !== 'succeeded') {
+                throw new common_1.BadRequestException('Stripe payment has not been authorized');
+            }
+            if (intent.currency !== 'usd') {
+                throw new common_1.BadRequestException('Unsupported payment currency');
+            }
+            if (intent.amount < expectedAmountCents) {
+                throw new common_1.BadRequestException('Stripe payment amount does not match the order total');
+            }
+            order.total = Number((intent.amount / 100).toFixed(2));
         }
         else if (createOrderDto.paymentMethod === order_entity_1.PaymentMethod.PO) {
             if (!createOrderDto.poNumber) {
                 throw new common_1.BadRequestException('PO Number is required for Purchase Order payments');
             }
-            order.status = createOrderDto.status || order_entity_1.OrderStatus.PENDING_APPROVAL;
+            order.status = requestedStatus || order_entity_1.OrderStatus.PENDING_APPROVAL;
         }
         else if (createOrderDto.paymentMethod === order_entity_1.PaymentMethod.BANK_TRANSFER) {
-            order.status = createOrderDto.status || order_entity_1.OrderStatus.PENDING_APPROVAL;
+            order.status = requestedStatus || order_entity_1.OrderStatus.PENDING_APPROVAL;
         }
         const rawEmail = String(((_a = order === null || order === void 0 ? void 0 : order.shippingAddress) === null || _a === void 0 ? void 0 : _a.email) || '').trim();
         const emailOk = !!rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail);
@@ -174,7 +304,7 @@ let OrdersService = class OrdersService {
       <div style="background:${gray};padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
           <div style="background:${navy};padding:20px 24px;color:#fff">
-            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">SERVER TECH CENTRAL</div>
+            <div style="font-weight:800;letter-spacing:0.04em;font-size:16px">Teraformix</div>
             <div style="margin-top:4px;font-size:13px;color:#cbd5e1">Enterprise Hardware | Order Confirmation</div>
           </div>
           <div style="padding:24px">
@@ -270,10 +400,10 @@ let OrdersService = class OrdersService {
 
             <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:${muted};text-transform:uppercase;font-weight:700;margin-bottom:6px">Support</div>
-              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@servertechcentral.com" style="color:${accent};text-decoration:none">sales@servertechcentral.com</a>.</div>
+              <div style="font-size:14px;color:${text}">Questions? Call (888) 787-4795 or email <a href="mailto:sales@teraformix.com" style="color:${accent};text-decoration:none">sales@teraformix.com</a>.</div>
             </div>
           </div>
-          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Server Tech Central</div>
+          <div style="background:${lightNavy};color:#cbd5e1;padding:16px 24px;text-align:center;font-size:12px">© ${new Date().getFullYear()} Teraformix</div>
         </div>
       </div>`;
             await this.notificationsService.sendEmail(subject, html, [customerEmail]);
@@ -422,7 +552,6 @@ exports.OrdersService = OrdersService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         config_1.ConfigService,
-        notifications_service_1.NotificationsService,
         notifications_service_1.NotificationsService,
         shipping_service_1.ShippingService,
         airtable_service_1.AirtableService,

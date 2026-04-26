@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auth = exports.AUTH_USER_ID_KEY = exports.AUTH_USER_KEY = exports.AUTH_ROLE_KEY = exports.AUTH_TOKEN_KEY = void 0;
 const api_1 = require("./api");
-exports.AUTH_TOKEN_KEY = 'stc_auth_token';
-exports.AUTH_ROLE_KEY = 'stc_auth_role';
-exports.AUTH_USER_KEY = 'stc_auth_user';
-exports.AUTH_USER_ID_KEY = 'stc_auth_user_id';
+exports.AUTH_TOKEN_KEY = 'tfx_auth_token';
+exports.AUTH_ROLE_KEY = 'tfx_auth_role';
+exports.AUTH_USER_KEY = 'tfx_auth_user';
+exports.AUTH_USER_ID_KEY = 'tfx_auth_user_id';
 const safeSetItem = (k, v) => { try {
     if (typeof localStorage !== 'undefined')
         localStorage.setItem(k, v);

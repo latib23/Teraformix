@@ -7,7 +7,10 @@ export declare class CmsService implements OnModuleInit {
     constructor(contentRepository: Repository<ContentBlock>);
     onModuleInit(): Promise<void>;
     getContent(key: string): Promise<any>;
+    private toPublicContent;
+    getPublicContent(key: string): Promise<any>;
     getAllContent(): Promise<Record<string, any>>;
+    getAllPublicContent(): Promise<Record<string, any>>;
     updateContent(key: string, data: any): Promise<ContentBlock>;
     importRedirectsFromCsv(filePath: string): Promise<{
         imported: number;

@@ -31,7 +31,7 @@ let XeroService = XeroService_1 = class XeroService {
         if (this.accessToken && Date.now() < this.tokenExpiry) {
             return this.accessToken;
         }
-        const clientId = this.configService.get('XERO_CLIENT_ID') || '2163355D601E494E82513B828470B488';
+        const clientId = this.configService.get('XERO_CLIENT_ID');
         const clientSecret = this.configService.get('XERO_CLIENT_SECRET');
         const refreshToken = this.configService.get('XERO_REFRESH_TOKEN');
         if (!clientId || !clientSecret || !refreshToken) {
@@ -95,9 +95,14 @@ let XeroService = XeroService_1 = class XeroService {
             throw error;
         }
     }
+    hasCredentials() {
+        return !!(this.configService.get('XERO_CLIENT_ID') &&
+            this.configService.get('XERO_CLIENT_SECRET') &&
+            this.configService.get('XERO_REFRESH_TOKEN') &&
+            this.configService.get('XERO_TENANT_ID'));
+    }
     async syncOrder(order) {
-        const clientId = this.configService.get('XERO_CLIENT_ID') || '2163355D601E494E82513B828470B488';
-        if (!clientId) {
+        if (!this.hasCredentials()) {
             this.logger.warn('Xero integration skipped: No credentials');
             return;
         }

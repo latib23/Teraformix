@@ -12,7 +12,7 @@ export class ShippingService {
   private readonly baseUrl = 'https://ssapi.shipstation.com';
 
   constructor(private configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('SHIPSTATION_API_KEY') || 'qIYmy/is6UizBm+jR6Eqg7JIz7TI6jSvvFX5Wo2CzvI';
+    this.apiKey = this.configService.get<string>('SHIPSTATION_API_KEY') || '';
     this.apiSecret = this.configService.get<string>('SHIPSTATION_API_SECRET') || ''; 
   }
 
@@ -31,6 +31,11 @@ export class ShippingService {
   async getRates(destination: { postalCode: string; country: string; city?: string; state?: string }, items: any[]): Promise<ShippingRate[]> {
     const totalWeightInOz = this.getTotalWeightInOz(items);
     const isInternational = destination.country && destination.country !== 'US';
+
+    if (!this.apiKey || !this.apiSecret) {
+      this.logger.warn('ShipStation credentials are not configured. Returning fallback shipping rates.');
+      return isInternational ? this.getInternationalFallbackRates(totalWeightInOz) : this.getFallbackRates(totalWeightInOz);
+    }
 
     try {
       const payload: any = {

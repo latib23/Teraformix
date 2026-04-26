@@ -20,21 +20,19 @@ export class OrdersController {
     const enforce = String(process.env.RECAPTCHA_ENFORCE || 'false').toLowerCase() === 'true';
     if (!enforce) return true;
     const secret = process.env.RECAPTCHA_SECRET || '';
-    if (!secret) return true;
+    if (!secret) return false;
     const t = String(token || '').trim();
     if (!t) return false;
     const params = new URLSearchParams();
     params.append('secret', secret);
     params.append('response', t);
-    const ip = (req?.ip || req?.headers?.['x-forwarded-for'] || '') as any;
-    const ipStr = Array.isArray(ip) ? ip[0] : String(ip || '');
+    const ipStr = String(req?.ip || req?.socket?.remoteAddress || '');
     if (ipStr) params.append('remoteip', ipStr);
     const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.3');
     const expectAction = String(process.env.RECAPTCHA_EXPECT_ACTION || 'checkout');
     try {
       const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
       const data = await resp.json();
-      if (data && data.success) return true;
       const scoreOk = typeof data?.score === 'number' ? data.score >= minScore : true;
       const actionOk = data?.action ? String(data.action) === expectAction : true;
       if (!!data?.success && scoreOk && actionOk) return true;
@@ -42,7 +40,6 @@ export class OrdersController {
     try {
       const resp2 = await fetch('https://www.recaptcha.net/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
       const data2 = await resp2.json();
-      if (data2 && data2.success) return true;
       const scoreOk2 = typeof data2?.score === 'number' ? data2.score >= minScore : true;
       const actionOk2 = data2?.action ? String(data2.action) === expectAction : true;
       if (!!data2?.success && scoreOk2 && actionOk2) return true;

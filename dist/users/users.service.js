@@ -80,26 +80,26 @@ let UsersService = UsersService_1 = class UsersService {
                 this.logger.warn('Skipping user seeding in production environment.');
                 return;
             }
-            const admin = await this.userRepository.findOneBy({ email: 'admin@servertechcentral.com' });
+            const admin = await this.userRepository.findOneBy({ email: 'admin@teraformix.com' });
             if (!admin) {
                 const adminPass = process.env.SEED_ADMIN_PASSWORD || 'password123';
                 const passwordHash = await bcrypt.hash(adminPass, 10);
                 const newAdmin = this.userRepository.create({
                     name: 'System Admin',
-                    email: 'admin@servertechcentral.com',
+                    email: 'admin@teraformix.com',
                     passwordHash,
                     role: user_entity_1.UserRole.SUPER_ADMIN
                 });
                 await this.userRepository.save(newAdmin);
                 this.logger.log('Seeded default admin user.');
             }
-            const salesUser = await this.userRepository.findOneBy({ email: 'sales@servertechcentral.com' });
+            const salesUser = await this.userRepository.findOneBy({ email: 'sales@teraformix.com' });
             if (!salesUser) {
                 const salesPass = process.env.SEED_SALES_PASSWORD || 'password123';
                 const passwordHash = await bcrypt.hash(salesPass, 10);
                 const newSalesUser = this.userRepository.create({
                     name: 'Alex Sales',
-                    email: 'sales@servertechcentral.com',
+                    email: 'sales@teraformix.com',
                     passwordHash,
                     role: user_entity_1.UserRole.SALESPERSON,
                     target: 50000,

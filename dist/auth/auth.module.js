@@ -25,10 +25,17 @@ exports.AuthModule = AuthModule = __decorate([
             passport_1.PassportModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
-                useFactory: async (configService) => ({
-                    secret: configService.get('JWT_SECRET') || 'SECRETKEY',
-                    signOptions: { expiresIn: '8h' },
-                }),
+                useFactory: async (configService) => {
+                    const secret = configService.get('JWT_SECRET');
+                    const isProduction = (configService.get('NODE_ENV') || '').toLowerCase() === 'production';
+                    if (isProduction && !secret) {
+                        throw new Error('JWT_SECRET must be configured in production');
+                    }
+                    return {
+                        secret: secret || 'SECRETKEY',
+                        signOptions: { expiresIn: '8h' },
+                    };
+                },
                 inject: [config_1.ConfigService],
             }),
         ],

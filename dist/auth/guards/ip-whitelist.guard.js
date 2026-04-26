@@ -57,15 +57,8 @@ let IpWhitelistGuard = IpWhitelistGuard_1 = class IpWhitelistGuard {
         throw new common_1.ForbiddenException(`Access denied. Your IP (${clientIp}) is not whitelisted for administrative access.`);
     }
     getClientIp(req) {
-        var _a;
-        const forwarded = req.headers['x-forwarded-for'];
-        if (forwarded) {
-            const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0]).trim();
-            if (ip.startsWith('::ffff:'))
-                return ip.substring(7);
-            return ip;
-        }
-        let ip = ((_a = req.connection) === null || _a === void 0 ? void 0 : _a.remoteAddress) || req.ip || '';
+        var _a, _b;
+        let ip = req.ip || ((_a = req.socket) === null || _a === void 0 ? void 0 : _a.remoteAddress) || ((_b = req.connection) === null || _b === void 0 ? void 0 : _b.remoteAddress) || '';
         if (ip.startsWith('::ffff:'))
             ip = ip.substring(7);
         return ip;

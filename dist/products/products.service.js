@@ -32,7 +32,17 @@ let ProductsService = ProductsService_1 = class ProductsService {
             const count = await this.productRepository.count();
             const firstItem = await this.productRepository.findOne({ where: {} });
             const needsUpdate = count === 0 || (firstItem && (!firstItem.category || !firstItem.brand));
-            if (needsUpdate) {
+            let hasMissingProducts = false;
+            if (!needsUpdate && mockData_1.mockProducts.length > 0) {
+                const mockSkus = mockData_1.mockProducts.map(p => p.sku);
+                const existingProducts = await this.productRepository.find({ where: { sku: (0, typeorm_2.In)(mockSkus) }, select: ['sku'] });
+                const existingSkus = new Set(existingProducts.map(p => p.sku));
+                hasMissingProducts = mockSkus.some(sku => !existingSkus.has(sku));
+                if (hasMissingProducts) {
+                    this.logger.log(`Found ${mockSkus.filter(s => !existingSkus.has(s)).length} new products to seed.`);
+                }
+            }
+            if (needsUpdate || hasMissingProducts) {
                 this.logger.log('Seeding/Updating Products table with rich mock data...');
                 for (const p of mockData_1.mockProducts) {
                     const existing = await this.productRepository.findOne({ where: { sku: p.sku } });
@@ -155,11 +165,11 @@ let ProductsService = ProductsService_1 = class ProductsService {
         const templates = [
             'Fantastic performance. We integrated this into our cluster and saw immediate improvements.',
             'Solid build quality. Exactly what you expect from enterprise-grade hardware.',
-            'Server Tech Central delivered this faster than expected. Perfect condition.',
+            'Teraformix delivered this faster than expected. Perfect condition.',
             'Reliable and robust. We have been running this for 3 months now with zero downtime.',
             'Excellent value for the price. Hard to beat this level of performance in this budget.',
             'The compatibility was spot on. Plug and play with our existing infrastructure.',
-            'Great customer support from STC when we had questions about the firmware version.',
+            'Great customer support from Teraformix when we had questions about the firmware version.',
             'Packaging was very secure. Electrostatic safe and well-padded.',
             'Performance exceeds the datasheet specs in our real-world testing.',
             'Highly recommend for any data center expansion project.',
@@ -176,7 +186,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
             'Build quality is top-notch, feels very premium and durable.',
             'Surprising performance benchmarks for this price point.',
             'Essential for our high-availability setup.',
-            'STC is now our go-to for all enterprise hardware needs.',
+            'Teraformix is now our go-to for all enterprise hardware needs.',
             'No issues during the 48-hour burn-in test.'
         ];
         for (const p of products) {
@@ -262,7 +272,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
         const product = this.productRepository.create(payload);
         const saved = await this.productRepository.save(product);
         await this.syncToQdrant(saved);
-        (0, index_now_1.pingIndexNow)(`https://servertechcentral.com/product/${encodeURIComponent(saved.sku)}`);
+        (0, index_now_1.pingIndexNow)(`https://teraformix.com/product/${encodeURIComponent(saved.sku)}`);
         return saved;
     }
     async update(id, updateData) {
@@ -307,7 +317,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
         const merged = this.productRepository.merge(product, updateData);
         const saved = await this.productRepository.save(merged);
         await this.syncToQdrant(saved);
-        (0, index_now_1.pingIndexNow)(`https://servertechcentral.com/product/${encodeURIComponent(saved.sku)}`);
+        (0, index_now_1.pingIndexNow)(`https://teraformix.com/product/${encodeURIComponent(saved.sku)}`);
         return saved;
     }
     async remove(id) {
@@ -544,7 +554,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
         if (details.length > 0) {
             const urls = details
                 .filter(d => d.status === 'created' || d.status === 'updated')
-                .map(d => `https://servertechcentral.com/product/${encodeURIComponent(d.sku)}`);
+                .map(d => `https://teraformix.com/product/${encodeURIComponent(d.sku)}`);
             if (urls.length > 0)
                 (0, index_now_1.pingIndexNow)(urls);
         }
@@ -564,11 +574,11 @@ let ProductsService = ProductsService_1 = class ProductsService {
         const templates = [
             'Fantastic performance. We integrated this into our cluster and saw immediate improvements.',
             'Solid build quality. Exactly what you expect from enterprise-grade hardware.',
-            'Server Tech Central delivered this faster than expected. Perfect condition.',
+            'Teraformix delivered this faster than expected. Perfect condition.',
             'Reliable and robust. We have been running this for 3 months now with zero downtime.',
             'Excellent value for the price. Hard to beat this level of performance in this budget.',
             'The compatibility was spot on. Plug and play with our existing infrastructure.',
-            'Great customer support from STC when we had questions about the firmware version.',
+            'Great customer support from Teraformix when we had questions about the firmware version.',
             'Packaging was very secure. Electrostatic safe and well-padded.',
             'Performance exceeds the datasheet specs in our real-world testing.',
             'Highly recommend for any data center expansion project.',
@@ -585,7 +595,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
             'Build quality is top-notch, feels very premium and durable.',
             'Surprising performance benchmarks for this price point.',
             'Essential for our high-availability setup.',
-            'STC is now our go-to for all enterprise hardware needs.',
+            'Teraformix is now our go-to for all enterprise hardware needs.',
             'No issues during the 48-hour burn-in test.'
         ];
         const reviews = [];

@@ -27,9 +27,12 @@ const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const user_entity_1 = require("../users/entities/user.entity");
 const ip_whitelist_guard_1 = require("../auth/guards/ip-whitelist.guard");
+const orders_service_1 = require("../orders/orders.service");
+const security_1 = require("../lib/security");
 let QuotesController = class QuotesController {
-    constructor(quotesService) {
+    constructor(quotesService, ordersService) {
         this.quotesService = quotesService;
+        this.ordersService = ordersService;
     }
     findAll() {
         return this.quotesService.findAll();
@@ -90,7 +93,8 @@ let QuotesController = class QuotesController {
             return res.status(common_1.HttpStatus.NOT_FOUND).json({ message: 'BOM not found' });
         }
         const submission = quote.submissionData || {};
-        const fileName = submission.fileName || `bom-${quote.referenceNumber}`;
+        const fileName = ((0, security_1.sanitizePlainText)(submission.fileName || `bom-${quote.referenceNumber}`, 255) || `bom-${quote.referenceNumber}`)
+            .replace(/["\r\n]/g, '');
         const dataUrl = submission.fileContent;
         if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
             return res.status(common_1.HttpStatus.BAD_REQUEST).json({ message: 'No file content available' });
@@ -99,9 +103,19 @@ let QuotesController = class QuotesController {
         if (!match) {
             return res.status(common_1.HttpStatus.BAD_REQUEST).json({ message: 'Invalid file data' });
         }
-        const mime = match[1];
+        const allowedMimes = new Set([
+            'text/csv',
+            'application/pdf',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/octet-stream',
+        ]);
+        const mime = allowedMimes.has(match[1]) ? match[1] : 'application/octet-stream';
         const b64 = match[2];
         const buffer = Buffer.from(b64, 'base64');
+        if (buffer.length > 6 * 1024 * 1024) {
+            return res.status(common_1.HttpStatus.BAD_REQUEST).json({ message: 'File is too large' });
+        }
         res.setHeader('Content-Type', mime || 'application/octet-stream');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         return res.status(common_1.HttpStatus.OK).send(buffer);
@@ -149,7 +163,7 @@ let QuotesController = class QuotesController {
             referenceNumber: quote.referenceNumber,
             status: quote.status,
             createdAt: quote.createdAt,
-            total: ((_a = quote.submissionData) === null || _a === void 0 ? void 0 : _a.total) || 0,
+            total: Number(quote.negotiatedTotal || ((_a = quote.submissionData) === null || _a === void 0 ? void 0 : _a.total) || 0),
             paymentTerms: quote.paymentTerms,
             items: ((_b = quote.submissionData) === null || _b === void 0 ? void 0 : _b.cart) || [],
             customer: {
@@ -160,6 +174,29 @@ let QuotesController = class QuotesController {
         };
     }
     async payQuote(id, paymentDetails) {
+        var _a, _b;
+        const quote = await this.quotesService.findOne(id);
+        if (!quote)
+            throw new common_1.NotFoundException('Quote not found');
+        const paymentIntentId = String((paymentDetails === null || paymentDetails === void 0 ? void 0 : paymentDetails.paymentIntentId) || '').trim();
+        if (!paymentIntentId) {
+            throw new common_1.BadRequestException('payment_intent_required');
+        }
+        const expectedAmount = Math.round(Number(quote.negotiatedTotal || ((_a = quote.submissionData) === null || _a === void 0 ? void 0 : _a.total) || 0) * 100);
+        if (!Number.isSafeInteger(expectedAmount) || expectedAmount < 50) {
+            throw new common_1.BadRequestException('invalid_quote_total');
+        }
+        const intent = await this.ordersService.getPaymentIntent(paymentIntentId);
+        const intentQuoteId = String(((_b = intent.metadata) === null || _b === void 0 ? void 0 : _b.quoteId) || '').trim();
+        if (intentQuoteId !== id) {
+            throw new common_1.BadRequestException('payment_quote_mismatch');
+        }
+        if (intent.currency !== 'usd' || intent.amount < expectedAmount) {
+            throw new common_1.BadRequestException('payment_amount_mismatch');
+        }
+        if (intent.status !== 'requires_capture' && intent.status !== 'succeeded') {
+            throw new common_1.BadRequestException('payment_not_confirmed');
+        }
         return this.quotesService.update(id, { status: quote_entity_1.QuoteStatus.PAID });
     }
     async captureAbandoned(body) {
@@ -345,6 +382,7 @@ exports.QuotesController = QuotesController = __decorate([
     (0, swagger_1.ApiTags)('quotes'),
     (0, common_1.Controller)('quotes'),
     (0, common_1.UseGuards)(ip_whitelist_guard_1.IpWhitelistGuard),
-    __metadata("design:paramtypes", [quotes_service_1.QuotesService])
+    __metadata("design:paramtypes", [quotes_service_1.QuotesService,
+        orders_service_1.OrdersService])
 ], QuotesController);
 //# sourceMappingURL=quotes.controller.js.map

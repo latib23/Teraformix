@@ -22,6 +22,7 @@ const roles_guard_1 = require("../auth/guards/roles.guard");
 const ip_whitelist_guard_1 = require("../auth/guards/ip-whitelist.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const user_entity_1 = require("../users/entities/user.entity");
+const security_1 = require("../lib/security");
 let ProductsController = class ProductsController {
     constructor(productsService) {
         this.productsService = productsService;
@@ -40,11 +41,17 @@ let ProductsController = class ProductsController {
     }
     async addReview(id, body) {
         const product = await this.productsService.findOne(id);
+        const author = (0, security_1.sanitizePlainText)(body.author || 'Anonymous', 80) || 'Anonymous';
+        const reviewBody = (0, security_1.sanitizePlainText)(body.reviewBody, 1200);
+        const ratingValue = Math.max(1, Math.min(5, Number(body.ratingValue || 5)));
+        if (!reviewBody || !Number.isFinite(ratingValue)) {
+            throw new common_1.BadRequestException('Invalid review');
+        }
         const review = {
-            author: body.author || 'Anonymous',
+            author,
             datePublished: new Date().toISOString().split('T')[0],
-            reviewBody: body.reviewBody,
-            ratingValue: body.ratingValue,
+            reviewBody,
+            ratingValue,
             status: 'PENDING'
         };
         const schema = product.schema || {};

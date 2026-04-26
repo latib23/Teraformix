@@ -21,15 +21,15 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     constructor(configService) {
         this.configService = configService;
         this.logger = new common_1.Logger(NotificationsService_1.name);
-        this.salesEmail = 'sales@servertechcentral.com';
+        this.salesEmail = 'sales@teraformix.com';
         this.transporter = null;
     }
     async sendEmail(subject, html, to) {
         var _a;
         try {
             const apiToken = this.configService.get('MAILTRAP_TOKEN');
-            const fromEmail = this.configService.get('MAILTRAP_FROM') || 'noreply@servertechcentral.com';
-            const fromName = this.configService.get('MAILTRAP_FROM_NAME') || 'Server Tech Central';
+            const fromEmail = this.configService.get('MAILTRAP_FROM') || 'noreply@teraformix.com';
+            const fromName = this.configService.get('MAILTRAP_FROM_NAME') || 'Teraformix';
             const recipients = Array.isArray(to) ? to.filter(Boolean) : (to ? [to] : []);
             if (!recipients.includes(this.salesEmail))
                 recipients.push(this.salesEmail);

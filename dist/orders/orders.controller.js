@@ -36,15 +36,14 @@ let OrdersController = class OrdersController {
             return true;
         const secret = process.env.RECAPTCHA_SECRET || '';
         if (!secret)
-            return true;
+            return false;
         const t = String(token || '').trim();
         if (!t)
             return false;
         const params = new URLSearchParams();
         params.append('secret', secret);
         params.append('response', t);
-        const ip = ((req === null || req === void 0 ? void 0 : req.ip) || ((_a = req === null || req === void 0 ? void 0 : req.headers) === null || _a === void 0 ? void 0 : _a['x-forwarded-for']) || '');
-        const ipStr = Array.isArray(ip) ? ip[0] : String(ip || '');
+        const ipStr = String((req === null || req === void 0 ? void 0 : req.ip) || ((_a = req === null || req === void 0 ? void 0 : req.socket) === null || _a === void 0 ? void 0 : _a.remoteAddress) || '');
         if (ipStr)
             params.append('remoteip', ipStr);
         const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.3');
@@ -52,8 +51,6 @@ let OrdersController = class OrdersController {
         try {
             const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
             const data = await resp.json();
-            if (data && data.success)
-                return true;
             const scoreOk = typeof (data === null || data === void 0 ? void 0 : data.score) === 'number' ? data.score >= minScore : true;
             const actionOk = (data === null || data === void 0 ? void 0 : data.action) ? String(data.action) === expectAction : true;
             if (!!(data === null || data === void 0 ? void 0 : data.success) && scoreOk && actionOk)
@@ -65,8 +62,6 @@ let OrdersController = class OrdersController {
         try {
             const resp2 = await fetch('https://www.recaptcha.net/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
             const data2 = await resp2.json();
-            if (data2 && data2.success)
-                return true;
             const scoreOk2 = typeof (data2 === null || data2 === void 0 ? void 0 : data2.score) === 'number' ? data2.score >= minScore : true;
             const actionOk2 = (data2 === null || data2 === void 0 ? void 0 : data2.action) ? String(data2.action) === expectAction : true;
             if (!!(data2 === null || data2 === void 0 ? void 0 : data2.success) && scoreOk2 && actionOk2)

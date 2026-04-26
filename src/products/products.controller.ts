@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Body, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ApiTags, ApiQuery, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { IpWhitelistGuard } from '../auth/guards/ip-whitelist.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
+import { sanitizePlainText } from '../lib/security';
 
 @ApiTags('products')
 @Controller('products')
@@ -52,11 +53,18 @@ export class ProductsController {
   @Post(':id/reviews')
   async addReview(@Param('id') id: string, @Body() body: any) {
     const product: any = await this.productsService.findOne(id);
+    const author = sanitizePlainText(body.author || 'Anonymous', 80) || 'Anonymous';
+    const reviewBody = sanitizePlainText(body.reviewBody, 1200);
+    const ratingValue = Math.max(1, Math.min(5, Number(body.ratingValue || 5)));
+    if (!reviewBody || !Number.isFinite(ratingValue)) {
+      throw new BadRequestException('Invalid review');
+    }
+
     const review = {
-      author: body.author || 'Anonymous',
+      author,
       datePublished: new Date().toISOString().split('T')[0],
-      reviewBody: body.reviewBody,
-      ratingValue: body.ratingValue,
+      reviewBody,
+      ratingValue,
       status: 'PENDING'
     };
 

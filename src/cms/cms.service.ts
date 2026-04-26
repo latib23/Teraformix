@@ -480,6 +480,32 @@ export class CmsService implements OnModuleInit {
     }
   }
 
+  private toPublicContent(key: string, data: any): any {
+    if (!data || typeof data !== 'object') return data;
+
+    if (key === 'security') {
+      return {
+        trueguardPublicId: data.trueguardPublicId || '',
+      };
+    }
+
+    if (key === 'payment') {
+      return {
+        stripePublicKey: data.stripePublicKey || '',
+        enablePO: !!data.enablePO,
+        enableBankTransfer: !!data.enableBankTransfer,
+        bankInstructions: data.enableBankTransfer ? String(data.bankInstructions || '') : '',
+      };
+    }
+
+    return data;
+  }
+
+  async getPublicContent(key: string): Promise<any> {
+    const data = await this.getContent(key);
+    return this.toPublicContent(key, data);
+  }
+
   async getAllContent(): Promise<Record<string, any>> {
     try {
       const blocks = await this.contentRepository.find();
@@ -503,6 +529,14 @@ export class CmsService implements OnModuleInit {
       this.logger.error('Error fetching all content', error);
       return {};
     }
+  }
+
+  async getAllPublicContent(): Promise<Record<string, any>> {
+    const content = await this.getAllContent();
+    return Object.keys(content).reduce((acc, key) => {
+      acc[key] = this.toPublicContent(key, content[key]);
+      return acc;
+    }, {} as Record<string, any>);
   }
 
   async updateContent(key: string, data: any): Promise<ContentBlock> {

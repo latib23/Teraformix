@@ -10,7 +10,7 @@ const getApiBase = () => {
         let apiBase = '';
         let override = '';
         try {
-            override = String(localStorage.getItem('stc_api_url') || '').trim();
+            override = String(localStorage.getItem('tfx_api_url') || '').trim();
         }
         catch (_e) {
             void _e;
@@ -122,7 +122,7 @@ async function fetchJson(endpoint, options) {
             }
         }
         if (looksHtml || ctOk.includes('text/html')) {
-            const candidates = ['https://servertechcentral.com/api', 'https://servertechcentral.com/api'];
+            const candidates = ['https://teraformix.com/api', 'https://teraformix.com/api'];
             for (const base of candidates) {
                 try {
                     if (base.replace(/\/+$/, '') === apiBase.replace(/\/+$/, ''))
@@ -138,7 +138,7 @@ async function fetchJson(endpoint, options) {
                         try {
                             const json = JSON.parse(retryBody);
                             try {
-                                localStorage.setItem('stc_api_url', base);
+                                localStorage.setItem('tfx_api_url', base);
                             }
                             catch (_e) {
                                 void _e;

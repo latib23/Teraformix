@@ -9,11 +9,14 @@ import { gzipSync } from 'zlib';
 import { CmsService } from './cms/cms.service';
 import { ProductsService } from './products/products.service';
 import compression from 'compression';
+import { escapeHtml, safeJsonScript } from './lib/security';
 
 async function bootstrap() {
   // Disable default body parser to handle large payloads manually
   const app = await NestFactory.create(AppModule, { bodyParser: false });
-  (app as any).set('trust proxy', true);
+  const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+  const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || (isProduction ? 1 : 0));
+  (app as any).set('trust proxy', trustProxyHops > 0 ? trustProxyHops : false);
 
   // Set global prefix with exclusions
   app.setGlobalPrefix('api', {
@@ -50,39 +53,60 @@ async function bootstrap() {
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
-  const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+
+  const isAllowedOrigin = (origin: string) => {
+    let parsed: URL;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      return false;
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+    const originNormalized = parsed.origin.toLowerCase();
+
+    return allowlist.some(allowed => {
+      const raw = allowed.toLowerCase().trim();
+      if (!raw || raw === '*') return !isProduction;
+
+      let allowedProtocol = '';
+      let allowedHost = raw;
+      try {
+        const url = new URL(raw);
+        allowedProtocol = url.protocol;
+        allowedHost = url.hostname.toLowerCase();
+      } catch {
+        allowedHost = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      }
+
+      if (allowedProtocol && parsed.protocol !== allowedProtocol) return false;
+      if (originNormalized === raw) return true;
+      if (hostname === allowedHost) return true;
+      if (allowedHost.startsWith('*.')) {
+        const suffix = allowedHost.slice(1);
+        return hostname.endsWith(suffix) && hostname !== allowedHost.slice(2);
+      }
+
+      return false;
+    });
+  };
 
   app.enableCors({
     origin: (origin, callback) => {
       // Allow same-origin or server-to-server calls (no origin)
       if (!origin) return callback(null, true);
 
-      // If no explicit allowlist, allow all origins
-      if (allowlist.length === 0 || allowlist.includes('*')) return callback(null, true);
-
       const originLower = origin.toLowerCase();
       const isLocal = originLower.includes('localhost') || originLower.includes('127.0.0.1') || originLower.includes('[::1]');
+      const isInAllowlist = isAllowedOrigin(origin);
 
-      // Check if origin matches any entry in allowlist
-      const isInAllowlist = allowlist.some(allowed => {
-        const a = allowed.toLowerCase().trim();
-        if (!a) return false;
-
-        // Match exact, with protocols, or as subdomain
-        return originLower === a ||
-          originLower === `https://${a}` ||
-          originLower === `http://${a}` ||
-          originLower.endsWith(`.${a}`) ||
-          originLower.includes(a.replace(/^https?:\/\//, ''));
-      });
-
-      if (isLocal || isInAllowlist) {
+      if ((!isProduction && isLocal) || isInAllowlist) {
         callback(null, true);
       } else {
         // High visibility warning in logs to help identify mission-critical missing origins
         console.warn(`\n!!! CORS BLOCKED origin: ${origin} !!!`);
         console.warn(`Current Allowlist: ${JSON.stringify(allowlist)}`);
-        callback(new Error('Not allowed by CORS'), false);
+        callback(null, false);
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -97,7 +121,7 @@ async function bootstrap() {
   app.use(async (req: any, res: any, next: any) => {
     // HTTPS redirect when enabled
     if (enforceHttps) {
-      const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol;
+      const proto = req.protocol;
       if (proto !== 'https') {
         const host = req.get('host');
         return res.redirect(301, `https://${host}${req.originalUrl}`);
@@ -107,7 +131,7 @@ async function bootstrap() {
     // WWW to non-WWW redirect
     const host = req.get('host') || '';
     if (host.startsWith('www.')) {
-      const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
+      const proto = req.protocol || 'https';
       const nonWwwHost = host.replace(/^www\./, '');
       return res.redirect(301, `${proto}://${nonWwwHost}${req.originalUrl}`);
     }
@@ -135,7 +159,7 @@ async function bootstrap() {
       ].join(', ')
     );
     try {
-      const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol;
+      const proto = req.protocol;
       if (proto === 'https') {
         res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
       }
@@ -193,8 +217,7 @@ async function bootstrap() {
   app.use(async (req: any, res: any, next: any) => {
     const m = req.method;
     if (m !== 'GET' && m !== 'POST' && m !== 'PUT' && m !== 'PATCH' && m !== 'DELETE') return next();
-    const ipHeader = (req.headers['x-forwarded-for'] as string) || '';
-    const ip = ipHeader.split(',')[0]?.trim() || req.ip || 'unknown';
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
     const path = req.path || req.url || '';
     const isLogin = path.startsWith('/api/auth/login');
     const isHeavy = (path.startsWith('/api/orders') || path.startsWith('/api/quotes') || path.startsWith('/api/checkout')) && !path.endsWith('/abandon');
@@ -270,7 +293,12 @@ async function bootstrap() {
   });
 
   // Apply global validation pipes
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transformOptions: { enableImplicitConversion: true },
+  }));
 
   // Setup Swagger
   const config = new DocumentBuilder()
@@ -446,8 +474,8 @@ async function bootstrap() {
         html = html.replace(/<title>[^<]*<\u002Ftitle>/i, `<title>${pageTitle}<\u002Ftitle>`);
         const canonicalTag = `<link rel="canonical" href="${productUrl}">`;
         const metaDescTag = `<meta name="description" content="${pageDesc}">`;
-        const jsonldProduct = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
-        const jsonldBreadcrumb = `<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`;
+        const jsonldProduct = `<script type="application/ld+json">${safeJsonScript(schemaData)}</script>`;
+        const jsonldBreadcrumb = `<script type="application/ld+json">${safeJsonScript(breadcrumb)}</script>`;
         const metaDescRegex = /<meta[^>]*name=(?:"|')description(?:"|')[^>]*>/i;
         if (metaDescRegex.test(html)) {
           html = html.replace(metaDescRegex, metaDescTag);
@@ -462,7 +490,7 @@ async function bootstrap() {
         const weight = String((p as any).weight || '').trim();
         const warranty = String((p as any).warranty || '3-Year Warranty').trim();
         const safeOverview = String((p as any).overview || '').replace(/<[^>]+>/g, '').slice(0, 500);
-        const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${schemaData.image[0]}" alt="${(p as any).name}" style="max-width:100%;height:auto" />` : '';
+        const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${escapeHtml(schemaData.image[0])}" alt="${escapeHtml((p as any).name)}" style="max-width:100%;height:auto" />` : '';
         const categoriesContent = await cms.getContent('categories');
         const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c: any) => c && c.isActive) : [];
         const currentCat = String(category || '').toLowerCase();
@@ -470,10 +498,13 @@ async function bootstrap() {
         const relatedCategoriesHtml = categoryPicks.length > 0
           ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${categoryPicks.map((c: any) => `<a href="/category/${encodeURIComponent(String(c.id))}" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${String(c.name)}</a>`).join('')}</div></section>`
           : `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${['Servers', 'Storage', 'Networking'].slice(0, 6).map((name) => `<a href="/category" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${name}</a>`).join('')}</div></section>`;
-        const reviewsHtml = Array.isArray(reviews) && reviews.length > 0
-          ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${reviews.slice(0, 3).map((r: any) => {
-            const author = r.author ? String(r.author) : 'Anonymous';
-            const body = r.reviewBody ? String(r.reviewBody) : '';
+        const approvedReviews = Array.isArray(reviews)
+          ? reviews.filter((r: any) => r && typeof r === 'object' && r.status === 'APPROVED')
+          : [];
+        const reviewsHtml = approvedReviews.length > 0
+          ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${approvedReviews.slice(0, 3).map((r: any) => {
+            const author = r.author ? escapeHtml(r.author) : 'Anonymous';
+            const body = r.reviewBody ? escapeHtml(r.reviewBody) : '';
             const rating = r.ratingValue ? Number(r.ratingValue) : undefined;
             const stars = rating ? '★'.repeat(Math.max(1, Math.min(5, Math.round(rating)))) : '';
             return `<div class="border rounded p-3"><div class="text-sm text-gray-700">${stars ? `<span class="text-yellow-600">${stars}</span> ` : ''}<strong>${author}</strong></div><p class="text-sm text-gray-800 mt-1">${body}</p></div>`;
@@ -482,7 +513,7 @@ async function bootstrap() {
         const resourcesHtml = (p as any).datasheet ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Resources</h2><ul class="list-disc pl-6 text-sm text-navy-900"><li><a href="${(p as any).datasheet}" rel="noopener" target="_blank">Datasheet (PDF)</a></li></ul></section>` : '';
         const ssrBlock = `
           <section id="ssr-product" class="container mx-auto px-4 py-6">
-            <h1>${(p as any).name}</h1>
+            <h1>${escapeHtml((p as any).name)}</h1>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div>${imgTag}</div>
               <div>
@@ -490,16 +521,16 @@ async function bootstrap() {
                 <div class="text-sm text-gray-700 mb-4">${availabilityText}</div>
                 <h3 class="text-sm font-bold text-navy-900 mb-2">Specifications</h3>
                 <ul class="text-sm text-gray-800 space-y-1">
-                  <li><strong>SKU:</strong> ${(p as any).sku}</li>
-                  <li><strong>Brand:</strong> ${(p as any).brand}</li>
-                  ${warranty ? `<li><strong>Warranty:</strong> ${warranty}</li>` : ''}
-                  ${dims ? `<li><strong>Dimensions:</strong> ${dims}</li>` : ''}
-                  ${weight ? `<li><strong>Weight:</strong> ${weight}</li>` : ''}
+                  <li><strong>SKU:</strong> ${escapeHtml((p as any).sku)}</li>
+                  <li><strong>Brand:</strong> ${escapeHtml((p as any).brand)}</li>
+                  ${warranty ? `<li><strong>Warranty:</strong> ${escapeHtml(warranty)}</li>` : ''}
+                  ${dims ? `<li><strong>Dimensions:</strong> ${escapeHtml(dims)}</li>` : ''}
+                  ${weight ? `<li><strong>Weight:</strong> ${escapeHtml(weight)}</li>` : ''}
                 </ul>
                 ${category ? `<div class="mt-3"><a href="${slug ? `${origin}/category/${slug}` : `${origin}/category`}" class="text-action-600 text-sm font-semibold hover:underline">View ${category} Products</a></div>` : ''}
               </div>
             </div>
-            ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${safeOverview}</p></div>` : ''}
+            ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${escapeHtml(safeOverview)}</p></div>` : ''}
             ${!safeOverview ? `<section class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><ul class="list-disc pl-6 text-sm text-gray-800 space-y-1"><li>OEM Genuine Component verified by certified technicians.</li><li>Clean serial number ready for service contract registration.</li><li>Electrostatic Discharge (ESD) safe packaging.</li><li>Supports hot-swapping for zero-downtime maintenance.</li></ul></section>` : ''}
             ${reviewsHtml}
             ${resourcesHtml}
@@ -533,7 +564,7 @@ async function bootstrap() {
     const handledPrefixes = [
       // SpaController specific routes (excluded from global prefix)
       '/product/', '/category/', '/landing', '/warranty', '/returns', '/contact',
-      '/privacy', '/terms', '/sitemap', '/about'
+      '/privacy', '/terms', '/sitemap', '/about', '/configurator'
     ];
 
     const isHandledByController = handledPrefixes.some(p => path.startsWith(p));
@@ -571,7 +602,7 @@ async function bootstrap() {
         const gaId = process.env.GA_MEASUREMENT_ID || '';
         if (gaId) html = html.replace('</head>', `<script>window.__GA_ID__='${gaId}'</script></head>`);
 
-        html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(org)}</script><script type="application/ld+json">${JSON.stringify(website)}</script></head>`);
+        html = html.replace('</head>', `<script type="application/ld+json">${safeJsonScript(org)}</script><script type="application/ld+json">${safeJsonScript(website)}</script></head>`);
       } catch (e) { void 0; }
 
       // Generic Title/headers based on path for nicer UX before React hydration

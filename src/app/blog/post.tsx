@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import SEOHead from '../../components/SEO/SEOHead';
 import { useGlobalContent } from '../../contexts/GlobalContent';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
+import { sanitizeRichHtml } from '../../lib/security';
 
 const BlogPostPage = () => {
   const { slug } = useParams();
@@ -13,6 +14,10 @@ const BlogPostPage = () => {
   const post = useMemo(
     () => (content.blogPosts || []).find((p) => p.slug === slug),
     [content.blogPosts, slug]
+  );
+  const safePostContent = useMemo(
+    () => sanitizeRichHtml(post?.content || ''),
+    [post?.content]
   );
 
   // Related posts (same category or recent)
@@ -348,7 +353,7 @@ const BlogPostPage = () => {
             {/* Article Content */}
             <div
               className="blog-content max-w-none"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: safePostContent }}
             />
           </div>
         </article>

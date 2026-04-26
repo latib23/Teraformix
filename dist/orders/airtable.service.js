@@ -32,7 +32,7 @@ let AirtableService = AirtableService_1 = class AirtableService {
         this.logger = new common_1.Logger(AirtableService_1.name);
         const apiKey = this.configService.get('AIRTABLE_API_KEY');
         const baseId = this.configService.get('AIRTABLE_BASE_ID');
-        const formsBaseId = this.configService.get('AIRTABLE_FORMS_BASE_ID') || 'app3aiGNMpvuzDsSQ';
+        const formsBaseId = this.configService.get('AIRTABLE_FORMS_BASE_ID');
         this.customersTable = this.configService.get('AIRTABLE_CUSTOMERS_TABLE') || 'Customers';
         this.ordersTable = this.configService.get('AIRTABLE_ORDERS_TABLE') || 'Orders';
         this.leadsTable = this.configService.get('AIRTABLE_FORMS_TABLE_NAME') || 'Leads';

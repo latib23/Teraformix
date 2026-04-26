@@ -68,7 +68,7 @@ let CmsService = CmsService_1 = class CmsService {
             const defaults = {
                 general: {
                     phone: '1-800-555-0199',
-                    email: 'sales@servertechcentral.com',
+                    email: 'sales@teraformix.com',
                     address: '100 Tech Plaza, Austin, TX 78701',
                     announcement: 'Same Day Shipping on In-Stock Items',
                     cageCode: '8H7V2',
@@ -81,19 +81,19 @@ let CmsService = CmsService_1 = class CmsService {
                     heroImage: 'https://images.unsplash.com/photo-1558494949-ef526b0042a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
                 },
                 categoryPage: {
-                    title: "Enterprise Servers & Storage Solutions | Server Tech Central",
+                    title: "Enterprise Servers & Storage Solutions | Teraformix",
                     description: "Browse our catalog of over 500,000 enterprise servers, storage drives, and networking components. In-stock items ship same day. ISO 9001 Certified.",
                     h1: "Enterprise Servers & Storage Solutions",
                     introText: "Browse our extensive catalog of new and refurbished enterprise hardware. We stock over 500,000 SKUs including Dell PowerEdge Servers, HPE ProLiant, and Cisco Networking equipment. All items are fully tested, include warranty, and are available for same-day shipping."
                 },
                 privacyPolicy: {
-                    content: `## Privacy Policy\n\n**Effective Date:** January 1, 2024\n\nAt Server Tech Central, we prioritize your data privacy. We collect only the information necessary to process your orders and provide customer support.\n\n### Information We Collect\n- Contact details (Name, Email, Phone)\n- Shipping and Billing Addresses\n- Transaction History\n\nWe do not sell your personal data to third parties.`,
+                    content: `## Privacy Policy\n\n**Effective Date:** January 1, 2024\n\nAt Teraformix, we prioritize your data privacy. We collect only the information necessary to process your orders and provide customer support.\n\n### Information We Collect\n- Contact details (Name, Email, Phone)\n- Shipping and Billing Addresses\n- Transaction History\n\nWe do not sell your personal data to third parties.`,
                 },
                 termsOfSale: {
-                    content: `## Terms of Sale\n\n**1. Acceptance of Order**\nAll orders are subject to acceptance by Server Tech Central. We reserve the right to cancel orders due to pricing errors or stock discrepancies.\n\n**2. Warranty**\nAll hardware comes with a standard 3-Year Warranty unless otherwise noted. This covers hardware defects only.\n\n**3. Returns**\nReturns are accepted within 30 days of delivery. A 15% restocking fee may apply to non-defective items opened by the customer.`,
+                    content: `## Terms of Sale\n\n**1. Acceptance of Order**\nAll orders are subject to acceptance by Teraformix. We reserve the right to cancel orders due to pricing errors or stock discrepancies.\n\n**2. Warranty**\nAll hardware comes with a standard 3-Year Warranty unless otherwise noted. This covers hardware defects only.\n\n**3. Returns**\nReturns are accepted within 30 days of delivery. A 15% restocking fee may apply to non-defective items opened by the customer.`,
                 },
                 termsAndConditions: {
-                    content: `## Terms & Conditions\n\n**Use of Website**\nBy accessing this website, you agree to comply with our terms. Unauthorized scraping, data mining, or automated ordering is prohibited.\n\n**Payment Terms**\nWe accept major credit cards, Purchase Orders for qualified entities, and bank transfers. Orders may be held pending verification.\n\n**Limitation of Liability**\nServer Tech Central is not liable for indirect or consequential damages arising from product use.`,
+                    content: `## Terms & Conditions\n\n**Use of Website**\nBy accessing this website, you agree to comply with our terms. Unauthorized scraping, data mining, or automated ordering is prohibited.\n\n**Payment Terms**\nWe accept major credit cards, Purchase Orders for qualified entities, and bank transfers. Orders may be held pending verification.\n\n**Limitation of Liability**\nTeraformix is not liable for indirect or consequential damages arising from product use.`,
                 },
                 returnPolicy: {
                     content: `## Return Policy\n\n**30-Day Returns**\nReturns accepted within 30 days of delivery with RMA authorization. Items must be in original condition and packaging.\n\n**Defective Items**\nDefective or DOA products qualify for full replacement or refund.\n\n**Restocking Fees**\nNon-defective returns may be subject to up to a 15% restocking fee.\n\n**Process**\nContact support with your order reference to initiate an RMA.`,
@@ -105,7 +105,7 @@ let CmsService = CmsService_1 = class CmsService {
                     aboutText: 'The premier B2B reseller for enterprise hardware, storage, and networking solutions.',
                 },
                 aboutPage: {
-                    content: `## About Us\n\nServer Tech Central supplies enterprise-grade servers, storage, and networking hardware to data centers, MSPs, and public sector organizations. Our mission is rapid, reliable fulfillment backed by technical expertise.\n\n**Why Choose Us**\n- Large in-stock inventory\n- Fast, professional procurement\n- 3-Year standard warranty\n- Dedicated account managers`,
+                    content: `## About Us\n\nTeraformix supplies enterprise-grade servers, storage, and networking hardware to data centers, MSPs, and public sector organizations. Our mission is rapid, reliable fulfillment backed by technical expertise.\n\n**Why Choose Us**\n- Large in-stock inventory\n- Fast, professional procurement\n- 3-Year standard warranty\n- Dedicated account managers`,
                 },
                 contactPage: {
                     content: `## Contact Us\n\nReach our team via the channels below. For urgent sourcing or order updates, include your reference number.`,
@@ -116,9 +116,9 @@ let CmsService = CmsService_1 = class CmsService {
                 settings: {
                     favicon: 'https://cdn-icons-png.flaticon.com/512/4400/4400508.png',
                     faviconDarkUrl: '',
-                    siteTitle: 'Server Tech Central | Enterprise Hardware Reseller',
+                    siteTitle: 'Teraformix | Enterprise Hardware Reseller',
                     logoUrl: '',
-                    logoText: 'SERVER TECH CENTRAL',
+                    logoText: 'TERAFORMIX',
                 },
                 payment: {
                     stripePublicKey: '',
@@ -141,7 +141,7 @@ let CmsService = CmsService_1 = class CmsService {
                         description: 'Rack, Tower, & Blade Systems',
                         image: '',
                         isActive: true,
-                        seoTitle: "Enterprise Servers | Dell PowerEdge & HPE ProLiant | Server Tech Central",
+                        seoTitle: "Enterprise Servers | Dell PowerEdge & HPE ProLiant | Teraformix",
                         seoDescription: "Buy new and refurbished enterprise servers. Huge inventory of Dell PowerEdge and HPE ProLiant rack, tower, and blade servers. 3-Year Warranty.",
                         seoH1: "Enterprise Server Solutions",
                         seoText: "Scale your data center with high-performance compute nodes. We stock the latest generation hardware as well as legacy systems for maintenance continuity. Our certified engineers rigorously test every unit to ensure mission-critical reliability."
@@ -180,6 +180,201 @@ let CmsService = CmsService_1 = class CmsService {
                         seoText: "Keep your systems online with genuine OEM parts. We maintain an extensive inventory of processors, memory modules, and power supplies for rapid replacement and upgrades."
                     }
                 ],
+                serverConfigurator: {
+                    title: "Build Your Custom Server",
+                    description: "Configure enterprise-grade servers with the latest Intel Xeon & DDR5 technology. Choose your platform, select components, and get an instant quote.",
+                    models: [
+                        {
+                            id: "dell-r760",
+                            name: "Dell PowerEdge R760",
+                            brand: "Dell",
+                            description: "16th Gen 2U Rack Server with PCIe Gen5, DDR5, and up to 24x 2.5\" NVMe bays. Ideal for AI inference, virtualization, and high-density compute.",
+                            basePrice: 2895.00,
+                            baseImage: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-enterprise-products/enterprise-systems/poweredge/r760/media-gallery/server-poweredge-r760-gallery-1.psd?fmt=png-alpha&wid=600",
+                            specs: {
+                                formFactor: "2U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "24x 2.5\" NVMe/SAS/SATA",
+                                cpuSockets: 2,
+                                pciSlots: "6x PCIe Gen5",
+                                generation: "16th Gen"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "sff-2.5",
+                                raidFamily: "dell-perc12"
+                            }
+                        },
+                        {
+                            id: "dell-r660",
+                            name: "Dell PowerEdge R660",
+                            brand: "Dell",
+                            description: "16th Gen 1U Rack Server optimized for dense compute. DDR5, PCIe Gen5, and up to 10x 2.5\" bays in a compact 1U form factor.",
+                            basePrice: 2495.00,
+                            baseImage: "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-enterprise-products/enterprise-systems/poweredge/r660/media-gallery/server-poweredge-r660-gallery-1.psd?fmt=png-alpha&wid=600",
+                            specs: {
+                                formFactor: "1U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "10x 2.5\" NVMe/SAS/SATA",
+                                cpuSockets: 2,
+                                pciSlots: "3x PCIe Gen5",
+                                generation: "16th Gen"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "sff-2.5",
+                                raidFamily: "dell-perc12"
+                            }
+                        },
+                        {
+                            id: "hpe-dl380a-gen11",
+                            name: "HPE ProLiant DL380a Gen11",
+                            brand: "HPE",
+                            description: "2U Rack Server with 4th Gen Intel Xeon Scalable, DDR5, PCIe Gen5, and GPU-ready design. The industry standard for hybrid cloud workloads.",
+                            basePrice: 3150.00,
+                            baseImage: "https://www.hpe.com/psnow/doc/a00008180enw.png",
+                            specs: {
+                                formFactor: "2U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "20x SFF + 2x Rear SFF",
+                                cpuSockets: 2,
+                                pciSlots: "8x PCIe Gen5",
+                                generation: "Gen11"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "sff-2.5",
+                                raidFamily: "hpe-mr416i"
+                            }
+                        },
+                        {
+                            id: "hpe-dl360-gen11",
+                            name: "HPE ProLiant DL360 Gen11",
+                            brand: "HPE",
+                            description: "1U Rack Server for compute-dense environments. 4th Gen Xeon, DDR5, PCIe Gen5. Optimized for edge computing and branch office deployments.",
+                            basePrice: 2695.00,
+                            baseImage: "https://www.hpe.com/psnow/doc/a00008180enw.png",
+                            specs: {
+                                formFactor: "1U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "10x SFF",
+                                cpuSockets: 2,
+                                pciSlots: "3x PCIe Gen5",
+                                generation: "Gen11"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "sff-2.5",
+                                raidFamily: "hpe-mr416i"
+                            }
+                        },
+                        {
+                            id: "supermicro-621c",
+                            name: "Supermicro SYS-621C-TN12R",
+                            brand: "Supermicro",
+                            description: "2U CloudDC Server with dual 4th Gen Intel Xeon, 32 DIMM slots, 12x 3.5\" hot-swap bays. Purpose-built for cloud infrastructure and HCI deployments.",
+                            basePrice: 2450.00,
+                            baseImage: "https://www.supermicro.com/a_images/products/Aplus/system/2U/AS_-2015HS-TNR_main.png",
+                            specs: {
+                                formFactor: "2U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "12x 3.5\" + 2x 2.5\" Rear",
+                                cpuSockets: 2,
+                                pciSlots: "6x PCIe Gen5",
+                                generation: "CloudDC"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "lff-3.5",
+                                raidFamily: "broadcom-9500"
+                            }
+                        },
+                        {
+                            id: "lenovo-sr650-v3",
+                            name: "Lenovo ThinkSystem SR650 V3",
+                            brand: "Lenovo",
+                            description: "2U Rack Server with 4th/5th Gen Intel Xeon, DDR5, and PCIe Gen5. Versatile platform for database, analytics, and virtualization workloads.",
+                            basePrice: 2795.00,
+                            baseImage: "https://lenovopress.lenovo.com/assets/images/LP1612/ThinkSystem%20SR650%20V3%20-%20front.png",
+                            specs: {
+                                formFactor: "2U Rack",
+                                maxRam: "4TB DDR5",
+                                maxStorage: "24x 2.5\" or 12x 3.5\"",
+                                cpuSockets: 2,
+                                pciSlots: "8x PCIe Gen5",
+                                generation: "V3"
+                            },
+                            compatibility: {
+                                cpuFamily: "intel-sapphire-rapids",
+                                ramType: "ddr5-ecc",
+                                diskResult: "sff-2.5",
+                                raidFamily: "broadcom-9500"
+                            }
+                        }
+                    ],
+                    availableComponents: {
+                        processors: [
+                            { partNumber: "PK8071305120601", name: "Intel Xeon Silver 4410Y (12C/24T, 2.0GHz, 30MB, 150W)", price: 485.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305120801", name: "Intel Xeon Silver 4416+ (20C/40T, 2.0GHz, 37.5MB, 165W)", price: 715.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305076800", name: "Intel Xeon Gold 5416S (16C/32T, 2.0GHz, 30MB, 150W)", price: 985.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305077001", name: "Intel Xeon Gold 6430 (32C/64T, 2.1GHz, 60MB, 270W)", price: 1850.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305121200", name: "Intel Xeon Gold 6438Y+ (32C/64T, 2.0GHz, 60MB, 205W)", price: 2250.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305072800", name: "Intel Xeon Gold 6448Y (32C/64T, 2.1GHz, 60MB, 225W)", price: 2895.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305073400", name: "Intel Xeon Platinum 8462Y+ (32C/64T, 2.8GHz, 60MB, 300W)", price: 4295.00, category: "cpu", family: "intel-sapphire-rapids" },
+                            { partNumber: "PK8071305074600", name: "Intel Xeon Platinum 8480+ (56C/112T, 2.0GHz, 105MB, 350W)", price: 6950.00, category: "cpu", family: "intel-sapphire-rapids" }
+                        ],
+                        memory: [
+                            { partNumber: "M321R2GA3BB6", name: "16GB DDR5-4800 ECC RDIMM (Samsung/SK Hynix)", price: 55.00, category: "ram", type: "ddr5-ecc" },
+                            { partNumber: "M321R4GA3BB6", name: "32GB DDR5-4800 ECC RDIMM (Samsung/SK Hynix)", price: 95.00, category: "ram", type: "ddr5-ecc" },
+                            { partNumber: "M321R8GA0BB0", name: "64GB DDR5-4800 ECC RDIMM (Samsung/SK Hynix)", price: 185.00, category: "ram", type: "ddr5-ecc" },
+                            { partNumber: "M321RADGA0B3", name: "128GB DDR5-4800 ECC RDIMM (Samsung/SK Hynix)", price: 450.00, category: "ram", type: "ddr5-ecc" },
+                            { partNumber: "M321RFAGA0B5", name: "256GB DDR5-4800 ECC LRDIMM (Samsung/SK Hynix)", price: 1250.00, category: "ram", type: "ddr5-ecc" }
+                        ],
+                        storage: [
+                            { partNumber: "MZWLO1T9HCJR", name: "1.92TB NVMe U.2 Enterprise SSD (Samsung PM1733)", price: 295.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "MZWLO3T8HCLS", name: "3.84TB NVMe U.2 Enterprise SSD (Samsung PM1733)", price: 520.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "MZWLO7T6HBLA", name: "7.68TB NVMe U.2 Enterprise SSD (Samsung PM1733)", price: 950.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "KCM61RUL3T84", name: "3.84TB NVMe U.2 Enterprise SSD (Kioxia CM6-R)", price: 480.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "KCM61RUL7T68", name: "7.68TB NVMe U.2 Enterprise SSD (Kioxia CM6-R)", price: 895.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "ST16000NM004J", name: "16TB 7.2K SAS 12Gbps 3.5\" HDD (Seagate Exos X18)", price: 310.00, category: "hdd", formFactor: "lff-3.5" },
+                            { partNumber: "ST20000NM007D", name: "20TB 7.2K SATA 6Gbps 3.5\" HDD (Seagate Exos X20)", price: 385.00, category: "hdd", formFactor: "lff-3.5" },
+                            { partNumber: "WUH722020AL5204", name: "20TB 7.2K SAS 12Gbps 3.5\" HDD (WD Ultrastar HC560)", price: 395.00, category: "hdd", formFactor: "lff-3.5" },
+                            { partNumber: "MZ-7L31T9B", name: "1.92TB SATA 2.5\" Enterprise SSD (Samsung PM893)", price: 195.00, category: "ssd", formFactor: "sff-2.5" },
+                            { partNumber: "MZ-7L33T8C", name: "3.84TB SATA 2.5\" Enterprise SSD (Samsung PM893)", price: 365.00, category: "ssd", formFactor: "sff-2.5" }
+                        ],
+                        raidControllers: [
+                            { partNumber: "405-ABDS", name: "Dell PERC H965i 8GB NV Cache (PCIe Gen4)", price: 385.00, category: "raid", family: "dell-perc12" },
+                            { partNumber: "405-ABDT", name: "Dell PERC H755 Front 8GB NV (PCIe Gen4)", price: 295.00, category: "raid", family: "dell-perc12" },
+                            { partNumber: "P48635-B21", name: "HPE MR416i-a Gen11 4GB Flash Backed Cache", price: 395.00, category: "raid", family: "hpe-mr416i" },
+                            { partNumber: "P26325-B21", name: "HPE MR408i-o Gen11 Controller (8 internal lanes)", price: 310.00, category: "raid", family: "hpe-mr416i" },
+                            { partNumber: "05-50077-00", name: "Broadcom MegaRAID 9560-16i (8GB, PCIe Gen4)", price: 425.00, category: "raid", family: "broadcom-9500" },
+                            { partNumber: "05-50076-00", name: "Broadcom MegaRAID 9560-8i (4GB, PCIe Gen4)", price: 310.00, category: "raid", family: "broadcom-9500" },
+                            { partNumber: "HBA-NONE", name: "No RAID Controller (Software RAID / HBA Mode)", price: 0.00, category: "raid", family: "universal" }
+                        ],
+                        networking: [
+                            { partNumber: "540-BDFQ", name: "Broadcom 57416 Dual Port 10GbE Base-T OCP 3.0", price: 115.00, category: "nic" },
+                            { partNumber: "540-BDHS", name: "Broadcom 57414 Dual Port 25GbE SFP28 OCP 3.0", price: 225.00, category: "nic" },
+                            { partNumber: "E810-XXVDA2", name: "Intel E810-XXVDA2 Dual Port 25GbE SFP28 (PCIe Gen4)", price: 290.00, category: "nic" },
+                            { partNumber: "E810-CQDA2", name: "Intel E810-CQDA2 Dual Port 100GbE QSFP28 (PCIe Gen4)", price: 650.00, category: "nic" },
+                            { partNumber: "MCX623106AN", name: "NVIDIA ConnectX-6 Dx Dual Port 25GbE SFP28 (PCIe Gen4)", price: 345.00, category: "nic" },
+                            { partNumber: "MCX713106AS", name: "NVIDIA ConnectX-7 Dual Port 100GbE QSFP56 (PCIe Gen5)", price: 895.00, category: "nic" }
+                        ],
+                        powerSupplies: [
+                            { partNumber: "450-AKLG", name: "Dell 800W Platinum Hot-Plug PSU (Gen16)", price: 85.00, category: "psu" },
+                            { partNumber: "450-AKLS", name: "Dell 1100W Titanium Hot-Plug PSU (Gen16)", price: 145.00, category: "psu" },
+                            { partNumber: "450-AKLT", name: "Dell 1400W Platinum Hot-Plug PSU (Gen16)", price: 175.00, category: "psu" },
+                            { partNumber: "P44412-B21", name: "HPE 800W Flex Slot Platinum Hot Plug LH PSU (Gen11)", price: 95.00, category: "psu" },
+                            { partNumber: "P44413-B21", name: "HPE 1600W Flex Slot Platinum Hot Plug LH PSU (Gen11)", price: 195.00, category: "psu" },
+                            { partNumber: "PWS-1K28P-SQ", name: "Supermicro 1200W Platinum Hot-Swap PSU", price: 125.00, category: "psu" },
+                            { partNumber: "4P57A72765", name: "Lenovo ThinkSystem 1100W Platinum Hot-Swap PSU (V3)", price: 135.00, category: "psu" }
+                        ]
+                    }
+                },
                 blogPosts: [],
                 landingCollections: [
                     {
@@ -240,7 +435,7 @@ let CmsService = CmsService_1 = class CmsService {
                                 updated = true;
                             }
                             if (!('logoText' in existing.data)) {
-                                existing.data.logoText = 'SERVER TECH CENTRAL';
+                                existing.data.logoText = 'TERAFORMIX';
                                 updated = true;
                             }
                         }
@@ -327,6 +522,28 @@ let CmsService = CmsService_1 = class CmsService {
             return null;
         }
     }
+    toPublicContent(key, data) {
+        if (!data || typeof data !== 'object')
+            return data;
+        if (key === 'security') {
+            return {
+                trueguardPublicId: data.trueguardPublicId || '',
+            };
+        }
+        if (key === 'payment') {
+            return {
+                stripePublicKey: data.stripePublicKey || '',
+                enablePO: !!data.enablePO,
+                enableBankTransfer: !!data.enableBankTransfer,
+                bankInstructions: data.enableBankTransfer ? String(data.bankInstructions || '') : '',
+            };
+        }
+        return data;
+    }
+    async getPublicContent(key) {
+        const data = await this.getContent(key);
+        return this.toPublicContent(key, data);
+    }
     async getAllContent() {
         var _a, _b;
         try {
@@ -350,6 +567,13 @@ let CmsService = CmsService_1 = class CmsService {
             return {};
         }
     }
+    async getAllPublicContent() {
+        const content = await this.getAllContent();
+        return Object.keys(content).reduce((acc, key) => {
+            acc[key] = this.toPublicContent(key, content[key]);
+            return acc;
+        }, {});
+    }
     async updateContent(key, data) {
         if (!data) {
             throw new Error("Cannot save empty data");
@@ -370,9 +594,9 @@ let CmsService = CmsService_1 = class CmsService {
         const block = this.contentRepository.create({ key, data });
         const saved = await this.contentRepository.save(block);
         this.logger.log(`PERSIST: Success '${key}'`);
-        const publicKeys = ['home', 'categoryPage', 'privacyPolicy', 'termsOfSale', 'termsAndConditions', 'returnPolicy', 'aboutPage', 'contactPage', 'categories'];
+        const publicKeys = ['home', 'categoryPage', 'privacyPolicy', 'termsOfSale', 'termsAndConditions', 'returnPolicy', 'aboutPage', 'contactPage', 'categories', 'serverConfigurator'];
         if (publicKeys.includes(key)) {
-            const origin = 'https://servertechcentral.com';
+            const origin = 'https://teraformix.com';
             if (key === 'categories' && Array.isArray(data)) {
                 const urls = data.filter(c => c.isActive && c.id).map(c => `${origin}/category/${c.id}`);
                 if (urls.length > 0)
@@ -388,6 +612,7 @@ let CmsService = CmsService_1 = class CmsService {
                     'returnPolicy': '/returns',
                     'aboutPage': '/about',
                     'contactPage': '/contact',
+                    'serverConfigurator': '/configurator',
                 };
                 if (map[key])
                     (0, index_now_1.pingIndexNow)(`${origin}${map[key]}`);

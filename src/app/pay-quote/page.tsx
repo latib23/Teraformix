@@ -27,17 +27,43 @@ const PaymentForm = ({ quote, onSuccess }: { quote: any, onSuccess: () => void }
         if (!cardElement) return;
 
         try {
-            // 1. Create Payment Intent on backend (simulated here for now or real implementation)
-            // For now, we'll assume the backend handles the payment via the 'pay' endpoint directly
-            // In a real app, you'd fetch a clientSecret here.
+            const amount = Math.round(Number(quote.total || 0) * 100);
+            const intentInit = await api.post<any>('/payments/intent', {
+                currency: 'usd',
+                amount,
+                metadata: {
+                    quoteId: quote.id,
+                    referenceNumber: quote.referenceNumber || '',
+                },
+            });
 
-            // Simulating payment processing
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const clientSecret = intentInit?.clientSecret;
+            if (!clientSecret) {
+                throw new Error('Failed to initialize payment');
+            }
 
-            // 2. Call backend to mark as paid
+            const confirmation = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: quote.customer?.name || undefined,
+                        email: quote.customer?.email || undefined,
+                    },
+                },
+            });
+
+            if (confirmation.error) {
+                throw new Error(confirmation.error.message || 'Card authorization failed');
+            }
+
+            const paymentIntentId = confirmation.paymentIntent?.id;
+            if (!paymentIntentId) {
+                throw new Error('Payment verification failed');
+            }
+
             await api.post(`/quotes/public/${quote.id}/pay`, {
                 paymentMethod: 'CC',
-                amount: quote.total
+                paymentIntentId
             });
 
             // 3. Create Official Order

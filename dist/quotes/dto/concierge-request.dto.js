@@ -19,18 +19,21 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(10000),
     __metadata("design:type", String)
 ], ConciergeRequestDto.prototype, "parts", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(254),
     __metadata("design:type", String)
 ], ConciergeRequestDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(120),
     __metadata("design:type", String)
 ], ConciergeRequestDto.prototype, "timeline", void 0);
 //# sourceMappingURL=concierge-request.dto.js.map

@@ -71,17 +71,7 @@ export class IpWhitelistGuard implements CanActivate {
   }
 
   private getClientIp(req: any): string {
-    // Check x-forwarded-for first (standard for proxies/load balancers)
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) {
-      // First IP is the client
-      const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0]).trim();
-      // Handle IPv6 mapping to IPv4 if needed (e.g. ::ffff:127.0.0.1)
-      if (ip.startsWith('::ffff:')) return ip.substring(7);
-      return ip;
-    }
-
-    let ip = req.connection?.remoteAddress || req.ip || '';
+    let ip = req.ip || req.socket?.remoteAddress || req.connection?.remoteAddress || '';
     if (ip.startsWith('::ffff:')) ip = ip.substring(7);
     return ip;
   }

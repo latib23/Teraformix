@@ -4,6 +4,7 @@ export declare class CreateOrderDto {
     paymentMethod: PaymentMethod;
     poNumber?: string;
     paymentMethodId?: string;
+    paymentIntentId?: string;
     items: any[];
     companyId?: string;
     status?: OrderStatus;

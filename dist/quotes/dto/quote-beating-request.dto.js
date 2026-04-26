@@ -19,54 +19,63 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(120),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(254),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MaxLength)(160),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "company", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(40),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, description: 'Part number for the item' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(120),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "partNumber", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, description: 'Competitor price offered' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(40),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "competitorPrice", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "fileName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false, description: 'Base64 data URL of the uploaded file' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(8000000),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "fileContent", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(2000),
     __metadata("design:type", String)
 ], QuoteBeatingRequestDto.prototype, "notes", void 0);
 //# sourceMappingURL=quote-beating-request.dto.js.map

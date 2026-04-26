@@ -21,8 +21,9 @@ export declare class OrdersService {
     private airtableService;
     private xeroService;
     private stripe;
-    constructor(orderRepository: Repository<Order>, companyRepository: Repository<Company>, userRepository: Repository<User>, productRepository: Repository<Product>, configService: ConfigService, privatenotificationsService: NotificationsService, notificationsService: NotificationsService, shippingService: ShippingService, airtableService: AirtableService, xeroService: XeroService);
+    constructor(orderRepository: Repository<Order>, companyRepository: Repository<Company>, userRepository: Repository<User>, productRepository: Repository<Product>, configService: ConfigService, notificationsService: NotificationsService, shippingService: ShippingService, airtableService: AirtableService, xeroService: XeroService);
     createPaymentIntent(amountInCents: number, currency: string, metadata?: Record<string, any>): Promise<Stripe.Response<Stripe.PaymentIntent>>;
+    getPaymentIntent(paymentIntentId: string): Promise<Stripe.Response<Stripe.PaymentIntent>>;
     calculateAmountCents(items: Array<{
         sku: string;
         quantity: number;
@@ -32,6 +33,9 @@ export declare class OrdersService {
         city: string;
         state: string;
     }, serviceCode?: string): Promise<number>;
+    private buildServerPricedItems;
+    private getOrderRateAddress;
+    private sanitizeOrderAddress;
     create(createOrderDto: CreateOrderDto, creatorId?: string): Promise<Order>;
     findAll(): Promise<Order[]>;
     findBySalesperson(salespersonId: string): Promise<Order[]>;

@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: server_tech_db
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local}
+      POSTGRES_DB: ${POSTGRES_DB:-server_tech_db}
     ports:
       - "5432:5432"
     volumes:
@@ -14,7 +14,7 @@ services:
   meilisearch:
     image: getmeili/meilisearch:v1.3
     environment:
-      - MEILI_MASTER_KEY=masterKey123
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-change-me-local}
     ports:
       - "7700:7700"
     volumes:

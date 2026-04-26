@@ -5,13 +5,14 @@ import { ConfigService } from '@nestjs/config';
 import { Order, OrderStatus, PaymentMethod } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Company } from '../companies/entities/company.entity';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import Stripe from 'stripe';
 import { NotificationsService } from '../notifications/notifications.service';
 import { Product } from '../products/entities/product.entity';
 import { ShippingService } from '../shipping/shipping.service';
 import { AirtableService } from './airtable.service';
 import { XeroService } from './xero.service';
+import { sanitizePlainText } from '../lib/security';
 
 @Injectable()
 export class OrdersService {
@@ -27,7 +28,6 @@ export class OrdersService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private configService: ConfigService,
-    privatenotificationsService: NotificationsService, // Typo in original file? Assuming I should fix or match. The original was 'private notificationsService'. I'll be careful.
     private notificationsService: NotificationsService,
     private shippingService: ShippingService,
     private airtableService: AirtableService,
@@ -49,9 +49,13 @@ export class OrdersService {
     if (!this.stripe) {
       throw new BadRequestException('Stripe not configured');
     }
+    const amount = Math.round(Number(amountInCents || 0));
+    if (!Number.isSafeInteger(amount) || amount < 50) {
+      throw new BadRequestException('Invalid payment amount');
+    }
     try {
       const intent = await this.stripe.paymentIntents.create({
-        amount: amountInCents,
+        amount,
         currency,
         capture_method: 'manual',
         automatic_payment_methods: { enabled: true },
@@ -64,6 +68,21 @@ export class OrdersService {
     }
   }
 
+  async getPaymentIntent(paymentIntentId: string) {
+    if (!this.stripe) {
+      throw new BadRequestException('Stripe not configured');
+    }
+    const id = String(paymentIntentId || '').trim();
+    if (!id.startsWith('pi_')) {
+      throw new BadRequestException('Invalid payment intent');
+    }
+    try {
+      return await this.stripe.paymentIntents.retrieve(id);
+    } catch (e: any) {
+      throw new BadRequestException(String(e?.message || 'Unable to verify payment'));
+    }
+  }
+
   async calculateAmountCents(
     items: Array<{ sku: string; quantity: number }>,
     address: { postalCode: string; country: string; city: string; state: string },
@@ -72,14 +91,21 @@ export class OrdersService {
     if (!Array.isArray(items) || items.length === 0) {
       throw new BadRequestException('Items are required');
     }
-    const skus = items.map(i => i.sku);
+    const skus = items.map(i => String(i.sku || '').trim()).filter(Boolean);
+    if (skus.length !== items.length) {
+      throw new BadRequestException('Every order item must include a SKU');
+    }
     const products = await this.productRepository.find({ where: { sku: In(skus) } });
     const priceBySku = new Map(products.map(p => [p.sku, Number(p.basePrice)]));
     let subtotal = 0;
     for (const i of items) {
-      const price = priceBySku.get(i.sku);
-      if (!price) throw new BadRequestException(`Unknown SKU: ${i.sku}`);
-      const qty = Math.max(1, Number(i.quantity || 1));
+      const sku = String(i.sku || '').trim();
+      const price = priceBySku.get(sku);
+      if (!Number.isFinite(price)) throw new BadRequestException(`Unknown SKU: ${sku}`);
+      const qty = Number(i.quantity);
+      if (!Number.isSafeInteger(qty) || qty < 1 || qty > 1000) {
+        throw new BadRequestException(`Invalid quantity for SKU: ${sku}`);
+      }
       subtotal += price * qty;
     }
 
@@ -98,43 +124,151 @@ export class OrdersService {
     }
 
     const total = subtotal + shipmentCost;
-    return Math.round(total * 100);
+    const cents = Math.round(total * 100);
+    if (!Number.isSafeInteger(cents) || cents < 50) {
+      throw new BadRequestException('Invalid order total');
+    }
+    return cents;
+  }
+
+  private async buildServerPricedItems(items: Array<{ sku: string; quantity: number }>) {
+    const normalized = items.map((i) => ({
+      sku: String(i.sku || '').trim(),
+      quantity: Number(i.quantity),
+    }));
+    const skus = normalized.map((i) => i.sku);
+    const products = await this.productRepository.find({ where: { sku: In(skus) } });
+    const productBySku = new Map(products.map((p) => [p.sku, p]));
+
+    return normalized.map((item) => {
+      const product = productBySku.get(item.sku);
+      if (!product) throw new BadRequestException(`Unknown SKU: ${item.sku}`);
+      return {
+        id: product.id,
+        sku: sanitizePlainText(product.sku, 120),
+        name: sanitizePlainText(product.name, 200),
+        price: Number(product.basePrice),
+        basePrice: Number(product.basePrice),
+        quantity: item.quantity,
+      };
+    });
+  }
+
+  private getOrderRateAddress(shippingAddress: any) {
+    const ship = shippingAddress || {};
+    return {
+      postalCode: String(ship.postalCode || ship.zip || '').trim(),
+      country: String(ship.country || 'US').trim(),
+      city: String(ship.city || '').trim(),
+      state: String(ship.state || '').trim(),
+    };
+  }
+
+  private sanitizeOrderAddress(input: any) {
+    const allowed = [
+      'firstName',
+      'lastName',
+      'company',
+      'street',
+      'city',
+      'state',
+      'zip',
+      'postalCode',
+      'country',
+      'phone',
+      'email',
+      'shippingCost',
+      'shipmentService',
+      'shipmentServiceCode',
+    ];
+    const output: Record<string, any> = {};
+
+    for (const key of allowed) {
+      const value = input?.[key];
+      if (value === undefined || value === null) continue;
+      if (key === 'shippingCost') {
+        const cost = Number(value);
+        if (Number.isFinite(cost) && cost >= 0) output[key] = cost;
+        continue;
+      }
+      const limit = key === 'email' ? 254 : key === 'street' ? 200 : 120;
+      const text = sanitizePlainText(value, limit);
+      if (text) output[key] = key === 'email' ? text.toLowerCase() : text;
+    }
+
+    return output;
   }
 
   async create(createOrderDto: CreateOrderDto, creatorId?: string): Promise<Order> {
     let company: Company | null = null;
     let salesperson: User | null = null;
+    let creator: User | null = null;
 
     if (createOrderDto.companyId) {
       company = await this.companyRepository.findOneBy({ id: createOrderDto.companyId });
     }
 
     if (creatorId) {
-      const creator = await this.userRepository.findOneBy({ id: creatorId });
+      creator = await this.userRepository.findOneBy({ id: creatorId });
       if (!creator) throw new NotFoundException('Creator user not found');
       // Only assign if the creator is a salesperson
-      if (creator.role === 'SALESPERSON') {
+      if (creator.role === UserRole.SALESPERSON) {
         salesperson = creator;
       }
     }
 
+    const requestedStatus =
+      creator && [UserRole.SUPER_ADMIN, UserRole.SALESPERSON].includes(creator.role)
+        ? createOrderDto.status
+        : undefined;
+    const shippingAddress = this.sanitizeOrderAddress(createOrderDto.shippingAddress || {});
+    const billingAddress = this.sanitizeOrderAddress(createOrderDto.billingAddress || {});
+    const serviceCode = String(
+      (shippingAddress as any).shipmentServiceCode ||
+      (shippingAddress as any).serviceCode ||
+      (createOrderDto as any).serviceCode ||
+      '',
+    ).trim() || undefined;
+    const expectedAmountCents = await this.calculateAmountCents(
+      createOrderDto.items,
+      this.getOrderRateAddress(shippingAddress),
+      serviceCode,
+    );
+    const serverItems = await this.buildServerPricedItems(createOrderDto.items);
+    const serverTotal = Number((expectedAmountCents / 100).toFixed(2));
+
     const order = this.orderRepository.create({
-      ...createOrderDto,
+      items: serverItems,
+      total: serverTotal,
+      paymentMethod: createOrderDto.paymentMethod,
+      poNumber: createOrderDto.poNumber ? sanitizePlainText(createOrderDto.poNumber, 80) : undefined,
+      shippingAddress,
+      billingAddress,
       company,
       salesperson,
-      status: createOrderDto.status || OrderStatus.PROCESSING,
+      status: requestedStatus || OrderStatus.PROCESSING,
     });
 
     if (createOrderDto.paymentMethod === PaymentMethod.STRIPE) {
-      // Stripe payment logic remains the same
+      const intent = await this.getPaymentIntent((createOrderDto as any).paymentIntentId);
+      if (intent.status !== 'requires_capture' && intent.status !== 'succeeded') {
+        throw new BadRequestException('Stripe payment has not been authorized');
+      }
+      if (intent.currency !== 'usd') {
+        throw new BadRequestException('Unsupported payment currency');
+      }
+      if (intent.amount < expectedAmountCents) {
+        throw new BadRequestException('Stripe payment amount does not match the order total');
+      }
+      order.total = Number((intent.amount / 100).toFixed(2));
     } else if (createOrderDto.paymentMethod === PaymentMethod.PO) {
       if (!createOrderDto.poNumber) {
         throw new BadRequestException('PO Number is required for Purchase Order payments');
       }
-      order.status = createOrderDto.status || OrderStatus.PENDING_APPROVAL;
+      order.status = requestedStatus || OrderStatus.PENDING_APPROVAL;
     } else if (createOrderDto.paymentMethod === PaymentMethod.BANK_TRANSFER) {
       // Manual payment method; move to pending approval and await confirmation
-      order.status = createOrderDto.status || OrderStatus.PENDING_APPROVAL;
+      order.status = requestedStatus || OrderStatus.PENDING_APPROVAL;
     }
 
     // Validate customer email in shipping address

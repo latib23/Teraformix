@@ -94,17 +94,17 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
 
   if (status === 'success') {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center animate-fade-in">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+      <div className="bg-green-900/30 border border-green-500/30 rounded-xl p-8 text-center animate-fade-in">
+        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-green-400" />
         </div>
-        <h3 className="text-2xl font-bold text-navy-900 mb-2">Request Received!</h3>
-        <p className="text-gray-600 max-w-md mx-auto">
+        <h3 className="text-2xl font-bold text-white mb-2">Request Received!</h3>
+        <p className="text-gray-300 max-w-md mx-auto">
           We've received your request{productName ? ` for ${productName}` : ''}. Our team is reviewing the details and will get back to you with our best price shortly.
         </p>
         <button
           onClick={() => setStatus('idle')}
-          className="mt-6 text-action-600 font-medium hover:text-action-700 underline"
+          className="mt-6 text-action-400 font-medium hover:text-action-300 underline"
         >
           Submit another request
         </button>
@@ -113,7 +113,7 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border-2 border-action-500 overflow-hidden">
+    <div className="bg-navy-900 rounded-xl shadow-lg border-2 border-action-500 overflow-hidden">
       <div className="bg-action-600 px-6 py-4 text-white">
         <h3 className="text-xl font-bold flex items-center gap-2">
           <DollarSign className="w-6 h-6" />
@@ -126,13 +126,13 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
       </div>
 
       <div className="p-6">
-        <div className="flex gap-4 mb-6 border-b border-gray-200">
+        <div className="flex gap-4 mb-6 border-b border-navy-800">
           <button
             type="button"
             onClick={() => setActiveTab('upload')}
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${activeTab === 'upload'
-              ? 'text-action-600 border-b-2 border-action-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-action-500 border-b-2 border-action-500'
+              : 'text-gray-400 hover:text-white'
               }`}
           >
             Upload Quote File
@@ -141,8 +141,8 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
             type="button"
             onClick={() => setActiveTab('price')}
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${activeTab === 'price'
-              ? 'text-action-600 border-b-2 border-action-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-action-500 border-b-2 border-action-500'
+              : 'text-gray-400 hover:text-white'
               }`}
           >
             Enter Competitor Price
@@ -152,49 +152,49 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
                 placeholder="John Doe"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Company <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="company"
                 required
                 value={formData.company}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
                 placeholder="Company Inc."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Email <span className="text-red-500">*</span></label>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
                 placeholder="john@company.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
                 placeholder="(555) 123-4567"
               />
             </div>
@@ -202,16 +202,16 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
 
           {activeTab === 'upload' ? (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Quote (PDF, Excel, Image) <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Upload Quote (PDF, Excel, Image) <span className="text-red-500">*</span></label>
               {!file ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-navy-700 border-dashed rounded-lg cursor-pointer hover:bg-navy-800 transition-colors"
                 >
                   <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-600">
-                      <span className="relative cursor-pointer rounded-md font-medium text-action-600 hover:text-action-500 focus-within:outline-none">
+                    <Upload className="mx-auto h-12 w-12 text-gray-500" />
+                    <div className="flex text-sm text-gray-400">
+                      <span className="relative cursor-pointer rounded-md font-medium text-action-500 hover:text-action-400 focus-within:outline-none">
                         Upload a file
                       </span>
                       <p className="pl-1">or drag and drop</p>
@@ -228,18 +228,18 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
                   />
                 </div>
               ) : (
-                <div className="mt-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="mt-1 flex items-center justify-between p-3 bg-navy-800 border border-navy-700 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-action-600" />
+                    <FileText className="w-8 h-8 text-action-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">{file.name}</p>
-                      <p className="text-xs text-gray-500">Ready to upload</p>
+                      <p className="text-sm font-medium text-white truncate max-w-[200px]">{file.name}</p>
+                      <p className="text-xs text-gray-400">Ready to upload</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={removeFile}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-1 text-gray-500 hover:text-red-500 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -249,22 +249,22 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
           ) : (
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Part Number <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Part Number <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   name="partNumber"
                   required={activeTab === 'price'}
                   value={formData.partNumber}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                  className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
                   placeholder="e.g. 123-4567"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Competitor Price / Offer <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Competitor Price / Offer <span className="text-red-500">*</span></label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-gray-500 sm:text-sm">$</span>
+                    <span className="text-gray-400 sm:text-sm">$</span>
                   </div>
                   <input
                     type="text"
@@ -272,7 +272,7 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
                     required={activeTab === 'price'}
                     value={formData.competitorPrice}
                     onChange={handleInputChange}
-                    className="block w-full rounded-md border-gray-300 pl-7 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+                    className="block w-full rounded-md bg-navy-950 border-navy-700 text-white pl-7 focus:border-action-500 focus:ring-action-500 sm:text-sm"
                     placeholder="0.00"
                   />
                 </div>
@@ -282,13 +282,13 @@ const QuoteBeatingForm = ({ productName }: { productName?: string }) => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Notes (Optional)</label>
             <textarea
               name="notes"
               rows={2}
               value={formData.notes}
               onChange={handleInputChange}
-              className="w-full rounded-lg border-gray-300 focus:border-action-500 focus:ring-action-500 sm:text-sm"
+              className="w-full rounded-lg bg-navy-950 border-navy-700 text-white focus:border-action-500 focus:ring-action-500 sm:text-sm"
               placeholder="Any specific requirements or details..."
             />
           </div>

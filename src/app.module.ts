@@ -21,6 +21,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ProductsService } from './products/products.service';
 import { CmsService } from './cms/cms.service';
 import { load as cheerioLoad } from 'cheerio';
+import { escapeHtml, safeJsonScript } from './lib/security';
 
 // Entities
 import { User } from './users/entities/user.entity';
@@ -167,8 +168,8 @@ class SpaController {
 
       const org: any = { '@context': 'https://schema.org', '@type': 'Organization', name: siteName, url: origin };
       const website: any = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: origin, potentialAction: { '@type': 'SearchAction', target: `${origin}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } };
-      $('head').append(`<script type="application/ld+json">${JSON.stringify(org)}</script>`);
-      $('head').append(`<script type="application/ld+json">${JSON.stringify(website)}</script>`);
+      $('head').append(`<script type="application/ld+json">${safeJsonScript(org)}</script>`);
+      $('head').append(`<script type="application/ld+json">${safeJsonScript(website)}</script>`);
       const categoriesContent = await this.cmsService.getContent('categories');
       const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c: any) => c && c.isActive) : [];
       const homeContent = await this.cmsService.getContent('home');
@@ -213,7 +214,7 @@ class SpaController {
         };
       });
 
-      const initialDataScript = `<script>window.INITIAL_DATA = { featuredItems: ${JSON.stringify(mappedFeatured)} };</script>`;
+      const initialDataScript = `<script>window.INITIAL_DATA = { featuredItems: ${safeJsonScript(mappedFeatured)} };</script>`;
       $('head').append(initialDataScript);
 
       const featuredHtml = Array.isArray(featuredItems) && featuredItems.length > 0
@@ -531,8 +532,8 @@ class SpaController {
         <link rel="alternate" hreflang="x-default" href="${productUrl}">
       `);
 
-      $('head').append(`<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`);
-      $('head').append(`<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`);
+      $('head').append(`<script type="application/ld+json">${safeJsonScript(schemaData)}</script>`);
+      $('head').append(`<script type="application/ld+json">${safeJsonScript(breadcrumb)}</script>`);
       const stockUnits = Number((p as any).stockLevel || 0);
       const availabilityText = stockUnits > 0 ? `In Stock • ${stockUnits} units` : 'Out of Stock';
       const priceText = Number((p as any).basePrice || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -540,7 +541,7 @@ class SpaController {
       const weight = String((p as any).weight || '').trim();
       const warranty = String((p as any).warranty || '3-Year Warranty').trim();
       const safeOverview = String((p as any).overview || '').replace(/<[^>]+>/g, '').slice(0, 500);
-      const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${schemaData.image[0]}" alt="${(p as any).name}" style="max-width:100%;height:auto" />` : '';
+      const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${escapeHtml(schemaData.image[0])}" alt="${escapeHtml((p as any).name)}" style="max-width:100%;height:auto" />` : '';
       const categoriesContent = await this.cmsService.getContent('categories');
       const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c: any) => c && c.isActive) : [];
       const currentCat = String(category || '').toLowerCase();
@@ -548,10 +549,13 @@ class SpaController {
       const relatedCategoriesHtml = categoryPicks.length > 0
         ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${categoryPicks.map((c: any) => `<a href="/category/${encodeURIComponent(String(c.id))}" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${String(c.name)}</a>`).join('')}</div></section>`
         : `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${['Servers', 'Storage', 'Networking'].slice(0, 6).map((name) => `<a href="/category" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${name}</a>`).join('')}</div></section>`;
-      const reviewsHtml = Array.isArray(reviews) && reviews.length > 0
-        ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${reviews.slice(0, 3).map((r: any) => {
-          const author = r.author ? String(r.author) : 'Anonymous';
-          const body = r.reviewBody ? String(r.reviewBody) : '';
+      const approvedReviews = Array.isArray(reviews)
+        ? reviews.filter((r: any) => r && typeof r === 'object' && r.status === 'APPROVED')
+        : [];
+      const reviewsHtml = approvedReviews.length > 0
+        ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${approvedReviews.slice(0, 3).map((r: any) => {
+          const author = r.author ? escapeHtml(r.author) : 'Anonymous';
+          const body = r.reviewBody ? escapeHtml(r.reviewBody) : '';
           const rating = r.ratingValue ? Number(r.ratingValue) : undefined;
           const stars = rating ? '★'.repeat(Math.max(1, Math.min(5, Math.round(rating)))) : '';
           return `<div class="border rounded p-3"><div class="text-sm text-gray-700">${stars ? `<span class="text-yellow-600">${stars}</span> ` : ''}<strong>${author}</strong></div><p class="text-sm text-gray-800 mt-1">${body}</p></div>`;
@@ -572,7 +576,7 @@ class SpaController {
 
       const ssrBlock = `
         <section id="ssr-product" class="container mx-auto px-4 py-6">
-          <h1>${(p as any).name}</h1>
+          <h1>${escapeHtml((p as any).name)}</h1>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div>${imgTag}</div>
             <div>
@@ -580,16 +584,16 @@ class SpaController {
               <div class="text-sm text-gray-700 mb-4">${availabilityText}</div>
               <h3 class="text-sm font-bold text-navy-900 mb-2">Specifications</h3>
               <ul class="text-sm text-gray-800 space-y-1">
-                <li><strong>SKU:</strong> ${(p as any).sku}</li>
-                <li><strong>Brand:</strong> ${(p as any).brand}</li>
-                ${warranty ? `<li><strong>Warranty:</strong> ${warranty}</li>` : ''}
-                ${dims ? `<li><strong>Dimensions:</strong> ${dims}</li>` : ''}
-                ${weight ? `<li><strong>Weight:</strong> ${weight}</li>` : ''}
+                <li><strong>SKU:</strong> ${escapeHtml((p as any).sku)}</li>
+                <li><strong>Brand:</strong> ${escapeHtml((p as any).brand)}</li>
+                ${warranty ? `<li><strong>Warranty:</strong> ${escapeHtml(warranty)}</li>` : ''}
+                ${dims ? `<li><strong>Dimensions:</strong> ${escapeHtml(dims)}</li>` : ''}
+                ${weight ? `<li><strong>Weight:</strong> ${escapeHtml(weight)}</li>` : ''}
               </ul>
               ${category ? `<div class="mt-3"><a href="${slug ? `${origin}/category/${slug}` : `${origin}/category`}" class="text-action-600 text-sm font-semibold hover:underline">View ${category} Products</a></div>` : ''}
             </div>
           </div>
-          ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${safeOverview}</p></div>` : ''}
+          ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${escapeHtml(safeOverview)}</p></div>` : ''}
           ${!safeOverview ? `<section class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800 mb-4">This enterprise-grade component is rigorously tested to ensure maximum reliability and performance for mission-critical server environments. Sourced from trusted OEM channels, it comes with our comprehensive warranty support.</p><ul class="list-disc pl-6 text-sm text-gray-800 space-y-1"><li>OEM Genuine Component verified by certified technicians.</li><li>Clean serial number ready for service contract registration.</li><li>Electrostatic Discharge (ESD) safe packaging.</li><li>Supports hot-swapping for zero-downtime maintenance.</li><li>Fully compatible with specified generation hardware.</li></ul></section>` : ''}
           ${reviewsHtml}
           <section class="mt-8 border-t border-gray-100 pt-6">
@@ -662,7 +666,7 @@ class SpaController {
         `);
 
         const breadcrumb = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` }, { '@type': 'ListItem', position: 2, name: String(cat.name), item: `${origin}/category/${encodeURIComponent(String(cat.id))}` }] };
-        $('head').append(`<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`);
+        $('head').append(`<script type="application/ld+json">${safeJsonScript(breadcrumb)}</script>`);
         const { items: catProducts } = await this.productsService.findPaginated({ limit: 8, offset: 0, category: String(cat.name) });
         const productList = Array.isArray(catProducts) && catProducts.length > 0
           ? `<ul class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${catProducts.slice(0, 9).map((p: any) => {
@@ -1134,6 +1138,66 @@ class SpaController {
     res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
   }
 
+  @Get('configurator')
+  async configurator(@Req() req: any, @Res() res: Response) {
+    try {
+      const rawHost = req.get('host'); const host = rawHost.replace(/^www\./, '');
+      const origin = `https://${host}`;
+      const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
+      const $ = loadIndex(readFileSync(indexHtmlPath, 'utf8'));
+      const pageTitle = `Server Configurator | Teraformix`;
+      const pageDesc = `Build and price custom enterprise servers with processors, memory, storage, RAID, networking, and power options.`;
+
+      $('title').text(pageTitle);
+
+      $('link[rel="canonical"]').remove();
+      $('head').append(`<link rel="canonical" href="${origin}/configurator">`);
+
+      $('meta[name="description"]').remove();
+      $('head').append(`<meta name="description" content="${pageDesc}">`);
+
+      $('meta[property^="og:"]').remove();
+      $('meta[name^="twitter:"]').remove();
+      $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/configurator">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/configurator">
+        <link rel="alternate" hreflang="x-default" href="${origin}/configurator">
+      `);
+
+      const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Teraformix Server Configurator',
+        url: `${origin}/configurator`,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        description: pageDesc,
+      };
+      $('head').append(`<script type="application/ld+json">${safeJsonScript(schema)}</script>`);
+
+      $('body').prepend(`
+        <noscript>
+          <section id="ssr-configurator" class="container mx-auto px-4 py-8">
+            <h1 class="text-2xl font-bold text-navy-900">Server Configurator</h1>
+            <p class="text-sm text-gray-700 mt-3">Enable JavaScript to configure and price a custom enterprise server.</p>
+          </section>
+        </noscript>
+      `);
+
+      return sendHtml(req, res, $.html());
+    } catch (_e) { void _e; }
+    res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
+  }
+
   @Get('sitemap')
   async sitemapHtml(@Req() req: any, @Res() res: Response) {
     try {
@@ -1491,7 +1555,7 @@ class SpaController {
     ServeStaticModule.forRoot(
       {
         rootPath: join(__dirname, '..', 'dist-client'),
-        exclude: ['/warranty', '/api/(.*)', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/(.*)', '/product/(.*)', '/category/(.*)', '/admin', '/admin/(.*)', '/products', '/products/(.*)', '/contact', '/returns', '/uploads/(.*)'],
+        exclude: ['/warranty', '/api/(.*)', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/(.*)', '/product/(.*)', '/category/(.*)', '/admin', '/admin/(.*)', '/products', '/products/(.*)', '/contact', '/configurator', '/returns', '/uploads/(.*)'],
         serveStaticOptions: {
           fallthrough: true,
           index: false,

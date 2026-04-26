@@ -31,21 +31,19 @@ export class PaymentsController {
     const enforce = String(process.env.RECAPTCHA_ENFORCE || 'false').toLowerCase() === 'true';
     if (!enforce) return true;
     const secret = this.configService.get<string>('RECAPTCHA_SECRET') || process.env.RECAPTCHA_SECRET || '';
-    if (!secret) return true;
+    if (!secret) return false;
     const t = String(token || '').trim();
     if (!t) return false;
     const params = new URLSearchParams();
     params.append('secret', secret);
     params.append('response', t);
-    const ip = (req?.ip || req?.headers?.['x-forwarded-for'] || '') as any;
-    const ipStr = Array.isArray(ip) ? ip[0] : String(ip || '');
+    const ipStr = String(req?.ip || req?.socket?.remoteAddress || '');
     if (ipStr) params.append('remoteip', ipStr);
     const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.3');
     const expectAction = String(process.env.RECAPTCHA_EXPECT_ACTION || 'checkout');
     try {
       const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
       const data = await resp.json();
-      if (data && data.success) return true;
       const scoreOk = typeof data?.score === 'number' ? data.score >= minScore : true;
       const actionOk = data?.action ? String(data.action) === expectAction : true;
       if (!!data?.success && scoreOk && actionOk) return true;
@@ -53,7 +51,6 @@ export class PaymentsController {
     try {
       const resp2 = await fetch('https://www.recaptcha.net/recaptcha/api/siteverify', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
       const data2 = await resp2.json();
-      if (data2 && data2.success) return true;
       const scoreOk2 = typeof data2?.score === 'number' ? data2.score >= minScore : true;
       const actionOk2 = data2?.action ? String(data2.action) === expectAction : true;
       if (!!data2?.success && scoreOk2 && actionOk2) return true;
@@ -74,25 +71,30 @@ export class PaymentsController {
       const providedAmount = Number(body.amount);
       const hasProvidedAmount = !!providedAmount && providedAmount > 0;
       const hasCart = Array.isArray(body.items) && body.items.length > 0 && body.address;
+      const rawMetadata = body.metadata && typeof body.metadata === 'object' ? body.metadata : {};
+      const metadata = Object.fromEntries(
+        Object.entries(rawMetadata)
+          .slice(0, 20)
+          .map(([key, value]) => [String(key).slice(0, 40), String(value ?? '').slice(0, 500)]),
+      );
 
       if (hasProvidedAmount && !hasCart) {
+        if (!String(metadata.quoteId || '').trim()) {
+          throw new BadRequestException('Quote id is required for amount-only payments');
+        }
         const MAX = 10000000;
+        const MIN = 50;
+        if (providedAmount < MIN) throw new BadRequestException('Amount below minimum');
         if (providedAmount > MAX) throw new BadRequestException('Amount exceeds limit');
         amount = providedAmount;
       } else if (hasCart) {
         amount = await this.ordersService.calculateAmountCents(body.items, body.address, body.serviceCode);
-        if (hasProvidedAmount) {
-          const MAX = 10000000;
-          if (providedAmount > 0 && providedAmount <= MAX) {
-            amount = providedAmount;
-          }
-        }
       } else {
         throw new BadRequestException('Invalid amount');
       }
 
       const intent = await this.ordersService.createPaymentIntent(amount, currency, {
-        ...(body.metadata || {}),
+        ...metadata,
         serviceCode: body.serviceCode || '',
       });
       return { clientSecret: intent.client_secret, id: intent.id, status: intent.status };

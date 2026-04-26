@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param, Logger, UseGuards, Req, UseIntercep
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { CmsService } from './cms.service';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -28,12 +28,12 @@ export class CmsController {
   @Get('/')
   @ApiOperation({ summary: 'Get all content blocks' })
   getAll() {
-    return this.cmsService.getAllContent();
+    return this.cmsService.getAllPublicContent();
   }
 
   @Get(':key')
   getOne(@Param('key') key: string) {
-    return this.cmsService.getContent(key);
+    return this.cmsService.getPublicContent(key);
   }
 
   @Post('upload')
@@ -44,7 +44,7 @@ export class CmsController {
     storage: diskStorage({
       destination: './uploads',
       filename: (req, file, cb) => {
-        const randomName = uuidv4();
+        const randomName = randomUUID();
         cb(null, `${randomName}${extname(file.originalname)}`);
       },
     }),
@@ -53,7 +53,8 @@ export class CmsController {
         return cb(new Error('Only image files are allowed!'), false);
       }
       cb(null, true);
-    }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
   }))
   @ApiOperation({ summary: 'Upload an image' })
   uploadFile(@UploadedFile() file: any) {
@@ -85,10 +86,17 @@ export class CmsController {
     storage: diskStorage({
       destination: './uploads/temp',
       filename: (req, file, cb) => {
-        const randomName = uuidv4();
+        const randomName = randomUUID();
         cb(null, `import-${randomName}${extname(file.originalname)}`);
       },
     }),
+    fileFilter: (req, file, cb) => {
+      if (!file.originalname.match(/\.csv$/i) && file.mimetype !== 'text/csv') {
+        return cb(new Error('Only CSV files are allowed!'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 2 * 1024 * 1024 },
   }))
   @ApiOperation({ summary: 'Import redirects from CSV' })
   async importRedirects(@UploadedFile() file: any) {

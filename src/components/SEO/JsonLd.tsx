@@ -2,6 +2,7 @@
 import React from 'react';
 import { Product } from '../../types';
 import { useGlobalContent } from '../../contexts/GlobalContent';
+import { safeJsonScript } from '../../lib/security';
 
 interface JsonLdProps {
   data: Product;
@@ -102,7 +103,7 @@ const JsonLd: React.FC<JsonLdProps> = ({ data }) => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonScript(structuredData) }}
     />
   );
 };

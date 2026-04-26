@@ -20,7 +20,7 @@ let ShippingService = ShippingService_1 = class ShippingService {
         this.configService = configService;
         this.logger = new common_1.Logger(ShippingService_1.name);
         this.baseUrl = 'https://ssapi.shipstation.com';
-        this.apiKey = this.configService.get('SHIPSTATION_API_KEY') || 'qIYmy/is6UizBm+jR6Eqg7JIz7TI6jSvvFX5Wo2CzvI';
+        this.apiKey = this.configService.get('SHIPSTATION_API_KEY') || '';
         this.apiSecret = this.configService.get('SHIPSTATION_API_SECRET') || '';
     }
     getTotalWeightInOz(items) {
@@ -39,6 +39,10 @@ let ShippingService = ShippingService_1 = class ShippingService {
     async getRates(destination, items) {
         const totalWeightInOz = this.getTotalWeightInOz(items);
         const isInternational = destination.country && destination.country !== 'US';
+        if (!this.apiKey || !this.apiSecret) {
+            this.logger.warn('ShipStation credentials are not configured. Returning fallback shipping rates.');
+            return isInternational ? this.getInternationalFallbackRates(totalWeightInOz) : this.getFallbackRates(totalWeightInOz);
+        }
         try {
             const payload = {
                 carrierCode: null,

@@ -10,6 +10,7 @@ import SEOHead from '../../components/SEO/SEOHead';
 import Image from '../../components/Image';
 import { ShieldCheck, Award, Clock, CreditCard, Phone, Mail, CheckCircle, ChevronDown, ChevronUp, HelpCircle, ChevronRight } from 'lucide-react';
 import { useUI } from '../../contexts/UIContext';
+import { safeJsonScript } from '../../lib/security';
 
 const LandingPage = () => {
   const { slug } = useParams();
@@ -290,7 +291,7 @@ const LandingPage = () => {
                 { question: 'Do you ship internationally?', answer: 'Yes. We offer international express and economy services with DDP options on request. Palletized freight is available for bulk shipments.' }
               ]).map(f => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } }));
               const data = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items };
-              return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
+              return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(data) }} />;
             })()}
           </div>
         </section>

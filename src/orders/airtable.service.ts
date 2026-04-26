@@ -25,7 +25,7 @@ export class AirtableService {
     ) {
         const apiKey = this.configService.get<string>('AIRTABLE_API_KEY');
         const baseId = this.configService.get<string>('AIRTABLE_BASE_ID');
-        const formsBaseId = this.configService.get<string>('AIRTABLE_FORMS_BASE_ID') || 'app3aiGNMpvuzDsSQ'; // User provided ID
+        const formsBaseId = this.configService.get<string>('AIRTABLE_FORMS_BASE_ID');
         this.customersTable = this.configService.get<string>('AIRTABLE_CUSTOMERS_TABLE') || 'Customers';
         this.ordersTable = this.configService.get<string>('AIRTABLE_ORDERS_TABLE') || 'Orders';
         this.leadsTable = this.configService.get<string>('AIRTABLE_FORMS_TABLE_NAME') || 'Leads';

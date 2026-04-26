@@ -1,55 +1,43 @@
 # ----------------------------
 # Stage 1: Build (Backend + Frontend)
 # ----------------------------
-FROM public.ecr.aws/docker/library/node:20-slim AS builder
+FROM public.ecr.aws/docker/library/node:22-slim AS builder
 
 WORKDIR /app
 
 ENV NODE_OPTIONS=--max-old-space-size=4096
 
 # Install all dependencies (apt-get for native deps if needed)
-RUN apt-get update -y && apt-get install -y openssl python3 make g++
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy full source
 COPY . .
 
-# Build backend
 RUN npm run build:server
-
-# Debug: List what nest build produced
-RUN echo "Contetns of dist after nest build:" && find dist -maxdepth 3
-
-# Explicitly build data-source.js with ALL required flags
-RUN npx tsc src/database/data-source.ts --outDir dist/database --target es2017 --module commonjs --moduleResolution node --esModuleInterop --skipLibCheck --experimentalDecorators --emitDecoratorMetadata
-
-# Debug: Check if it exists now
-RUN echo "Checking for data-source.js in dist/database:" && ls -la dist/database/data-source.js || echo "File not found in standard path"
-RUN echo "Searching entire dist for data-source.js:" && find dist -name "data-source.js"
-
 RUN npm run build:client
 
 # ----------------------------
 # Stage 2: Production Runner
 # ----------------------------
-FROM public.ecr.aws/docker/library/node:20-slim AS runner
+FROM public.ecr.aws/docker/library/node:22-slim AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install only production dependencies (tolerant to lock drift)
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy backend dist files
-COPY --from=builder /app/dist ./dist
+RUN mkdir -p uploads && chown -R node:node /app
 
-# Copy frontend build output (Vite outDir 'dist-client') into runtime
-COPY --from=builder /app/dist-client ./dist-client
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/dist-client ./dist-client
 
 EXPOSE 3000
+USER node
 
 # Healthcheck probing /health on the bound PORT
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \

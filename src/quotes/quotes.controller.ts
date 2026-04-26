@@ -1,5 +1,5 @@
 
-import { Controller, Post, Body, Param, Patch, Get, Req, Res, HttpCode, HttpStatus, UseGuards, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Controller, Post, Body, Param, Patch, Get, Req, Res, HttpCode, HttpStatus, UseGuards, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { QuotesService } from './quotes.service';
 import { QuoteStatus } from './entities/quote.entity';
@@ -14,13 +14,18 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
 import { IpWhitelistGuard } from '../auth/guards/ip-whitelist.guard';
+import { OrdersService } from '../orders/orders.service';
+import { sanitizePlainText } from '../lib/security';
 
 
 @ApiTags('quotes')
 @Controller('quotes')
 @UseGuards(IpWhitelistGuard)
 export class QuotesController {
-  constructor(private readonly quotesService: QuotesService) { }
+  constructor(
+    private readonly quotesService: QuotesService,
+    private readonly ordersService: OrdersService,
+  ) { }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -141,7 +146,8 @@ export class QuotesController {
     }
 
     const submission = quote.submissionData || {};
-    const fileName = submission.fileName || `bom-${quote.referenceNumber}`;
+    const fileName = (sanitizePlainText(submission.fileName || `bom-${quote.referenceNumber}`, 255) || `bom-${quote.referenceNumber}`)
+      .replace(/["\r\n]/g, '');
     const dataUrl: string = submission.fileContent;
     if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: 'No file content available' });
@@ -151,9 +157,19 @@ export class QuotesController {
     if (!match) {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid file data' });
     }
-    const mime = match[1];
+    const allowedMimes = new Set([
+      'text/csv',
+      'application/pdf',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/octet-stream',
+    ]);
+    const mime = allowedMimes.has(match[1]) ? match[1] : 'application/octet-stream';
     const b64 = match[2];
     const buffer = Buffer.from(b64, 'base64');
+    if (buffer.length > 6 * 1024 * 1024) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'File is too large' });
+    }
 
     res.setHeader('Content-Type', mime || 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -206,7 +222,7 @@ export class QuotesController {
       referenceNumber: quote.referenceNumber,
       status: quote.status,
       createdAt: quote.createdAt,
-      total: quote.submissionData?.total || 0, // Assuming total is stored here or needs calculation
+      total: Number(quote.negotiatedTotal || quote.submissionData?.total || 0),
       paymentTerms: quote.paymentTerms,
       items: quote.submissionData?.cart || [],
       customer: {
@@ -220,8 +236,31 @@ export class QuotesController {
   @Post('public/:id/pay')
   @ApiOperation({ summary: 'Process payment for a quote' })
   async payQuote(@Param('id') id: string, @Body() paymentDetails: any) {
-    // In a real app, integrate with Stripe/PayPal here
-    // For now, we simulate a successful payment
+    const quote = await this.quotesService.findOne(id);
+    if (!quote) throw new NotFoundException('Quote not found');
+
+    const paymentIntentId = String(paymentDetails?.paymentIntentId || '').trim();
+    if (!paymentIntentId) {
+      throw new BadRequestException('payment_intent_required');
+    }
+
+    const expectedAmount = Math.round(Number(quote.negotiatedTotal || quote.submissionData?.total || 0) * 100);
+    if (!Number.isSafeInteger(expectedAmount) || expectedAmount < 50) {
+      throw new BadRequestException('invalid_quote_total');
+    }
+
+    const intent = await this.ordersService.getPaymentIntent(paymentIntentId);
+    const intentQuoteId = String(intent.metadata?.quoteId || '').trim();
+    if (intentQuoteId !== id) {
+      throw new BadRequestException('payment_quote_mismatch');
+    }
+    if (intent.currency !== 'usd' || intent.amount < expectedAmount) {
+      throw new BadRequestException('payment_amount_mismatch');
+    }
+    if (intent.status !== 'requires_capture' && intent.status !== 'succeeded') {
+      throw new BadRequestException('payment_not_confirmed');
+    }
+
     return this.quotesService.update(id, { status: QuoteStatus.PAID });
   }
 

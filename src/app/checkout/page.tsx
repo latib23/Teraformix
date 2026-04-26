@@ -1025,7 +1025,6 @@ const CheckoutPage = () => {
         }
         const intentInit = await api.post<any>('/payments/intent', {
           currency: 'usd',
-          amount: Math.round(finalTotal * 100),
           items: itemsPayload.map(p => ({ sku: p.sku, quantity: p.quantity })),
           address: {
             postalCode: shippingData.zip,
@@ -1071,7 +1070,13 @@ const CheckoutPage = () => {
         total: finalTotal,
         paymentMethod: paymentMethod === 'CC' ? 'STRIPE' : (paymentMethod === 'PO' ? 'PO' : 'BANK_TRANSFER'),
         poNumber: paymentMethod === 'PO' ? poNumber : undefined,
-        shippingAddress: { ...shippingData, shippingCost, shipmentService: selectedRate?.serviceName },
+        shippingAddress: {
+          ...shippingData,
+          postalCode: shippingData.zip,
+          shippingCost,
+          shipmentService: selectedRate?.serviceName,
+          shipmentServiceCode: selectedRate?.serviceCode,
+        },
         billingAddress: billingSameAsShipping ? shippingData : billingData,
         status: paymentMethod === 'PO' || paymentMethod === 'BANK' ? 'PENDING_APPROVAL' : 'PROCESSING',
         recaptchaToken
@@ -1079,6 +1084,9 @@ const CheckoutPage = () => {
 
       if (paymentConfirmation && (paymentConfirmation as any)?.paymentIntent?.payment_method) {
         payload.paymentMethodId = (paymentConfirmation as any).paymentIntent.payment_method;
+      }
+      if (paymentConfirmation && (paymentConfirmation as any)?.paymentIntent?.id) {
+        payload.paymentIntentId = (paymentConfirmation as any).paymentIntent.id;
       }
 
       const endpoint = auth.isAuthenticated() ? '/orders' : '/orders/guest';

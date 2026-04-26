@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { safeJsonScript } from '../lib/security';
 
 interface BreadcrumbItem {
   label: string;
@@ -36,7 +37,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
     <nav aria-label="Breadcrumb" className="bg-navy-950 border-b border-navy-800 py-3">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonScript(schema) }}
       />
       <div className="container mx-auto px-4">
         <ol className="flex items-center space-x-2 text-xs text-gray-500">

@@ -35,6 +35,7 @@ const dashboard_module_1 = require("./dashboard/dashboard.module");
 const products_service_1 = require("./products/products.service");
 const cms_service_1 = require("./cms/cms.service");
 const cheerio_1 = require("cheerio");
+const security_1 = require("./lib/security");
 const user_entity_1 = require("./users/entities/user.entity");
 const company_entity_1 = require("./companies/entities/company.entity");
 const product_entity_1 = require("./products/entities/product.entity");
@@ -156,7 +157,7 @@ let SpaController = class SpaController {
             const host = rawHost.replace(/^www\./, '');
             const origin = `https://${host}`;
             const settings = await this.cmsService.getContent('settings');
-            const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Server Tech Central';
+            const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Teraformix';
             const siteDesc = (settings && settings.siteDescription) ? String(settings.siteDescription) : 'Enterprise Hardware Reseller. Servers, Storage, and Networking.';
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
@@ -167,21 +168,28 @@ let SpaController = class SpaController {
             $('head').append(`<link rel="canonical" href="${origin}/">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
             $('head').append(`
         <meta property="og:title" content="${pageTitle}">
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="${origin}/">
-        <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
         <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
-        <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/">
+        <link rel="alternate" hreflang="x-default" href="${origin}/">
       `);
             const org = { '@context': 'https://schema.org', '@type': 'Organization', name: siteName, url: origin };
             const website = { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: origin, potentialAction: { '@type': 'SearchAction', target: `${origin}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } };
-            $('head').append(`<script type="application/ld+json">${JSON.stringify(org)}</script>`);
-            $('head').append(`<script type="application/ld+json">${JSON.stringify(website)}</script>`);
+            $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(org)}</script>`);
+            $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(website)}</script>`);
             const categoriesContent = await this.cmsService.getContent('categories');
             const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c) => c && c.isActive) : [];
             const homeContent = await this.cmsService.getContent('home');
@@ -215,7 +223,7 @@ let SpaController = class SpaController {
                 const schema = hasSchema ? p.schema : derived;
                 return Object.assign(Object.assign({}, p), { price: Number(p.basePrice), specs: a, schema, stockStatus: p.stockLevel > 0 ? 'IN_STOCK' : 'BACKORDER', brand: p.brand || 'Generic', category: p.category || 'Uncategorized', image: p.image || '' });
             });
-            const initialDataScript = `<script>window.INITIAL_DATA = { featuredItems: ${JSON.stringify(mappedFeatured)} };</script>`;
+            const initialDataScript = `<script>window.INITIAL_DATA = { featuredItems: ${(0, security_1.safeJsonScript)(mappedFeatured)} };</script>`;
             $('head').append(initialDataScript);
             const featuredHtml = Array.isArray(featuredItems) && featuredItems.length > 0
                 ? `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">${featuredItems.slice(0, 4).map((p, idx) => {
@@ -356,22 +364,6 @@ let SpaController = class SpaController {
         }
         res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
     }
-    async genericPages(req, res) {
-        if (req.url === '/404') {
-            res.status(404);
-        }
-        try {
-            const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
-            const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const footerHtml = await this.getFooterHtml();
-            $('body').prepend(`<noscript>${footerHtml}</noscript>`);
-            return sendHtml(req, res, $.html());
-        }
-        catch (_e) {
-            void _e;
-        }
-        res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
-    }
     async landingRoot(req, res) {
         try {
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
@@ -422,7 +414,7 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const productUrl = `${origin}/product/${encodeURIComponent(String(p.sku))}`;
             const settings = await this.cmsService.getContent('settings');
-            const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Server Tech Central';
+            const siteName = (settings && settings.siteTitle) ? String(settings.siteTitle) : 'Teraformix';
             const a = p.attributes || {};
             const s = p.schema || {};
             const schemaData = {
@@ -464,7 +456,7 @@ let SpaController = class SpaController {
                 },
             };
             const img = String(p.image || '');
-            const defaultOg = 'https://servertechcentral.com/og-default.jpg';
+            const defaultOg = 'https://teraformix.com/og-default.jpg';
             schemaData.image = img && !img.startsWith('data:') ? [img] : [defaultOg];
             if (s.gtin13 || a.__schema_gtin13)
                 schemaData.gtin13 = String(s.gtin13 || a.__schema_gtin13);
@@ -509,28 +501,37 @@ let SpaController = class SpaController {
                     { '@type': 'ListItem', position: 3, name: p.name, item: productUrl }
                 ]
             };
-            const pageTitle = `${p.name} | Server Tech Central`;
+            const rawName = String(p.name || '');
+            const truncName = rawName.length > 40 ? rawName.substring(0, 40) + '...' : rawName;
+            const pageTitle = `${truncName} | Teraformix`;
             const pageDesc = String(p.description || `${p.brand || ''} ${p.sku || ''}`).slice(0, 160).replace(/"/g, '');
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${productUrl}">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
             $('head').append(`
         <meta property="og:title" content="${pageTitle}">
         <meta property="og:description" content="${pageDesc}">
         <meta property="og:type" content="product">
         <meta property="og:url" content="${productUrl}">
+        <meta property="og:site_name" content="Teraformix">
         <meta property="og:image" content="${schemaData.image[0]}">
         <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
         <meta name="twitter:title" content="${pageTitle}">
         <meta name="twitter:description" content="${pageDesc}">
         <meta name="twitter:image" content="${schemaData.image[0]}">
         ${p.basePrice ? `<meta property="product:price:amount" content="${p.basePrice}">` : ''}
         <meta property="product:price:currency" content="USD">
+        <link rel="alternate" hreflang="en-US" href="${productUrl}">
+        <link rel="alternate" hreflang="x-default" href="${productUrl}">
       `);
-            $('head').append(`<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`);
-            $('head').append(`<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`);
+            $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(schemaData)}</script>`);
+            $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(breadcrumb)}</script>`);
             const stockUnits = Number(p.stockLevel || 0);
             const availabilityText = stockUnits > 0 ? `In Stock • ${stockUnits} units` : 'Out of Stock';
             const priceText = Number(p.basePrice || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -538,7 +539,7 @@ let SpaController = class SpaController {
             const weight = String(p.weight || '').trim();
             const warranty = String(p.warranty || '3-Year Warranty').trim();
             const safeOverview = String(p.overview || '').replace(/<[^>]+>/g, '').slice(0, 500);
-            const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${schemaData.image[0]}" alt="${p.name}" style="max-width:100%;height:auto" />` : '';
+            const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${(0, security_1.escapeHtml)(schemaData.image[0])}" alt="${(0, security_1.escapeHtml)(p.name)}" style="max-width:100%;height:auto" />` : '';
             const categoriesContent = await this.cmsService.getContent('categories');
             const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c) => c && c.isActive) : [];
             const currentCat = String(category || '').toLowerCase();
@@ -546,10 +547,13 @@ let SpaController = class SpaController {
             const relatedCategoriesHtml = categoryPicks.length > 0
                 ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${categoryPicks.map((c) => `<a href="/category/${encodeURIComponent(String(c.id))}" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${String(c.name)}</a>`).join('')}</div></section>`
                 : `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${['Servers', 'Storage', 'Networking'].slice(0, 6).map((name) => `<a href="/category" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${name}</a>`).join('')}</div></section>`;
-            const reviewsHtml = Array.isArray(reviews) && reviews.length > 0
-                ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${reviews.slice(0, 3).map((r) => {
-                    const author = r.author ? String(r.author) : 'Anonymous';
-                    const body = r.reviewBody ? String(r.reviewBody) : '';
+            const approvedReviews = Array.isArray(reviews)
+                ? reviews.filter((r) => r && typeof r === 'object' && r.status === 'APPROVED')
+                : [];
+            const reviewsHtml = approvedReviews.length > 0
+                ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${approvedReviews.slice(0, 3).map((r) => {
+                    const author = r.author ? (0, security_1.escapeHtml)(r.author) : 'Anonymous';
+                    const body = r.reviewBody ? (0, security_1.escapeHtml)(r.reviewBody) : '';
                     const rating = r.ratingValue ? Number(r.ratingValue) : undefined;
                     const stars = rating ? '★'.repeat(Math.max(1, Math.min(5, Math.round(rating)))) : '';
                     return `<div class="border rounded p-3"><div class="text-sm text-gray-700">${stars ? `<span class="text-yellow-600">${stars}</span> ` : ''}<strong>${author}</strong></div><p class="text-sm text-gray-800 mt-1">${body}</p></div>`;
@@ -569,7 +573,7 @@ let SpaController = class SpaController {
             </div>`;
             const ssrBlock = `
         <section id="ssr-product" class="container mx-auto px-4 py-6">
-          <h1>${p.name}</h1>
+          <h1>${(0, security_1.escapeHtml)(p.name)}</h1>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div>${imgTag}</div>
             <div>
@@ -577,22 +581,22 @@ let SpaController = class SpaController {
               <div class="text-sm text-gray-700 mb-4">${availabilityText}</div>
               <h3 class="text-sm font-bold text-navy-900 mb-2">Specifications</h3>
               <ul class="text-sm text-gray-800 space-y-1">
-                <li><strong>SKU:</strong> ${p.sku}</li>
-                <li><strong>Brand:</strong> ${p.brand}</li>
-                ${warranty ? `<li><strong>Warranty:</strong> ${warranty}</li>` : ''}
-                ${dims ? `<li><strong>Dimensions:</strong> ${dims}</li>` : ''}
-                ${weight ? `<li><strong>Weight:</strong> ${weight}</li>` : ''}
+                <li><strong>SKU:</strong> ${(0, security_1.escapeHtml)(p.sku)}</li>
+                <li><strong>Brand:</strong> ${(0, security_1.escapeHtml)(p.brand)}</li>
+                ${warranty ? `<li><strong>Warranty:</strong> ${(0, security_1.escapeHtml)(warranty)}</li>` : ''}
+                ${dims ? `<li><strong>Dimensions:</strong> ${(0, security_1.escapeHtml)(dims)}</li>` : ''}
+                ${weight ? `<li><strong>Weight:</strong> ${(0, security_1.escapeHtml)(weight)}</li>` : ''}
               </ul>
               ${category ? `<div class="mt-3"><a href="${slug ? `${origin}/category/${slug}` : `${origin}/category`}" class="text-action-600 text-sm font-semibold hover:underline">View ${category} Products</a></div>` : ''}
             </div>
           </div>
-          ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${safeOverview}</p></div>` : ''}
-          ${!safeOverview ? `<section class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><ul class="list-disc pl-6 text-sm text-gray-800 space-y-1"><li>OEM Genuine Component verified by certified technicians.</li><li>Clean serial number ready for service contract registration.</li><li>Electrostatic Discharge (ESD) safe packaging.</li><li>Supports hot-swapping for zero-downtime maintenance.</li></ul></section>` : ''}
+          ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${(0, security_1.escapeHtml)(safeOverview)}</p></div>` : ''}
+          ${!safeOverview ? `<section class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800 mb-4">This enterprise-grade component is rigorously tested to ensure maximum reliability and performance for mission-critical server environments. Sourced from trusted OEM channels, it comes with our comprehensive warranty support.</p><ul class="list-disc pl-6 text-sm text-gray-800 space-y-1"><li>OEM Genuine Component verified by certified technicians.</li><li>Clean serial number ready for service contract registration.</li><li>Electrostatic Discharge (ESD) safe packaging.</li><li>Supports hot-swapping for zero-downtime maintenance.</li><li>Fully compatible with specified generation hardware.</li></ul></section>` : ''}
           ${reviewsHtml}
           <section class="mt-8 border-t border-gray-100 pt-6">
             <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Trusted by Professionals Worldwide</h2>
             ${logosHtml}
-            <p class="text-[11px] text-gray-500 mt-4 italic">Join over 10,000 IT professionals who rely on Server Tech Central for mission-critical infrastructure.</p>
+            <p class="text-[11px] text-gray-500 mt-4 italic">Join over 10,000 IT professionals who rely on Teraformix for mission-critical infrastructure.</p>
           </section>
           ${resourcesHtml}
           ${relatedCategoriesHtml}
@@ -626,26 +630,35 @@ let SpaController = class SpaController {
                 }
                 const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
                 const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-                const pageTitle = String(cat.seoTitle || `${cat.name} | Server Tech Central`);
+                const catName = String(cat.name || '');
+                const truncCat = catName.length > 40 ? catName.substring(0, 40) + '...' : catName;
+                const pageTitle = String(cat.seoTitle || `${truncCat} | Teraformix`);
                 const pageDesc = String(cat.seoDescription || cat.description || `${cat.name} inventory`).replace(/"/g, '').slice(0, 160);
                 $('title').text(pageTitle);
                 $('link[rel="canonical"]').remove();
                 $('head').append(`<link rel="canonical" href="${origin}/category/${encodeURIComponent(String(cat.id))}">`);
                 $('meta[name="description"]').remove();
                 $('head').append(`<meta name="description" content="${pageDesc}">`);
+                $('meta[property^="og:"]').remove();
+                $('meta[name^="twitter:"]').remove();
                 $('head').append(`
           <meta property="og:title" content="${pageTitle}">
           <meta property="og:description" content="${pageDesc}">
           <meta property="og:type" content="website">
           <meta property="og:url" content="${origin}/category/${encodeURIComponent(String(cat.id))}">
-          <meta property="og:image" content="https://servertechcentral.com/og-default.jpg">
+          <meta property="og:site_name" content="Teraformix">
+          <meta property="og:image" content="https://teraformix.com/og-default.jpg">
           <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:site" content="@Teraformix">
+          <meta name="twitter:creator" content="@Teraformix">
           <meta name="twitter:title" content="${pageTitle}">
           <meta name="twitter:description" content="${pageDesc}">
-          <meta name="twitter:image" content="https://servertechcentral.com/og-default.jpg">
+          <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+          <link rel="alternate" hreflang="en-US" href="${origin}/category/${encodeURIComponent(String(cat.id))}">
+          <link rel="alternate" hreflang="x-default" href="${origin}/category/${encodeURIComponent(String(cat.id))}">
         `);
                 const breadcrumb = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` }, { '@type': 'ListItem', position: 2, name: String(cat.name), item: `${origin}/category/${encodeURIComponent(String(cat.id))}` }] };
-                $('head').append(`<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`);
+                $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(breadcrumb)}</script>`);
                 const { items: catProducts } = await this.productsService.findPaginated({ limit: 8, offset: 0, category: String(cat.name) });
                 const productList = Array.isArray(catProducts) && catProducts.length > 0
                     ? `<ul class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${catProducts.slice(0, 9).map((p) => {
@@ -683,7 +696,7 @@ let SpaController = class SpaController {
             const origin = `${proto}://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Categories | Server Tech Central`;
+            const pageTitle = `Categories | Teraformix`;
             const pageDesc = `Browse enterprise hardware categories: Servers, Storage, Networking.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
@@ -716,19 +729,6 @@ let SpaController = class SpaController {
         }
         res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
     }
-    async productsRoot(req, res) {
-        try {
-            const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
-            const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const footerHtml = await this.getFooterHtml();
-            $('body').prepend(`<noscript>${footerHtml}</noscript>`);
-            return sendHtml(req, res, $.html());
-        }
-        catch (_e) {
-            void _e;
-        }
-        res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
-    }
     async privacy(req, res) {
         try {
             const proto = process.env.NODE_ENV === 'production' ? 'https' : (req.headers['x-forwarded-proto'] || req.protocol || 'http');
@@ -737,13 +737,31 @@ let SpaController = class SpaController {
             const origin = `${proto}://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Privacy Policy | Server Tech Central`;
+            const pageTitle = `Privacy Policy | Teraformix`;
             const pageDesc = `Read our privacy practices and data protection policy.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/privacy">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/privacy">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/privacy">
+        <link rel="alternate" hreflang="x-default" href="${origin}/privacy">
+      `);
             const privacy = await this.cmsService.getContent('privacyPolicy');
             let body = String((privacy === null || privacy === void 0 ? void 0 : privacy.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -773,13 +791,31 @@ let SpaController = class SpaController {
             const origin = `${proto}://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Terms of Sale | Server Tech Central`;
+            const pageTitle = `Terms of Sale | Teraformix`;
             const pageDesc = `View order policies, returns, warranties, and terms.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/terms">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/terms">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/terms">
+        <link rel="alternate" hreflang="x-default" href="${origin}/terms">
+      `);
             const terms = await this.cmsService.getContent('termsOfSale');
             let body = String((terms === null || terms === void 0 ? void 0 : terms.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -809,13 +845,31 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Terms & Conditions | Server Tech Central`;
+            const pageTitle = `Terms & Conditions | Teraformix`;
             const pageDesc = `Website usage terms, payment policies, and liability disclaimers.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/terms-and-conditions">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/terms-and-conditions">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/terms-and-conditions">
+        <link rel="alternate" hreflang="x-default" href="${origin}/terms-and-conditions">
+      `);
             const terms = await this.cmsService.getContent('termsAndConditions');
             let body = String((terms === null || terms === void 0 ? void 0 : terms.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -845,13 +899,31 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Warranty Policy | Server Tech Central`;
+            const pageTitle = `Warranty Policy | Teraformix`;
             const pageDesc = `Standard 3-Year Warranty on all enterprise hardware. Advanced replacement and support terms.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/warranty">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/warranty">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/warranty">
+        <link rel="alternate" hreflang="x-default" href="${origin}/warranty">
+      `);
             const content = await this.cmsService.getContent('warrantyPage');
             let body = String((content === null || content === void 0 ? void 0 : content.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -881,13 +953,31 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Return Policy | Server Tech Central`;
+            const pageTitle = `Return Policy | Teraformix`;
             const pageDesc = `30-day return policy for enterprise hardware. RMA process and warranty info.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/returns">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/returns">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/returns">
+        <link rel="alternate" hreflang="x-default" href="${origin}/returns">
+      `);
             const content = await this.cmsService.getContent('returnPolicy');
             let body = String((content === null || content === void 0 ? void 0 : content.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -917,13 +1007,31 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `About Us | Server Tech Central`;
-            const pageDesc = `Learn about Server Tech Central, our mission, and enterprise hardware expertise.`;
+            const pageTitle = `About Us | Teraformix`;
+            const pageDesc = `Learn about Teraformix, our mission, and enterprise hardware expertise.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/about">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/about">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/about">
+        <link rel="alternate" hreflang="x-default" href="${origin}/about">
+      `);
             const content = await this.cmsService.getContent('aboutPage');
             let body = String((content === null || content === void 0 ? void 0 : content.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -933,7 +1041,7 @@ let SpaController = class SpaController {
             const ssrBlock = `
         <section id="ssr-about" class="container mx-auto px-4 py-8">
           <h1 class="text-2xl font-bold text-navy-900">About Us</h1>
-          <div class="prose max-w-none text-gray-800 mt-4">${body || '<p class="text-sm text-gray-700">About Server Tech Central.</p>'}</div>
+          <div class="prose max-w-none text-gray-800 mt-4">${body || '<p class="text-sm text-gray-700">About Teraformix.</p>'}</div>
         </section>
       `;
             const footerHtml = await this.getFooterHtml();
@@ -953,13 +1061,31 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Contact Us | Server Tech Central`;
+            const pageTitle = `Contact Us | Teraformix`;
             const pageDesc = `Get in touch with our sales and support team for enterprise hardware needs.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
             $('head').append(`<link rel="canonical" href="${origin}/contact">`);
             $('meta[name="description"]').remove();
             $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/contact">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@Teraformix">
+        <meta name="twitter:creator" content="@Teraformix">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/contact">
+        <link rel="alternate" hreflang="x-default" href="${origin}/contact">
+      `);
             const content = await this.cmsService.getContent('contactPage');
             let body = String((content === null || content === void 0 ? void 0 : content.content) || '').trim();
             body = body.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-navy-900 mt-6">$1</h3>');
@@ -981,6 +1107,61 @@ let SpaController = class SpaController {
         }
         res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
     }
+    async configurator(req, res) {
+        try {
+            const rawHost = req.get('host');
+            const host = rawHost.replace(/^www\./, '');
+            const origin = `https://${host}`;
+            const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
+            const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
+            const pageTitle = `Server Configurator | Teraformix`;
+            const pageDesc = `Build and price custom enterprise servers with processors, memory, storage, RAID, networking, and power options.`;
+            $('title').text(pageTitle);
+            $('link[rel="canonical"]').remove();
+            $('head').append(`<link rel="canonical" href="${origin}/configurator">`);
+            $('meta[name="description"]').remove();
+            $('head').append(`<meta name="description" content="${pageDesc}">`);
+            $('meta[property^="og:"]').remove();
+            $('meta[name^="twitter:"]').remove();
+            $('head').append(`
+        <meta property="og:title" content="${pageTitle}">
+        <meta property="og:description" content="${pageDesc}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="${origin}/configurator">
+        <meta property="og:site_name" content="Teraformix">
+        <meta property="og:image" content="https://teraformix.com/og-default.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="${pageTitle}">
+        <meta name="twitter:description" content="${pageDesc}">
+        <meta name="twitter:image" content="https://teraformix.com/og-default.jpg">
+        <link rel="alternate" hreflang="en-US" href="${origin}/configurator">
+        <link rel="alternate" hreflang="x-default" href="${origin}/configurator">
+      `);
+            const schema = {
+                '@context': 'https://schema.org',
+                '@type': 'WebApplication',
+                name: 'Teraformix Server Configurator',
+                url: `${origin}/configurator`,
+                applicationCategory: 'BusinessApplication',
+                operatingSystem: 'Web',
+                description: pageDesc,
+            };
+            $('head').append(`<script type="application/ld+json">${(0, security_1.safeJsonScript)(schema)}</script>`);
+            $('body').prepend(`
+        <noscript>
+          <section id="ssr-configurator" class="container mx-auto px-4 py-8">
+            <h1 class="text-2xl font-bold text-navy-900">Server Configurator</h1>
+            <p class="text-sm text-gray-700 mt-3">Enable JavaScript to configure and price a custom enterprise server.</p>
+          </section>
+        </noscript>
+      `);
+            return sendHtml(req, res, $.html());
+        }
+        catch (_e) {
+            void _e;
+        }
+        res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
+    }
     async sitemapHtml(req, res) {
         try {
             const proto = req.headers['x-forwarded-proto'] || 'https';
@@ -989,7 +1170,7 @@ let SpaController = class SpaController {
             const origin = `https://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Sitemap | Server Tech Central`;
+            const pageTitle = `Sitemap | Teraformix`;
             const pageDesc = `Navigate our complete catalog of enterprise servers, storage, and networking.`;
             $('title').text(pageTitle);
             $('link[rel="canonical"]').remove();
@@ -1041,7 +1222,7 @@ let SpaController = class SpaController {
             const origin = `${proto}://${host}`;
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Track Order | Server Tech Central`;
+            const pageTitle = `Track Order | Teraformix`;
             $('title').text(pageTitle);
             const ssrBlock = `
         <section id="ssr-track" class="container mx-auto px-4 py-8">
@@ -1066,7 +1247,7 @@ let SpaController = class SpaController {
         try {
             const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
             const $ = loadIndex((0, fs_1.readFileSync)(indexHtmlPath, 'utf8'));
-            const pageTitle = `Admin Login | Server Tech Central`;
+            const pageTitle = `Admin Login | Teraformix`;
             $('title').text(pageTitle);
             const ssrBlock = `
         <div class="min-h-screen flex items-center justify-center bg-gray-100">
@@ -1229,7 +1410,7 @@ let SpaController = class SpaController {
           <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
               <div>
-                <h3 class="text-xl font-bold mb-4 tracking-tight">Server Tech Central</h3>
+                <h3 class="text-xl font-bold mb-4 tracking-tight">Teraformix</h3>
                 <p class="text-gray-300 text-sm mb-6 leading-relaxed">${footer.aboutText || ''}</p>
                 <div class="bg-navy-800 rounded p-4 border border-navy-700">
                   <h4 class="text-xs font-bold text-gray-200 uppercase mb-2 flex items-center gap-2">
@@ -1279,7 +1460,7 @@ let SpaController = class SpaController {
             </div>
             <div class="border-t border-navy-800 py-8 flex flex-col lg:flex-row justify-between items-center gap-6 text-xs text-gray-300">
               <div class="flex flex-col md:flex-row items-center gap-4">
-                <span>&copy; ${year} Server Tech Central. All rights reserved.</span>
+                <span>&copy; ${year} Teraformix. All rights reserved.</span>
                 <div class="hidden md:block w-px h-4 bg-navy-700"></div>
                 <div id="amex-logo" style="width: 230px; height: 50px;">
                   <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/4_Card_color_horizontal.png" width="100%" height="100%" alt="American Express Accepted Here" />
@@ -1315,14 +1496,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], SpaController.prototype, "root", null);
-__decorate([
-    (0, common_1.Get)(['/admin', '/admin/*', 'cart', 'checkout', 'upload-bom', 'thank-you', 'login', 'register', 'account', '404']),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], SpaController.prototype, "genericPages", null);
 __decorate([
     (0, common_1.Get)('landing'),
     __param(0, (0, common_1.Req)()),
@@ -1363,14 +1536,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], SpaController.prototype, "categoryRoot", null);
-__decorate([
-    (0, common_1.Get)('products'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], SpaController.prototype, "productsRoot", null);
 __decorate([
     (0, common_1.Get)('privacy'),
     __param(0, (0, common_1.Req)()),
@@ -1427,6 +1592,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], SpaController.prototype, "contact", null);
+__decorate([
+    (0, common_1.Get)('configurator'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], SpaController.prototype, "configurator", null);
 __decorate([
     (0, common_1.Get)('sitemap'),
     __param(0, (0, common_1.Req)()),
@@ -1509,7 +1682,7 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'dist-client'),
-                exclude: ['/warranty', '/api/(.*)', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/(.*)', '/product/(.*)', '/category/(.*)', '/admin', '/admin/(.*)', '/products', '/products/(.*)', '/contact', '/returns', '/uploads/(.*)'],
+                exclude: ['/warranty', '/api/(.*)', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/(.*)', '/product/(.*)', '/category/(.*)', '/admin', '/admin/(.*)', '/products', '/products/(.*)', '/contact', '/configurator', '/returns', '/uploads/(.*)'],
                 serveStaticOptions: {
                     fallthrough: true,
                     index: false,

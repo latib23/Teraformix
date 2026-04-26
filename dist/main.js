@@ -10,13 +10,15 @@ const common_1 = require("@nestjs/common");
 const express_1 = require("express");
 const path_1 = require("path");
 const fs_1 = require("fs");
-const zlib_1 = require("zlib");
 const cms_service_1 = require("./cms/cms.service");
 const products_service_1 = require("./products/products.service");
 const compression_1 = __importDefault(require("compression"));
+const security_1 = require("./lib/security");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { bodyParser: false });
-    app.set('trust proxy', true);
+    const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || (isProduction ? 1 : 0));
+    app.set('trust proxy', trustProxyHops > 0 ? trustProxyHops : false);
     app.setGlobalPrefix('api', {
         exclude: [
             { path: 'warranty', method: common_1.RequestMethod.GET },
@@ -35,6 +37,7 @@ async function bootstrap() {
             { path: 'admin', method: common_1.RequestMethod.GET },
             { path: 'admin/(.*)', method: common_1.RequestMethod.GET },
             { path: 'contact', method: common_1.RequestMethod.GET },
+            { path: 'configurator', method: common_1.RequestMethod.GET },
             { path: 'returns', method: common_1.RequestMethod.GET },
         ],
     });
@@ -46,32 +49,57 @@ async function bootstrap() {
         .split(',')
         .map(s => s.trim())
         .filter(Boolean);
-    const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const isAllowedOrigin = (origin) => {
+        let parsed;
+        try {
+            parsed = new URL(origin);
+        }
+        catch (_a) {
+            return false;
+        }
+        const hostname = parsed.hostname.toLowerCase();
+        const originNormalized = parsed.origin.toLowerCase();
+        return allowlist.some(allowed => {
+            const raw = allowed.toLowerCase().trim();
+            if (!raw || raw === '*')
+                return !isProduction;
+            let allowedProtocol = '';
+            let allowedHost = raw;
+            try {
+                const url = new URL(raw);
+                allowedProtocol = url.protocol;
+                allowedHost = url.hostname.toLowerCase();
+            }
+            catch (_a) {
+                allowedHost = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+            }
+            if (allowedProtocol && parsed.protocol !== allowedProtocol)
+                return false;
+            if (originNormalized === raw)
+                return true;
+            if (hostname === allowedHost)
+                return true;
+            if (allowedHost.startsWith('*.')) {
+                const suffix = allowedHost.slice(1);
+                return hostname.endsWith(suffix) && hostname !== allowedHost.slice(2);
+            }
+            return false;
+        });
+    };
     app.enableCors({
         origin: (origin, callback) => {
             if (!origin)
                 return callback(null, true);
-            if (allowlist.length === 0 || allowlist.includes('*'))
-                return callback(null, true);
             const originLower = origin.toLowerCase();
             const isLocal = originLower.includes('localhost') || originLower.includes('127.0.0.1') || originLower.includes('[::1]');
-            const isInAllowlist = allowlist.some(allowed => {
-                const a = allowed.toLowerCase().trim();
-                if (!a)
-                    return false;
-                return originLower === a ||
-                    originLower === `https://${a}` ||
-                    originLower === `http://${a}` ||
-                    originLower.endsWith(`.${a}`) ||
-                    originLower.includes(a.replace(/^https?:\/\//, ''));
-            });
-            if (isLocal || isInAllowlist) {
+            const isInAllowlist = isAllowedOrigin(origin);
+            if ((!isProduction && isLocal) || isInAllowlist) {
                 callback(null, true);
             }
             else {
                 console.warn(`\n!!! CORS BLOCKED origin: ${origin} !!!`);
                 console.warn(`Current Allowlist: ${JSON.stringify(allowlist)}`);
-                callback(new Error('Not allowed by CORS'), false);
+                callback(null, false);
             }
         },
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -83,7 +111,7 @@ async function bootstrap() {
     const cmsService = app.get(cms_service_1.CmsService);
     app.use(async (req, res, next) => {
         if (enforceHttps) {
-            const proto = req.headers['x-forwarded-proto'] || req.protocol;
+            const proto = req.protocol;
             if (proto !== 'https') {
                 const host = req.get('host');
                 return res.redirect(301, `https://${host}${req.originalUrl}`);
@@ -91,7 +119,7 @@ async function bootstrap() {
         }
         const host = req.get('host') || '';
         if (host.startsWith('www.')) {
-            const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+            const proto = req.protocol || 'https';
             const nonWwwHost = host.replace(/^www\./, '');
             return res.redirect(301, `${proto}://${nonWwwHost}${req.originalUrl}`);
         }
@@ -114,7 +142,7 @@ async function bootstrap() {
             'interest-cohort=()'
         ].join(', '));
         try {
-            const proto = req.headers['x-forwarded-proto'] || req.protocol;
+            const proto = req.protocol;
             if (proto === 'https') {
                 res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
             }
@@ -172,8 +200,7 @@ async function bootstrap() {
         const m = req.method;
         if (m !== 'GET' && m !== 'POST' && m !== 'PUT' && m !== 'PATCH' && m !== 'DELETE')
             return next();
-        const ipHeader = req.headers['x-forwarded-for'] || '';
-        const ip = ((_a = ipHeader.split(',')[0]) === null || _a === void 0 ? void 0 : _a.trim()) || req.ip || 'unknown';
+        const ip = req.ip || ((_a = req.socket) === null || _a === void 0 ? void 0 : _a.remoteAddress) || 'unknown';
         const path = req.path || req.url || '';
         const isLogin = path.startsWith('/api/auth/login');
         const isHeavy = (path.startsWith('/api/orders') || path.startsWith('/api/quotes') || path.startsWith('/api/checkout')) && !path.endsWith('/abandon');
@@ -253,9 +280,14 @@ async function bootstrap() {
         }
         next();
     });
-    app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
+    app.useGlobalPipes(new common_1.ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transformOptions: { enableImplicitConversion: true },
+    }));
     const config = new swagger_1.DocumentBuilder()
-        .setTitle('Server Tech Central B2B API')
+        .setTitle('Teraformix B2B API')
         .setDescription('Enterprise Hardware Reseller API')
         .setVersion('1.0')
         .addBearerAuth()
@@ -313,7 +345,7 @@ async function bootstrap() {
                 const origin = `${proto}://${host}`;
                 const productUrl = `${origin}/product/${encodeURIComponent(String(p.sku))}`;
                 const settings = (await cms.getContent('settings')) || {};
-                const siteName = String((settings === null || settings === void 0 ? void 0 : settings.siteTitle) || 'Server Tech Central');
+                const siteName = String((settings === null || settings === void 0 ? void 0 : settings.siteTitle) || 'Teraformix');
                 const a = p.attributes || {};
                 const s = p.schema || {};
                 const schemaData = {
@@ -355,7 +387,7 @@ async function bootstrap() {
                     },
                 };
                 const img = String(p.image || '');
-                const defaultOg = 'https://servertechcentral.com/og-default.jpg';
+                const defaultOg = 'https://teraformix.com/og-default.jpg';
                 schemaData.image = img && !img.startsWith('data:') ? [img] : [defaultOg];
                 if (s.gtin13 || a.__schema_gtin13)
                     schemaData.gtin13 = String(s.gtin13 || a.__schema_gtin13);
@@ -422,13 +454,13 @@ async function bootstrap() {
                 catch (e) {
                     void 0;
                 }
-                const pageTitle = `${p.name} | Server Tech Central`;
+                const pageTitle = `${p.name} | Teraformix`;
                 const pageDesc = String(p.description || `${p.brand || ''} ${p.sku || ''}`).slice(0, 160).replace(/"/g, '');
                 html = html.replace(/<title>[^<]*<\u002Ftitle>/i, `<title>${pageTitle}<\u002Ftitle>`);
                 const canonicalTag = `<link rel="canonical" href="${productUrl}">`;
                 const metaDescTag = `<meta name="description" content="${pageDesc}">`;
-                const jsonldProduct = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`;
-                const jsonldBreadcrumb = `<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`;
+                const jsonldProduct = `<script type="application/ld+json">${(0, security_1.safeJsonScript)(schemaData)}</script>`;
+                const jsonldBreadcrumb = `<script type="application/ld+json">${(0, security_1.safeJsonScript)(breadcrumb)}</script>`;
                 const metaDescRegex = /<meta[^>]*name=(?:"|')description(?:"|')[^>]*>/i;
                 if (metaDescRegex.test(html)) {
                     html = html.replace(metaDescRegex, metaDescTag);
@@ -444,7 +476,7 @@ async function bootstrap() {
                 const weight = String(p.weight || '').trim();
                 const warranty = String(p.warranty || '3-Year Warranty').trim();
                 const safeOverview = String(p.overview || '').replace(/<[^>]+>/g, '').slice(0, 500);
-                const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${schemaData.image[0]}" alt="${p.name}" style="max-width:100%;height:auto" />` : '';
+                const imgTag = schemaData.image && schemaData.image.length > 0 ? `<img src="${(0, security_1.escapeHtml)(schemaData.image[0])}" alt="${(0, security_1.escapeHtml)(p.name)}" style="max-width:100%;height:auto" />` : '';
                 const categoriesContent = await cms.getContent('categories');
                 const activeCategories = Array.isArray(categoriesContent) ? categoriesContent.filter((c) => c && c.isActive) : [];
                 const currentCat = String(category || '').toLowerCase();
@@ -452,10 +484,13 @@ async function bootstrap() {
                 const relatedCategoriesHtml = categoryPicks.length > 0
                     ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${categoryPicks.map((c) => `<a href="/category/${encodeURIComponent(String(c.id))}" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${String(c.name)}</a>`).join('')}</div></section>`
                     : `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Explore Related Categories</h2><div class="flex flex-wrap gap-2">${['Servers', 'Storage', 'Networking'].slice(0, 6).map((name) => `<a href="/category" class="px-3 py-1 bg-white border border-gray-200 rounded-full text-gray-700 hover:text-action-600 hover:border-action-500 transition">${name}</a>`).join('')}</div></section>`;
-                const reviewsHtml = Array.isArray(reviews) && reviews.length > 0
-                    ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${reviews.slice(0, 3).map((r) => {
-                        const author = r.author ? String(r.author) : 'Anonymous';
-                        const body = r.reviewBody ? String(r.reviewBody) : '';
+                const approvedReviews = Array.isArray(reviews)
+                    ? reviews.filter((r) => r && typeof r === 'object' && r.status === 'APPROVED')
+                    : [];
+                const reviewsHtml = approvedReviews.length > 0
+                    ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Verified Buyer Reviews</h2><div class="space-y-4">${approvedReviews.slice(0, 3).map((r) => {
+                        const author = r.author ? (0, security_1.escapeHtml)(r.author) : 'Anonymous';
+                        const body = r.reviewBody ? (0, security_1.escapeHtml)(r.reviewBody) : '';
                         const rating = r.ratingValue ? Number(r.ratingValue) : undefined;
                         const stars = rating ? '★'.repeat(Math.max(1, Math.min(5, Math.round(rating)))) : '';
                         return `<div class="border rounded p-3"><div class="text-sm text-gray-700">${stars ? `<span class="text-yellow-600">${stars}</span> ` : ''}<strong>${author}</strong></div><p class="text-sm text-gray-800 mt-1">${body}</p></div>`;
@@ -464,7 +499,7 @@ async function bootstrap() {
                 const resourcesHtml = p.datasheet ? `<section class="mt-8"><h2 class="text-lg font-bold text-navy-900 mb-3">Resources</h2><ul class="list-disc pl-6 text-sm text-navy-900"><li><a href="${p.datasheet}" rel="noopener" target="_blank">Datasheet (PDF)</a></li></ul></section>` : '';
                 const ssrBlock = `
           <section id="ssr-product" class="container mx-auto px-4 py-6">
-            <h1>${p.name}</h1>
+            <h1>${(0, security_1.escapeHtml)(p.name)}</h1>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div>${imgTag}</div>
               <div>
@@ -472,16 +507,16 @@ async function bootstrap() {
                 <div class="text-sm text-gray-700 mb-4">${availabilityText}</div>
                 <h3 class="text-sm font-bold text-navy-900 mb-2">Specifications</h3>
                 <ul class="text-sm text-gray-800 space-y-1">
-                  <li><strong>SKU:</strong> ${p.sku}</li>
-                  <li><strong>Brand:</strong> ${p.brand}</li>
-                  ${warranty ? `<li><strong>Warranty:</strong> ${warranty}</li>` : ''}
-                  ${dims ? `<li><strong>Dimensions:</strong> ${dims}</li>` : ''}
-                  ${weight ? `<li><strong>Weight:</strong> ${weight}</li>` : ''}
+                  <li><strong>SKU:</strong> ${(0, security_1.escapeHtml)(p.sku)}</li>
+                  <li><strong>Brand:</strong> ${(0, security_1.escapeHtml)(p.brand)}</li>
+                  ${warranty ? `<li><strong>Warranty:</strong> ${(0, security_1.escapeHtml)(warranty)}</li>` : ''}
+                  ${dims ? `<li><strong>Dimensions:</strong> ${(0, security_1.escapeHtml)(dims)}</li>` : ''}
+                  ${weight ? `<li><strong>Weight:</strong> ${(0, security_1.escapeHtml)(weight)}</li>` : ''}
                 </ul>
                 ${category ? `<div class="mt-3"><a href="${slug ? `${origin}/category/${slug}` : `${origin}/category`}" class="text-action-600 text-sm font-semibold hover:underline">View ${category} Products</a></div>` : ''}
               </div>
             </div>
-            ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${safeOverview}</p></div>` : ''}
+            ${safeOverview ? `<div class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><p class="text-gray-800">${(0, security_1.escapeHtml)(safeOverview)}</p></div>` : ''}
             ${!safeOverview ? `<section class="mt-6"><h2 class="text-lg font-bold text-navy-900 mb-3">Key Features</h2><ul class="list-disc pl-6 text-sm text-gray-800 space-y-1"><li>OEM Genuine Component verified by certified technicians.</li><li>Clean serial number ready for service contract registration.</li><li>Electrostatic Discharge (ESD) safe packaging.</li><li>Supports hot-swapping for zero-downtime maintenance.</li></ul></section>` : ''}
             ${reviewsHtml}
             ${resourcesHtml}
@@ -497,111 +532,62 @@ async function bootstrap() {
     });
     app.use((req, res, next) => {
         const path = req.path || req.url || '';
-        if (path.includes('warranty')) {
-            console.log(`[Middleware] Path: ${path}, Method: ${req.method}`);
-        }
-        if (req.method === 'GET' && (path === '/' || path === ''))
+        if (req.method !== 'GET')
             return next();
-        const isApi = path.startsWith('/api');
-        const isAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|map|txt|xml)$/i.test(path);
-        const isSpecial = path === '/robots.txt' || path === '/sitemap.xml';
-        const isHandledRoute = path.startsWith('/product/') || path.startsWith('/category/') || path.startsWith('/landing') || path.startsWith('/products') || path.startsWith('/admin') || path.startsWith('/warranty') || path.startsWith('/contact') || path.startsWith('/returns') || path.startsWith('/upload-bom') || path.startsWith('/cart') || path.startsWith('/checkout') || path.startsWith('/thank-you') || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/account') || path.startsWith('/about') || path.startsWith('/sitemap') || path.startsWith('/track') || path.startsWith('/privacy') || path.startsWith('/terms');
-        if (req.method === 'GET' && !isApi && !isAsset && !isSpecial && !isHandledRoute) {
-            const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-            const rawHost = req.get('host');
-            const host = rawHost.replace(/^www\./, '');
-            const origin = `${proto}://${host}`;
-            const settingsPromise = cms.getContent('settings');
-            return Promise.resolve(settingsPromise).then((settings) => {
-                var _a, _b;
-                const siteName = String((settings === null || settings === void 0 ? void 0 : settings.siteTitle) || 'Server Tech Central');
-                const org = {
-                    '@context': 'https://schema.org',
-                    '@type': 'Organization',
-                    'name': siteName,
-                    'url': origin
-                };
-                const website = {
-                    '@context': 'https://schema.org',
-                    '@type': 'WebSite',
-                    'name': siteName,
-                    'url': origin,
-                    'potentialAction': {
-                        '@type': 'SearchAction',
-                        'target': `${origin}/search?q={search_term_string}`,
-                        'query-input': 'required name=search_term_string'
-                    }
-                };
-                const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
-                let html = (0, fs_1.readFileSync)(indexHtmlPath, 'utf8');
-                try {
-                    html = html.replace(/<link[^>]*rel=(?:"|')modulepreload(?:"|')[^>]*href=(?:"|')data:[^"']*(?:"|')[^>]*>/gi, '');
-                    html = html.replace(/<script[^>]*type=(?:"|')importmap(?:"|')[^>]*>[\s\S]*?<\u002Fscript>/i, '');
-                    const gaId = process.env.GA_MEASUREMENT_ID || '';
-                    if (gaId) {
-                        html = html.replace('</head>', `<script>window.__GA_ID__='${gaId}'</script></head>`);
-                    }
-                    const gtmId = process.env.GTM_CONTAINER_ID || '';
-                    if (gtmId) {
-                        const headInject = `<script>window.__GTM_ID__='${gtmId}';(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');</script>`;
-                        const bodyNoscript = `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
-                        html = html.replace('</head>', `${headInject}</head>`);
-                        html = html.replace('<body>', `<body>${bodyNoscript}`);
-                    }
-                }
-                catch (e) {
-                    void 0;
-                }
-                const scriptOrg = `<script type="application/ld+json">${JSON.stringify(org)}</script>`;
-                const scriptWeb = `<script type="application/ld+json">${JSON.stringify(website)}</script>`;
-                html = html.replace('</head>', `${scriptOrg}${scriptWeb}</head>`);
-                const assetBase = (process.env.ASSET_BASE_URL || '').trim();
-                if (assetBase) {
-                    html = html.replace(/(href|src)=("|')\/assets\//gi, `$1=$2${assetBase.replace(/\/$/, '')}/assets/`);
-                }
-                const pth = req.path || req.url || '';
-                const noscriptH1 = pth.startsWith('/category')
-                    ? 'Enterprise Servers & Storage Solutions'
-                    : pth.startsWith('/product')
-                        ? 'Product Details'
-                        : pth.startsWith('/blog')
-                            ? 'Blog'
-                            : 'Server Tech Central';
-                html = html.replace('<body>', `<body><noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1></noscript>`);
-                const ssr404 = `
-          <section id="ssr-404" class="container mx-auto px-4 py-16">
-            <h1 class="text-3xl font-bold text-navy-900 mb-4">Page Not Found</h1>
-            <p class="text-gray-600 mb-6">The page you’re looking for doesn’t exist or may have moved.</p>
-            <div class="flex flex-wrap gap-3">
-              <a href="/" class="px-4 py-2 bg-action-600 text-white rounded">Go to Home</a>
-              <a href="/category" class="px-4 py-2 bg-white border border-gray-300 rounded text-navy-900">Browse Categories</a>
-              <a href="/sitemap" class="px-4 py-2 bg-white border border-gray-300 rounded text-navy-900">View Sitemap</a>
-            </div>
-          </section>
-        `;
-                html = html.replace('<body>', `<body><noscript>${ssr404}</noscript>`);
-                const isClientRoute = pth.startsWith('/admin') || pth.startsWith('/cart') || pth.startsWith('/checkout') || pth.startsWith('/login');
-                res.status(isClientRoute ? 200 : 404);
-                try {
-                    const enc = String(((_a = req.headers) === null || _a === void 0 ? void 0 : _a['accept-encoding']) || ((_b = req.headers) === null || _b === void 0 ? void 0 : _b['Accept-Encoding']) || '');
-                    if (enc.toLowerCase().includes('gzip')) {
-                        const buf = (0, zlib_1.gzipSync)(Buffer.from(html, 'utf8'));
-                        res.setHeader('Content-Encoding', 'gzip');
-                        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                        res.setHeader('Vary', 'Accept-Encoding');
-                        return res.end(buf);
-                    }
-                }
-                catch (_e) {
-                    void _e;
-                }
-                res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                res.send(html);
-            }).catch(() => {
-                return res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
-            });
+        if (path.startsWith('/api'))
+            return next();
+        if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|map|txt|xml|json)$/i.test(path))
+            return next();
+        if (path === '/robots.txt' || path === '/sitemap.xml')
+            return next();
+        const handledPrefixes = [
+            '/product/', '/category/', '/landing', '/warranty', '/returns', '/contact',
+            '/privacy', '/terms', '/sitemap', '/about', '/configurator'
+        ];
+        const isHandledByController = handledPrefixes.some(p => path.startsWith(p));
+        if (isHandledByController) {
+            return next();
         }
-        next();
+        const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+        const rawHost = req.get('host');
+        const host = rawHost.replace(/^www\./, '');
+        const origin = `${proto}://${host}`;
+        const settingsPromise = cms.getContent('settings');
+        Promise.resolve(settingsPromise).then((settings) => {
+            const siteName = String((settings === null || settings === void 0 ? void 0 : settings.siteTitle) || 'Teraformix');
+            const org = { '@context': 'https://schema.org', '@type': 'Organization', 'name': siteName, 'url': origin };
+            const website = { '@context': 'https://schema.org', '@type': 'WebSite', 'name': siteName, 'url': origin };
+            const indexHtmlPath = (0, path_1.join)(__dirname, '..', 'dist-client', 'index.html');
+            let html = (0, fs_1.readFileSync)(indexHtmlPath, 'utf8');
+            try {
+                html = html.replace(/<link[^>]*rel=(?:"|')modulepreload(?:"|')[^>]*href=(?:"|')data:[^"']*(?:"|')[^>]*>/gi, '');
+                html = html.replace(/<script[^>]*type=(?:"|')importmap(?:"|')[^>]*>[\s\S]*?<\/script>/i, '');
+            }
+            catch (_e) {
+                void _e;
+            }
+            try {
+                const gaId = process.env.GA_MEASUREMENT_ID || '';
+                if (gaId)
+                    html = html.replace('</head>', `<script>window.__GA_ID__='${gaId}'</script></head>`);
+                html = html.replace('</head>', `<script type="application/ld+json">${(0, security_1.safeJsonScript)(org)}</script><script type="application/ld+json">${(0, security_1.safeJsonScript)(website)}</script></head>`);
+            }
+            catch (e) {
+                void 0;
+            }
+            let noscriptH1 = 'Teraformix';
+            if (path.includes('configurator'))
+                noscriptH1 = 'Server Configurator';
+            else if (path.includes('cart'))
+                noscriptH1 = 'Shopping Cart';
+            else if (path.includes('login'))
+                noscriptH1 = 'Login';
+            html = html.replace('<body>', `<body><noscript><h1 class="text-3xl font-bold text-navy-900">${noscriptH1}</h1></noscript>`);
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.send(html);
+        }).catch(() => {
+            res.sendFile((0, path_1.join)(__dirname, '..', 'dist-client', 'index.html'));
+        });
     });
     await app.listen(port, '0.0.0.0');
     console.log(`Application is running on port: ${port}`);

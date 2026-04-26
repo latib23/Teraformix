@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { safeJsonScript } from '../lib/security';
 
 const CategoryKnowledgeBase = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -40,7 +41,7 @@ const CategoryKnowledgeBase = () => {
     <div className="bg-white border-t border-gray-200 mt-16 py-16">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonScript(faqSchema) }}
       />
       <div className="container mx-auto px-4 max-w-14xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

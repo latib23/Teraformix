@@ -17,6 +17,7 @@ import { fetchJson } from '../../lib/api';
 import { useUI } from '../../contexts/UIContext';
 import { useGlobalContent } from '../../contexts/GlobalContent';
 import { generateUniversalReviews } from '../../lib/universal-reviews';
+import { safeJsonScript } from '../../lib/security';
 
 
 // Swiper
@@ -356,20 +357,20 @@ const ProductPage = () => {
       {/* Stock Availability Quote Modal */}
       {isStockQuoteModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative">
+          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative text-gray-200">
             <button
               onClick={() => setIsStockQuoteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
             <div className="text-center mb-6">
-              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <MessageSquare className="w-8 h-8 text-blue-600" />
+              <div className="mx-auto w-16 h-16 bg-navy-800 border border-navy-700 rounded-full flex items-center justify-center mb-4">
+                <MessageSquare className="w-8 h-8 text-action-500" />
               </div>
-              <h3 className="text-xl font-bold text-navy-900 mb-2">Limited Stock Available</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-xl font-bold text-white mb-2">Limited Stock Available</h3>
+              <p className="text-sm text-gray-400">
                 We currently have {typeof product.stockLevel === 'number' ? product.stockLevel : 0} units in stock.
                 For larger quantities, please request a quote and we'll check availability with our suppliers.
               </p>
@@ -387,7 +388,7 @@ const ProductPage = () => {
               </button>
               <button
                 onClick={() => setIsStockQuoteModalOpen(false)}
-                className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded transition"
+                className="w-full bg-navy-800 border border-navy-700 hover:bg-navy-700 text-white font-semibold py-3 px-4 rounded transition"
               >
                 Cancel
               </button>
@@ -399,32 +400,32 @@ const ProductPage = () => {
       {/* Review Modal */}
       {isReviewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
+          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
             <button
               onClick={() => setIsReviewModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
-            <h3 className="text-xl font-bold text-navy-900 mb-4">Write a Review</h3>
-            <p className="text-sm text-gray-500 mb-6">Share your experience with this product. Reviews are moderated before publishing.</p>
+            <h3 className="text-xl font-bold text-white mb-4">Write a Review</h3>
+            <p className="text-sm text-gray-400 mb-6">Share your experience with this product. Reviews are moderated before publishing.</p>
 
             <form onSubmit={handleReviewSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Your Name</label>
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Your Name</label>
                 <input
                   type="text"
                   required
                   value={reviewForm.author}
                   onChange={e => setReviewForm({ ...reviewForm, author: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy-900 outline-none"
+                  className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-action-500 outline-none"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Rating</label>
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
@@ -434,7 +435,7 @@ const ProductPage = () => {
                       className="focus:outline-none"
                     >
                       <Star
-                        className={`w-8 h-8 ${star <= reviewForm.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-100 text-gray-300'}`}
+                        className={`w-8 h-8 ${star <= reviewForm.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-navy-800 text-navy-700'}`}
                       />
                     </button>
                   ))}
@@ -442,13 +443,13 @@ const ProductPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Review</label>
                 <textarea
                   required
                   rows={4}
                   value={reviewForm.body}
                   onChange={e => setReviewForm({ ...reviewForm, body: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy-900 outline-none"
+                  className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-action-500 outline-none"
                   placeholder="Tell us what you liked or didn't like..."
                 />
               </div>
@@ -457,7 +458,7 @@ const ProductPage = () => {
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(false)}
-                  className="flex-1 py-2.5 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50"
+                  className="flex-1 py-2.5 bg-navy-800 border border-navy-700 rounded-lg font-semibold text-white hover:bg-navy-700"
                 >
                   Cancel
                 </button>
@@ -477,10 +478,10 @@ const ProductPage = () => {
       {/* Beat Quote Modal */}
       {isBeatQuoteModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsBeatQuoteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
@@ -508,7 +509,7 @@ const ProductPage = () => {
           { position: 3, name: product.name, item: `https://teraformix.com/product/${product.sku}` },
         ];
         const data = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(i => ({ '@type': 'ListItem', position: i.position, name: i.name, item: i.item })) };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
+        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(data) }} />;
       })()}
 
       {/* FAQ Schema for SEO */}
@@ -559,7 +560,7 @@ const ProductPage = () => {
             }
           ]
         };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />;
+        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(faqSchema) }} />;
       })()}
 
       {/* Aggregate Rating Schema for SEO */}
@@ -589,7 +590,7 @@ const ProductPage = () => {
             "url": `https://teraformix.com/product/${product.sku}`
           }
         };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }} />;
+        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(reviewSchema) }} />;
       })()}
       <Header />
 
@@ -1029,7 +1030,7 @@ const ProductPage = () => {
 
               {/* Trustpilot Widget */}
               <div className="mt-6">
-                <Suspense fallback={<div className="h-24 bg-gray-50 animate-pulse rounded" />}>
+                <Suspense fallback={<div className="h-24 bg-navy-800 animate-pulse rounded" />}>
                   <TrustBox />
                 </Suspense>
               </div>

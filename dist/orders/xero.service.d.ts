@@ -10,6 +10,7 @@ export declare class XeroService {
     constructor(configService: ConfigService, orderRepository: Repository<Order>);
     private getAccessToken;
     private makeRequest;
+    private hasCredentials;
     syncOrder(order: Order): Promise<void>;
     private ensureContact;
     private createInvoice;

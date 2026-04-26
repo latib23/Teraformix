@@ -13,10 +13,17 @@ import { AuthService } from './auth.service';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'SECRETKEY',
-        signOptions: { expiresIn: '8h' },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        const isProduction = (configService.get<string>('NODE_ENV') || '').toLowerCase() === 'production';
+        if (isProduction && !secret) {
+          throw new Error('JWT_SECRET must be configured in production');
+        }
+        return {
+          secret: secret || 'SECRETKEY',
+          signOptions: { expiresIn: '8h' },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
