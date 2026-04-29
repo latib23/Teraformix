@@ -272,6 +272,7 @@ async function bootstrap() {
         'blogposts': 'blogPosts',
         'landingcollections': 'landingCollections',
         'warrantypage': 'warrantyPage',
+        'serverconfigurator': 'serverConfigurator',
       };
 
       const keyLower = seg.toLowerCase();
