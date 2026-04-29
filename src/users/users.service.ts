@@ -25,8 +25,14 @@ export class UsersService implements OnModuleInit {
         return;
       }
       if (isProduction) {
-        this.logger.warn('Skipping user seeding in production environment.');
-        return;
+        // Allow seeding in production only when the flag is explicitly set, AND there are no users yet.
+        // This prevents accidentally re-seeding default credentials over a real production DB.
+        const existingCount = await this.userRepository.count();
+        if (existingCount > 0) {
+          this.logger.warn('Skipping user seeding in production: users already exist.');
+          return;
+        }
+        this.logger.warn('Production user seeding enabled (empty DB detected). CHANGE THE DEFAULT PASSWORDS IMMEDIATELY.');
       }
       // Seeder for Admin and Sales users if they don't exist
       const admin = await this.userRepository.findOneBy({ email: 'admin@teraformix.com' });

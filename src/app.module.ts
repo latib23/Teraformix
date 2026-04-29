@@ -1580,7 +1580,11 @@ class SpaController {
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const isProduction = configService.get<string>('NODE_ENV') === 'production';
-        const syncFlag = (configService.get<string>('DB_SYNC') || '').toLowerCase() === 'true';
+        // Default to auto-sync schema unless DB_SYNC is explicitly set to "false".
+        // This lets a fresh DB bootstrap itself on first deploy (creates tables so seeders can run).
+        // For mature production environments, set DB_SYNC=false and use explicit migrations instead.
+        const dbSyncRaw = (configService.get<string>('DB_SYNC') || '').toLowerCase();
+        const syncFlag = dbSyncRaw === '' ? true : dbSyncRaw !== 'false';
         const databaseUrl = configService.get<string>('DATABASE_URL');
         if (databaseUrl) {
           const u = new URL(databaseUrl);
