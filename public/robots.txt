@@ -8,4 +8,4 @@ Disallow: /admin/
 Disallow: /upload-bom
 Disallow: /thank-you
 
-Sitemap: https://www.servertechcentral.com/sitemap.xml
+Sitemap: https://www.teraformix.com/sitemap.xml

@@ -67,13 +67,13 @@ Check that schema.org markup is valid:
 
 #### **Step 1: Verify Sitemap Accessibility**
 ```bash
-curl https://www.servertechcentral.com/sitemap.xml
+curl https://www.teraformix.com/sitemap.xml
 ```
 Should return valid XML with all URLs
 
 #### **Step 2: Check Robots.txt**
 ```bash
-curl https://www.servertechcentral.com/robots.txt
+curl https://www.teraformix.com/robots.txt
 ```
 Should show:
 ```
@@ -81,7 +81,7 @@ User-agent: *
 Allow: /*.js
 Allow: /*.css
 ...
-Sitemap: https://www.servertechcentral.com/sitemap.xml
+Sitemap: https://www.teraformix.com/sitemap.xml
 ```
 
 #### **Step 3: Submit to Bing Webmaster Tools**
@@ -151,8 +151,8 @@ Already implemented ✅
 
 ### 7. **Testing Checklist**
 
-- [ ] Verify sitemap loads: `https://www.servertechcentral.com/sitemap.xml`
-- [ ] Verify robots.txt: `https://www.servertechcentral.com/robots.txt`
+- [ ] Verify sitemap loads: `https://www.teraformix.com/sitemap.xml`
+- [ ] Verify robots.txt: `https://www.teraformix.com/robots.txt`
 - [ ] Test mobile responsiveness (Google Mobile-Friendly Test)
 - [ ] Check HTTPS redirect (should redirect http → https)
 - [ ] Validate structured data (Google Rich Results Test)
@@ -211,14 +211,14 @@ Use IndexNow API (already configured):
 curl -X POST "https://api.indexnow.org/indexnow" \
   -H "Content-Type: application/json" \
   -d '{
-    "host": "www.servertechcentral.com",
+    "host": "www.teraformix.com",
     "key": "c9573827bc124806a88b577189cc2138",
-    "keyLocation": "https://www.servertechcentral.com/c9573827bc124806a88b577189cc2138.txt",
+    "keyLocation": "https://www.teraformix.com/c9573827bc124806a88b577189cc2138.txt",
     "urlList": [
-      "https://www.servertechcentral.com/",
-      "https://www.servertechcentral.com/category",
-      "https://www.servertechcentral.com/privacy",
-      "https://www.servertechcentral.com/terms"
+      "https://www.teraformix.com/",
+      "https://www.teraformix.com/category",
+      "https://www.teraformix.com/privacy",
+      "https://www.teraformix.com/terms"
     ]
   }'
 ```

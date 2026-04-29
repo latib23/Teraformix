@@ -22,7 +22,7 @@ Your product page is **already highly SEO-optimized** with strong technical SEO,
 
 **Example**:
 ```tsx
-title={`${product.name} ${product.sku} - Genuine ${product.brand} ${product.category} | Server Tech Central`}
+title={`${product.name} ${product.sku} - Genuine ${product.brand} ${product.category} | Teraformix`}
 ```
 
 ### 2. **Schema.org Structured Data** (10/10)
@@ -110,9 +110,9 @@ Currently missing:
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Server Tech Central",
-  "url": "https://servertechcentral.com",
-  "logo": "https://servertechcentral.com/logo.png",
+  "name": "Teraformix",
+  "url": "https://teraformix.com",
+  "logo": "https://teraformix.com/logo.png",
   "contactPoint": {
     "@type": "ContactPoint",
     "telephone": "+1-xxx-xxx-xxxx",
