@@ -10,6 +10,7 @@ import { CmsService } from './cms/cms.service';
 import { ProductsService } from './products/products.service';
 import compression from 'compression';
 import { escapeHtml, safeJsonScript } from './lib/security';
+import { DataSource } from 'typeorm';
 
 async function bootstrap() {
   // Disable default body parser to handle large payloads manually
@@ -17,6 +18,26 @@ async function bootstrap() {
   const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
   const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || (isProduction ? 1 : 0));
   (app as any).set('trust proxy', trustProxyHops > 0 ? trustProxyHops : false);
+
+  app.use(async (req: any, res: any, next: any) => {
+    const path = String(req.path || req.url || '').split('?')[0];
+    if (req.method !== 'GET' || !['/health', '/api/health', '/health/db', '/api/health/db'].includes(path)) {
+      return next();
+    }
+
+    res.setHeader('Cache-Control', 'no-store');
+    if (path.endsWith('/db')) {
+      try {
+        const dataSource = app.get(DataSource, { strict: false });
+        await dataSource.query('SELECT 1');
+        return res.status(200).json({ status: 'ok', database: 'connected' });
+      } catch (error: any) {
+        return res.status(503).json({ status: 'error', database: 'unavailable', message: String(error?.message || error) });
+      }
+    }
+
+    return res.status(200).json({ status: 'ok' });
+  });
 
   // Set global prefix with exclusions
   app.setGlobalPrefix('api', {
@@ -35,7 +56,7 @@ async function bootstrap() {
       { path: 'category/:id', method: RequestMethod.GET },
       { path: 'admin', method: RequestMethod.GET },
       { path: 'admin', method: RequestMethod.GET },
-      { path: 'admin/(.*)', method: RequestMethod.GET },
+      { path: 'admin/*path', method: RequestMethod.GET },
       { path: 'contact', method: RequestMethod.GET },
       { path: 'configurator', method: RequestMethod.GET },
       { path: 'returns', method: RequestMethod.GET },
@@ -568,7 +589,9 @@ async function bootstrap() {
       '/privacy', '/terms', '/sitemap', '/about', '/configurator'
     ];
 
-    const isHandledByController = handledPrefixes.some(p => path.startsWith(p));
+    // The homepage ('/') is also served by SpaController.root (rich SSR + INITIAL_DATA);
+    // let it fall through instead of serving the generic SPA shell.
+    const isHandledByController = path === '/' || handledPrefixes.some(p => path.startsWith(p));
 
     if (isHandledByController) {
       return next();

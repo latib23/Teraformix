@@ -1,493 +1,706 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  AlertTriangle,
+  Check,
+  ChevronRight,
+  Clipboard,
+  Cpu,
+  HardDrive,
+  Info,
+  Network,
+  RotateCcw,
+  Server,
+  Shield,
+  ShoppingCart,
+  Zap,
+} from 'lucide-react';
+import SEOHead from '../../components/SEO/SEOHead';
+import Image from '../../components/Image';
+import { useCart } from '../../contexts/CartContext';
+import { useGlobalContent } from '../../contexts/GlobalContent';
+import { useUI } from '../../contexts/UIContext';
 
-import React, { useState, useEffect } from "react";
-import { useGlobalContent } from "../../contexts/GlobalContent";
-import SEOHead from "../../components/SEO/SEOHead";
-import { ChevronRight, Server, Check, ShoppingCart, Info, RotateCcw, Cpu, HardDrive, Network, Zap, Shield } from "lucide-react";
-import Image from "../../components/Image";
-import { useCart } from "../../contexts/CartContext";
-import { useUI } from "../../contexts/UIContext";
-import { useNavigate, useLocation } from "react-router-dom";
+type ComponentItem = {
+  partNumber: string;
+  name: string;
+  price: number;
+  category?: string;
+  family?: string;
+  type?: string;
+  formFactor?: string;
+  compatibleBrands?: string[];
+};
+
+type ServerModel = {
+  id: string;
+  name: string;
+  brand: string;
+  description: string;
+  basePrice: number;
+  baseImage: string;
+  specs: {
+    formFactor?: string;
+    maxRam?: string;
+    maxStorage?: string;
+    cpuSockets?: number;
+    pciSlots?: string;
+    generation?: string;
+    maxDriveCount?: number;
+    memorySlots?: number;
+  };
+  compatibility?: {
+    cpuFamily?: string;
+    ramType?: string;
+    diskResult?: string;
+    raidFamily?: string;
+  };
+};
+
+type Catalog = {
+  title: string;
+  description: string;
+  models: ServerModel[];
+  availableComponents: {
+    processors: ComponentItem[];
+    memory: ComponentItem[];
+    storage: ComponentItem[];
+    raidControllers: ComponentItem[];
+    networking: ComponentItem[];
+    powerSupplies: ComponentItem[];
+  };
+};
+
+type BuilderConfig = {
+  cpu: ComponentItem | null;
+  ram: ComponentItem | null;
+  ram_qty: number;
+  storage: ComponentItem | null;
+  storage_qty: number;
+  raid: ComponentItem | null;
+  nic: ComponentItem | null;
+  psu: ComponentItem | null;
+  psu_qty: number;
+  support: 'standard' | 'advanced' | 'mission-critical';
+  burnIn: boolean;
+};
+
+const DEFAULT_CATALOG: Catalog = {
+  title: 'Enterprise Server Builder',
+  description: 'Build deployment-ready Dell, HPE, Lenovo, and Supermicro rack servers with compatible CPUs, memory, storage, networking, and support.',
+  models: [
+    {
+      id: 'dell-r760',
+      name: 'Dell PowerEdge R760',
+      brand: 'Dell',
+      description: '2U dual-socket platform for virtualization, database, analytics, and dense NVMe workloads.',
+      basePrice: 2895,
+      baseImage: 'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-enterprise-products/enterprise-systems/poweredge/r760/media-gallery/server-poweredge-r760-gallery-1.psd?fmt=png-alpha&wid=600',
+      specs: { formFactor: '2U Rack', maxRam: '4TB DDR5', maxStorage: '24x 2.5 in NVMe/SAS/SATA', cpuSockets: 2, pciSlots: '6x PCIe Gen5', generation: '16th Gen', maxDriveCount: 24, memorySlots: 32 },
+      compatibility: { cpuFamily: 'intel-sapphire-rapids', ramType: 'ddr5-ecc', diskResult: 'sff-2.5', raidFamily: 'dell-perc12' },
+    },
+    {
+      id: 'hpe-dl380a-gen11',
+      name: 'HPE ProLiant DL380a Gen11',
+      brand: 'HPE',
+      description: '2U Gen11 platform with PCIe Gen5 expansion for hybrid cloud, GPU, and storage-heavy builds.',
+      basePrice: 3150,
+      baseImage: 'https://www.hpe.com/psnow/doc/a00008180enw.png',
+      specs: { formFactor: '2U Rack', maxRam: '4TB DDR5', maxStorage: '20x SFF + 2x rear SFF', cpuSockets: 2, pciSlots: '8x PCIe Gen5', generation: 'Gen11', maxDriveCount: 20, memorySlots: 32 },
+      compatibility: { cpuFamily: 'intel-sapphire-rapids', ramType: 'ddr5-ecc', diskResult: 'sff-2.5', raidFamily: 'hpe-mr416i' },
+    },
+    {
+      id: 'supermicro-621c',
+      name: 'Supermicro SYS-621C-TN12R',
+      brand: 'Supermicro',
+      description: '2U CloudDC system with 12 large-form-factor bays for HCI, backup, and bulk storage.',
+      basePrice: 2450,
+      baseImage: 'https://www.supermicro.com/a_images/products/Aplus/system/2U/AS_-2015HS-TNR_main.png',
+      specs: { formFactor: '2U Rack', maxRam: '4TB DDR5', maxStorage: '12x 3.5 in + rear 2.5 in', cpuSockets: 2, pciSlots: '6x PCIe Gen5', generation: 'CloudDC', maxDriveCount: 12, memorySlots: 32 },
+      compatibility: { cpuFamily: 'intel-sapphire-rapids', ramType: 'ddr5-ecc', diskResult: 'lff-3.5', raidFamily: 'broadcom-9500' },
+    },
+    {
+      id: 'lenovo-sr650-v3',
+      name: 'Lenovo ThinkSystem SR650 V3',
+      brand: 'Lenovo',
+      description: 'Balanced 2U enterprise platform for databases, virtualization clusters, and analytics workloads.',
+      basePrice: 2795,
+      baseImage: 'https://lenovopress.lenovo.com/assets/images/LP1612/ThinkSystem%20SR650%20V3%20-%20front.png',
+      specs: { formFactor: '2U Rack', maxRam: '4TB DDR5', maxStorage: '24x 2.5 in or 12x 3.5 in', cpuSockets: 2, pciSlots: '8x PCIe Gen5', generation: 'V3', maxDriveCount: 24, memorySlots: 32 },
+      compatibility: { cpuFamily: 'intel-sapphire-rapids', ramType: 'ddr5-ecc', diskResult: 'sff-2.5', raidFamily: 'broadcom-9500' },
+    },
+  ],
+  availableComponents: {
+    processors: [
+      { partNumber: 'PK8071305120601', name: 'Intel Xeon Silver 4410Y (12C/24T, 2.0GHz, 150W)', price: 485, family: 'intel-sapphire-rapids' },
+      { partNumber: 'PK8071305120801', name: 'Intel Xeon Silver 4416+ (20C/40T, 2.0GHz, 165W)', price: 715, family: 'intel-sapphire-rapids' },
+      { partNumber: 'PK8071305077001', name: 'Intel Xeon Gold 6430 (32C/64T, 2.1GHz, 270W)', price: 1850, family: 'intel-sapphire-rapids' },
+      { partNumber: 'PK8071305074600', name: 'Intel Xeon Platinum 8480+ (56C/112T, 2.0GHz, 350W)', price: 6950, family: 'intel-sapphire-rapids' },
+    ],
+    memory: [
+      { partNumber: 'M321R2GA3BB6', name: '16GB DDR5-4800 ECC RDIMM', price: 55, type: 'ddr5-ecc' },
+      { partNumber: 'M321R4GA3BB6', name: '32GB DDR5-4800 ECC RDIMM', price: 95, type: 'ddr5-ecc' },
+      { partNumber: 'M321R8GA0BB0', name: '64GB DDR5-4800 ECC RDIMM', price: 185, type: 'ddr5-ecc' },
+      { partNumber: 'M321RADGA0B3', name: '128GB DDR5-4800 ECC RDIMM', price: 450, type: 'ddr5-ecc' },
+      { partNumber: 'M321RFAGA0B5', name: '256GB DDR5-4800 ECC LRDIMM', price: 1250, type: 'ddr5-ecc' },
+    ],
+    storage: [
+      { partNumber: 'MZWLO1T9HCJR', name: '1.92TB NVMe U.2 Enterprise SSD', price: 295, formFactor: 'sff-2.5' },
+      { partNumber: 'MZWLO3T8HCLS', name: '3.84TB NVMe U.2 Enterprise SSD', price: 520, formFactor: 'sff-2.5' },
+      { partNumber: 'MZWLO7T6HBLA', name: '7.68TB NVMe U.2 Enterprise SSD', price: 950, formFactor: 'sff-2.5' },
+      { partNumber: 'ST16000NM004J', name: '16TB 7.2K SAS 3.5 in HDD', price: 310, formFactor: 'lff-3.5' },
+      { partNumber: 'ST20000NM007D', name: '20TB 7.2K SATA 3.5 in HDD', price: 385, formFactor: 'lff-3.5' },
+    ],
+    raidControllers: [
+      { partNumber: '405-ABDS', name: 'Dell PERC H965i 8GB NV Cache', price: 385, family: 'dell-perc12' },
+      { partNumber: 'P48635-B21', name: 'HPE MR416i-a Gen11 4GB Cache', price: 395, family: 'hpe-mr416i' },
+      { partNumber: '05-50077-00', name: 'Broadcom MegaRAID 9560-16i 8GB Cache', price: 425, family: 'broadcom-9500' },
+      { partNumber: 'HBA-NONE', name: 'No RAID Controller (software RAID / HBA mode)', price: 0, family: 'universal' },
+    ],
+    networking: [
+      { partNumber: '540-BDFQ', name: 'Broadcom 57416 Dual Port 10GbE Base-T OCP 3.0', price: 115 },
+      { partNumber: 'E810-XXVDA2', name: 'Intel E810 Dual Port 25GbE SFP28', price: 290 },
+      { partNumber: 'E810-CQDA2', name: 'Intel E810 Dual Port 100GbE QSFP28', price: 650 },
+      { partNumber: 'MCX713106AS', name: 'NVIDIA ConnectX-7 Dual Port 100GbE QSFP56', price: 895 },
+    ],
+    powerSupplies: [
+      { partNumber: '450-AKLG', name: 'Dell 800W Platinum Hot-Plug PSU', price: 85, compatibleBrands: ['Dell'] },
+      { partNumber: '450-AKLT', name: 'Dell 1400W Platinum Hot-Plug PSU', price: 175, compatibleBrands: ['Dell'] },
+      { partNumber: 'P44412-B21', name: 'HPE 800W Flex Slot Platinum PSU', price: 95, compatibleBrands: ['HPE'] },
+      { partNumber: 'P44413-B21', name: 'HPE 1600W Flex Slot PSU', price: 195, compatibleBrands: ['HPE'] },
+      { partNumber: 'PWS-1K28P-SQ', name: 'Supermicro 1200W Platinum Hot-Swap PSU', price: 125, compatibleBrands: ['Supermicro'] },
+      { partNumber: '4P57A72765', name: 'Lenovo 1100W Platinum Hot-Swap PSU', price: 135, compatibleBrands: ['Lenovo'] },
+    ],
+  },
+};
+
+const money = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+const toArray = <T,>(value: unknown, fallback: T[]): T[] => (Array.isArray(value) && value.length > 0 ? value as T[] : fallback);
+
+const normalizeCatalog = (cmsCatalog: any): Catalog => {
+  const cms = cmsCatalog && typeof cmsCatalog === 'object' ? cmsCatalog : {};
+  const components = cms.availableComponents || {};
+
+  return {
+    title: String(cms.title || DEFAULT_CATALOG.title),
+    description: String(cms.description || DEFAULT_CATALOG.description),
+    models: toArray<ServerModel>(cms.models, DEFAULT_CATALOG.models),
+    availableComponents: {
+      processors: toArray<ComponentItem>(components.processors, DEFAULT_CATALOG.availableComponents.processors),
+      memory: toArray<ComponentItem>(components.memory, DEFAULT_CATALOG.availableComponents.memory),
+      storage: toArray<ComponentItem>(components.storage, DEFAULT_CATALOG.availableComponents.storage),
+      raidControllers: toArray<ComponentItem>(components.raidControllers, DEFAULT_CATALOG.availableComponents.raidControllers),
+      networking: toArray<ComponentItem>(components.networking, DEFAULT_CATALOG.availableComponents.networking),
+      powerSupplies: toArray<ComponentItem>(components.powerSupplies, DEFAULT_CATALOG.availableComponents.powerSupplies),
+    },
+  };
+};
+
+const firstNumber = (value: string, unit: 'GB' | 'TB' | 'W') => {
+  const match = value.match(new RegExp(`([0-9]+(?:\\.[0-9]+)?)\\s*${unit}`, 'i'));
+  return match ? Number(match[1]) : 0;
+};
+
+const getCompatibleItems = (model: ServerModel | undefined, items: ComponentItem[], kind: keyof Catalog['availableComponents']) => {
+  if (!model) return [];
+  const compatibility = model.compatibility || {};
+  const brand = String(model.brand || '').toLowerCase();
+
+  return items.filter((item) => {
+    if (kind === 'processors' && compatibility.cpuFamily) return item.family === compatibility.cpuFamily;
+    if (kind === 'memory' && compatibility.ramType) return item.type === compatibility.ramType;
+    if (kind === 'storage' && compatibility.diskResult) return item.formFactor === compatibility.diskResult;
+    if (kind === 'raidControllers' && compatibility.raidFamily) return item.family === compatibility.raidFamily || item.family === 'universal';
+    if (kind === 'powerSupplies' && item.compatibleBrands?.length) {
+      return item.compatibleBrands.some((compatibleBrand) => compatibleBrand.toLowerCase() === brand);
+    }
+    return true;
+  });
+};
+
+const buildQuoteText = (model: ServerModel, config: BuilderConfig, totalPrice: number, metrics: { memoryGb: number; storageTb: number; powerWatts: number }) => [
+  `${model.name} custom server configuration`,
+  `Estimated build price: ${money(totalPrice)}`,
+  '',
+  `Base platform: ${model.name}`,
+  `Processor: ${model.specs.cpuSockets || 2}x ${config.cpu?.name || 'TBD'} (${config.cpu?.partNumber || 'TBD'})`,
+  `Memory: ${config.ram_qty}x ${config.ram?.name || 'TBD'} (${metrics.memoryGb}GB total)`,
+  `Storage: ${config.storage_qty}x ${config.storage?.name || 'TBD'} (${metrics.storageTb.toFixed(metrics.storageTb >= 10 ? 0 : 2)}TB raw)`,
+  `RAID/HBA: ${config.raid?.name || 'TBD'}`,
+  `Networking: ${config.nic?.name || 'TBD'}`,
+  `Power: ${config.psu_qty}x ${config.psu?.name || 'TBD'}`,
+  `Support: ${config.support}`,
+  `Burn-in validation: ${config.burnIn ? 'Yes' : 'No'}`,
+].join('\n');
 
 const ConfiguratorPage = () => {
-    const { content } = useGlobalContent();
-    const { addToCart } = useCart();
-    const { openQuoteModal } = useUI();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const { content } = useGlobalContent();
+  const { addToCart } = useCart();
+  const { openQuoteModal, showToast } = useUI();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
-    const [configuration, setConfiguration] = useState<Record<string, any>>({});
-    const [totalPrice, setTotalPrice] = useState<number>(0);
+  const catalog = useMemo(() => normalizeCatalog(content.serverConfigurator), [content.serverConfigurator]);
+  const [selectedModelId, setSelectedModelId] = useState<string>('');
+  const [configuration, setConfiguration] = useState<BuilderConfig>({
+    cpu: null,
+    ram: null,
+    ram_qty: 4,
+    storage: null,
+    storage_qty: 4,
+    raid: null,
+    nic: null,
+    psu: null,
+    psu_qty: 2,
+    support: 'standard',
+    burnIn: true,
+  });
 
-    // Initialize data from CMS (with fallback)
-    const serverData = content.serverConfigurator || {
-        title: "Server Configurator",
-        description: "Custom build your enterprise server.",
-        models: [],
-        availableComponents: {
-            processors: [], memory: [], storage: [], raidControllers: [], networking: [], powerSupplies: []
-        }
-    };
+  const selectedModel = catalog.models.find((model) => model.id === selectedModelId) || catalog.models[0];
+  const compatible = useMemo(() => ({
+    processors: getCompatibleItems(selectedModel, catalog.availableComponents.processors, 'processors'),
+    memory: getCompatibleItems(selectedModel, catalog.availableComponents.memory, 'memory'),
+    storage: getCompatibleItems(selectedModel, catalog.availableComponents.storage, 'storage'),
+    raidControllers: getCompatibleItems(selectedModel, catalog.availableComponents.raidControllers, 'raidControllers'),
+    networking: getCompatibleItems(selectedModel, catalog.availableComponents.networking, 'networking'),
+    powerSupplies: getCompatibleItems(selectedModel, catalog.availableComponents.powerSupplies, 'powerSupplies'),
+  }), [catalog, selectedModel]);
 
-    const selectedModel = serverData.models.find(m => m.id === selectedModelId);
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const fromUrl = params.get('model');
+    const nextModel = catalog.models.find((model) => model.id === fromUrl)?.id || catalog.models[0]?.id || '';
+    if (nextModel && nextModel !== selectedModelId) setSelectedModelId(nextModel);
+  }, [catalog.models, location.search, selectedModelId]);
 
-    // Auto-select model from URL or default to first
-    useEffect(() => {
-        if (serverData.models.length > 0) {
-            const params = new URLSearchParams(location.search);
-            const modelParam = params.get('model');
+  useEffect(() => {
+    if (!selectedModel) return;
 
-            if (modelParam && serverData.models.find(m => m.id === modelParam)) {
-                if (selectedModelId !== modelParam) setSelectedModelId(modelParam);
-            } else if (!selectedModelId) {
-                setSelectedModelId(serverData.models[0].id);
-            }
-        }
-    }, [serverData.models, location.search]);
+    setConfiguration((prev) => ({
+      ...prev,
+      cpu: compatible.processors.find((item) => item.partNumber === prev.cpu?.partNumber) || compatible.processors[0] || null,
+      ram: compatible.memory.find((item) => item.partNumber === prev.ram?.partNumber) || compatible.memory[1] || compatible.memory[0] || null,
+      storage: compatible.storage.find((item) => item.partNumber === prev.storage?.partNumber) || compatible.storage[0] || null,
+      raid: compatible.raidControllers.find((item) => item.partNumber === prev.raid?.partNumber) || compatible.raidControllers[0] || null,
+      nic: compatible.networking.find((item) => item.partNumber === prev.nic?.partNumber) || compatible.networking[0] || null,
+      psu: compatible.powerSupplies.find((item) => item.partNumber === prev.psu?.partNumber) || compatible.powerSupplies[0] || null,
+      ram_qty: Math.min(prev.ram_qty || 4, selectedModel.specs.memorySlots || 32),
+      storage_qty: Math.min(prev.storage_qty || 4, selectedModel.specs.maxDriveCount || 24),
+      psu_qty: Math.max(prev.psu_qty || 2, 1),
+    }));
+  }, [selectedModel?.id, compatible.processors, compatible.memory, compatible.storage, compatible.raidControllers, compatible.networking, compatible.powerSupplies]);
 
-    // Reset configuration when model changes
-    useEffect(() => {
-        if (selectedModel) {
-            setConfiguration({
-                cpu: serverData.availableComponents.processors[0] || null,
-                ram_qty: 2,
-                ram: serverData.availableComponents.memory[0] || null,
-                storage_qty: 2,
-                storage: serverData.availableComponents.storage[0] || null,
-                raid: serverData.availableComponents.raidControllers[0] || null,
-                nic: serverData.availableComponents.networking[0] || null,
-                psu_qty: 2,
-                psu: serverData.availableComponents.powerSupplies[0] || null,
-            });
-        }
-    }, [selectedModel, serverData.availableComponents]);
+  const metrics = useMemo(() => {
+    const cpuSockets = selectedModel?.specs.cpuSockets || 2;
+    const memoryGb = firstNumber(configuration.ram?.name || '', 'GB') * (configuration.ram_qty || 0);
+    const storageTb = firstNumber(configuration.storage?.name || '', 'TB') * (configuration.storage_qty || 0);
+    const cpuWatts = firstNumber(configuration.cpu?.name || '', 'W') * cpuSockets;
+    const powerWatts = Math.ceil(240 + cpuWatts + ((configuration.ram_qty || 0) * 8) + ((configuration.storage_qty || 0) * 14) + (configuration.nic?.price && configuration.nic.price > 500 ? 45 : 20));
+    return { memoryGb, storageTb, powerWatts };
+  }, [configuration, selectedModel]);
 
-    // Calculate Total Price
-    useEffect(() => {
-        if (!selectedModel) return;
-        let total = selectedModel.basePrice || 0;
+  const totalPrice = useMemo(() => {
+    if (!selectedModel) return 0;
+    const cpuSockets = selectedModel.specs.cpuSockets || 2;
+    const supportPrice = configuration.support === 'mission-critical' ? 895 : configuration.support === 'advanced' ? 395 : 0;
+    const burnInPrice = configuration.burnIn ? 149 : 0;
 
-        if (configuration.cpu) total += (configuration.cpu.price || 0) * (selectedModel.specs.cpuSockets || 2);
-        if (configuration.ram && configuration.ram_qty) total += (configuration.ram.price || 0) * configuration.ram_qty;
-        if (configuration.storage && configuration.storage_qty) total += (configuration.storage.price || 0) * configuration.storage_qty;
-        if (configuration.raid) total += (configuration.raid.price || 0);
-        if (configuration.nic) total += (configuration.nic.price || 0);
-        if (configuration.psu && configuration.psu_qty) total += (configuration.psu.price || 0) * configuration.psu_qty;
+    return selectedModel.basePrice
+      + ((configuration.cpu?.price || 0) * cpuSockets)
+      + ((configuration.ram?.price || 0) * (configuration.ram_qty || 0))
+      + ((configuration.storage?.price || 0) * (configuration.storage_qty || 0))
+      + (configuration.raid?.price || 0)
+      + (configuration.nic?.price || 0)
+      + ((configuration.psu?.price || 0) * (configuration.psu_qty || 0))
+      + supportPrice
+      + burnInPrice;
+  }, [configuration, selectedModel]);
 
-        setTotalPrice(total);
-    }, [configuration, selectedModel]);
+  const warnings = useMemo(() => {
+    if (!selectedModel) return [];
+    const list: Array<{ type: 'error' | 'warning'; message: string }> = [];
+    const cpuSockets = selectedModel.specs.cpuSockets || 2;
+    const maxDrives = selectedModel.specs.maxDriveCount || 24;
 
-
-    const handleOptionChange = (category: string, item: any) => {
-        setConfiguration(prev => ({ ...prev, [category]: item }));
-    };
-
-    const handleQtyChange = (category: string, qty: number) => {
-        setConfiguration(prev => ({ ...prev, [`${category}_qty`]: qty }));
-    };
-
-    const handleAddToCart = () => {
-        if (!selectedModel) return;
-
-        const description = `
-      ${selectedModel.name} Config:
-      ${selectedModel.specs.cpuSockets || 2}x ${configuration.cpu?.name || 'N/A'}
-      ${configuration.ram_qty}x ${configuration.ram?.name || 'N/A'}
-      ${configuration.storage_qty}x ${configuration.storage?.name || 'N/A'}
-      RAID: ${configuration.raid?.name || 'None'}
-      NIC: ${configuration.nic?.name || 'None'}
-      PSU: ${configuration.psu_qty}x ${configuration.psu?.name || 'N/A'}
-    `;
-
-        addToCart({
-            id: `custom-${Date.now()}`,
-            name: `${selectedModel.name} (Custom Build)`,
-            price: totalPrice,
-            image: selectedModel.baseImage,
-            sku: `CFG-${selectedModel.id.toUpperCase()}-${Date.now().toString().slice(-4)}`,
-            stockStatus: 'IN_STOCK',
-            category: 'server-config',
-            slug: 'custom-server',
-            description: description
-        } as any, 1);
-
-        navigate('/cart');
-    };
-
-    // Component Section Renderer
-    const renderRadioSection = (
-        label: string,
-        icon: React.ReactNode,
-        sectionNum: number,
-        items: any[],
-        configKey: string,
-        qtyKey?: string,
-        qtyOptions?: number[],
-        qtyLabel?: string
-    ) => (
-        <div className="mb-8 border-b border-gray-100 pb-8 last:border-0 last:pb-0 last:mb-0">
-            <div className="flex justify-between items-center mb-4">
-                <label className="font-bold text-navy-800 flex items-center gap-2">
-                    {icon} {label}
-                </label>
-                {qtyKey && qtyOptions && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">{qtyLabel || 'Qty'}:</span>
-                        <select
-                            value={configuration[qtyKey] || 0}
-                            onChange={(e) => handleQtyChange(qtyKey.replace('_qty', ''), parseInt(e.target.value))}
-                            className="text-sm border-gray-300 rounded-sm focus:ring-action-500 focus:border-action-500 py-1 pr-8"
-                        >
-                            {qtyOptions.map(n => <option key={n} value={n}>{n}</option>)}
-                        </select>
-                    </div>
-                )}
-                {!qtyKey && configKey === 'cpu' && selectedModel && (
-                    <span className="text-xs font-mono text-gray-400 bg-navy-800 px-2 py-1 rounded border border-navy-700">
-                        {selectedModel.specs.cpuSockets || 2}x Included
-                    </span>
-                )}
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-                {items.map((item: any) => (
-                    <label
-                        key={item.partNumber}
-                        className={`flex items-center justify-between p-3 border rounded-sm cursor-pointer hover:bg-navy-800 transition-colors ${configuration[configKey]?.partNumber === item.partNumber
-                            ? 'border-action-500 bg-action-500/10 ring-1 ring-action-500'
-                            : 'border-navy-700'
-                            }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="radio"
-                                name={configKey}
-                                checked={configuration[configKey]?.partNumber === item.partNumber}
-                                onChange={() => handleOptionChange(configKey, item)}
-                                className="text-action-500 focus:ring-action-500 bg-navy-800 border-navy-600"
-                            />
-                            <div>
-                                <div className="font-bold text-sm text-white">{item.name}</div>
-                                <div className="text-xs text-gray-500 font-mono">{item.partNumber}</div>
-                            </div>
-                        </div>
-                        <div className="text-sm font-bold text-gray-300 whitespace-nowrap">
-                            {item.price === 0 ? 'Included' : `+$${item.price.toLocaleString()} ea.`}
-                        </div>
-                    </label>
-                ))}
-            </div>
-        </div>
-    );
-
-    // Dropdown Section Renderer
-    const renderDropdownSection = (
-        label: string,
-        items: any[],
-        configKey: string
-    ) => (
-        <div className="mb-8 border-b border-navy-800 pb-8 last:border-0 last:pb-0 last:mb-0">
-            <h3 className="font-bold text-gray-200 mb-4">{label}</h3>
-            <select
-                className="w-full p-3 border border-navy-700 rounded-sm focus:ring-action-500 focus:border-action-500 bg-navy-800 text-white"
-                onChange={(e) => {
-                    const item = items.find((r: any) => r.partNumber === e.target.value);
-                    handleOptionChange(configKey, item);
-                }}
-                value={configuration[configKey]?.partNumber || ''}
-            >
-                {items.map((item: any) => (
-                    <option key={item.partNumber} value={item.partNumber}>
-                        {item.name} {item.price === 0 ? '(Included)' : `(+$${item.price.toLocaleString()})`}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-
-    if (!serverData.models.length) {
-        return (
-            <div className="min-h-screen bg-navy-950 pt-32 pb-20 px-4 text-center">
-                <h2 className="text-2xl font-bold text-white">Configurator Loading...</h2>
-            </div>
-        );
+    if (!configuration.cpu || !configuration.ram || !configuration.storage || !configuration.psu) {
+      list.push({ type: 'error', message: 'Select a CPU, memory kit, storage drive, and power supply to complete the build.' });
+    }
+    if ((configuration.ram_qty || 0) < cpuSockets) {
+      list.push({ type: 'error', message: `Use at least ${cpuSockets} DIMMs so each CPU has memory populated.` });
+    }
+    if ((configuration.ram_qty || 0) % cpuSockets !== 0) {
+      list.push({ type: 'warning', message: 'Memory quantity should be balanced evenly across CPU sockets.' });
+    }
+    if ((configuration.storage_qty || 0) > maxDrives) {
+      list.push({ type: 'error', message: `This chassis supports up to ${maxDrives} front drive bays.` });
+    }
+    if ((configuration.psu_qty || 0) < 2) {
+      list.push({ type: 'warning', message: 'Use dual power supplies for redundant production deployments.' });
+    }
+    if (metrics.powerWatts > 1200 && /800W/i.test(configuration.psu?.name || '')) {
+      list.push({ type: 'warning', message: 'Estimated draw is high. Consider a 1100W, 1400W, or 1600W PSU option.' });
     }
 
+    return list;
+  }, [configuration, metrics.powerWatts, selectedModel]);
+
+  const hasBlockingIssue = warnings.some((warning) => warning.type === 'error');
+  const quoteText = selectedModel ? buildQuoteText(selectedModel, configuration, totalPrice, metrics) : '';
+
+  const selectModel = (modelId: string) => {
+    setSelectedModelId(modelId);
+    const params = new URLSearchParams(location.search);
+    params.set('model', modelId);
+    navigate({ pathname: '/configurator', search: params.toString() }, { replace: false });
+  };
+
+  const updateOption = (key: keyof BuilderConfig, item: ComponentItem) => {
+    setConfiguration((prev) => ({ ...prev, [key]: item }));
+  };
+
+  const updateQuantity = (key: 'ram_qty' | 'storage_qty' | 'psu_qty', qty: number) => {
+    setConfiguration((prev) => ({ ...prev, [key]: qty }));
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedModel || hasBlockingIssue) {
+      showToast('Please resolve the build checks before adding this server.', 'error');
+      return;
+    }
+
+    const sku = `CFG-${selectedModel.id.toUpperCase()}-${Date.now().toString().slice(-6)}`;
+    addToCart({
+      id: sku,
+      name: `${selectedModel.name} - Custom Build`,
+      price: totalPrice,
+      image: selectedModel.baseImage,
+      sku,
+      stockStatus: 'IN_STOCK',
+      category: 'server-config',
+      slug: 'custom-server',
+      description: quoteText,
+    } as any, 1);
+    navigate('/cart');
+  };
+
+  const copyBuild = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/configurator?model=${selectedModel.id}\n\n${quoteText}`);
+      showToast('Configuration copied to clipboard.', 'success');
+    } catch {
+      showToast('Could not copy configuration in this browser.', 'error');
+    }
+  };
+
+  const OptionList = ({
+    title,
+    icon,
+    items,
+    configKey,
+    qtyKey,
+    qtyOptions,
+    qtyLabel,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    items: ComponentItem[];
+    configKey: 'cpu' | 'ram' | 'storage' | 'raid' | 'nic' | 'psu';
+    qtyKey?: 'ram_qty' | 'storage_qty' | 'psu_qty';
+    qtyOptions?: number[];
+    qtyLabel?: string;
+  }) => (
+    <section className="border-t border-navy-800 py-6 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h3 className="font-bold text-white flex items-center gap-2">
+          {icon}
+          {title}
+        </h3>
+        {qtyKey && qtyOptions ? (
+          <label className="flex items-center gap-2 text-xs text-gray-400">
+            {qtyLabel || 'Qty'}
+            <select
+              value={configuration[qtyKey]}
+              onChange={(event) => updateQuantity(qtyKey, Number(event.target.value))}
+              className="bg-navy-950 border border-navy-700 rounded-sm px-2 py-1 text-sm text-white focus:border-action-500"
+            >
+              {qtyOptions.map((qty) => <option key={qty} value={qty}>{qty}</option>)}
+            </select>
+          </label>
+        ) : null}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2">
+        {items.map((item) => {
+          const isSelected = configuration[configKey]?.partNumber === item.partNumber;
+          return (
+            <button
+              type="button"
+              key={item.partNumber}
+              onClick={() => updateOption(configKey, item)}
+              className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-sm border p-3 text-left transition ${isSelected ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+            >
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${isSelected ? 'border-action-500 bg-action-500 text-white' : 'border-navy-600'}`}>
+                {isSelected ? <Check className="h-3.5 w-3.5" /> : null}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-bold text-white">{item.name}</span>
+                <span className="block text-xs font-mono text-gray-500">{item.partNumber}</span>
+              </span>
+              <span className="text-sm font-bold text-gray-200 whitespace-nowrap">{item.price === 0 ? 'Included' : `+${money(item.price)}`}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+
+  if (!selectedModel) {
     return (
-        <div className="min-h-screen bg-navy-950 font-sans text-gray-200 selection:bg-action-500 selection:text-white">
-            <SEOHead
-                title="Server Configurator | Build Your Own | Teraformix"
-                description="Customize Dell PowerEdge R760, HPE ProLiant DL380a Gen11, Supermicro, and Lenovo servers. Select 4th Gen Intel Xeon processors, DDR5 memory, and NVMe storage."
-                canonicalUrl="https://teraformix.com/configurator"
-            />
-
-            {/* Header Spacer */}
-            <div className="h-20 bg-navy-900"></div>
-
-            <div className="container mx-auto px-4 py-12">
-                <div className="mb-8">
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="w-10 h-[1px] bg-action-500"></span>
-                        <span className="text-action-500 font-mono text-xs tracking-widest uppercase">Build & Deploy</span>
-                    </div>
-                    <h1 className="text-4xl font-black text-white mb-2">{serverData.title}</h1>
-                    <p className="text-lg text-gray-400 max-w-2xl">{serverData.description}</p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-                    {/* Main Configurator Area */}
-                    <div className="lg:col-span-8 space-y-8">
-
-                        {/* 1. Model Selection */}
-                        <section className="bg-navy-900 rounded-sm border border-navy-800 p-6">
-                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                                <span className="bg-action-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
-                                Select Platform
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {serverData.models.map((model: any) => (
-                                    <button
-                                        key={model.id}
-                                        onClick={() => navigate(`?model=${model.id}`)}
-                                        className={`relative p-4 rounded-sm border-2 transition-all text-left group
-                      ${selectedModelId === model.id ? 'border-action-500 bg-action-500/10 shadow-md' : 'border-navy-700 hover:border-action-500/50 bg-navy-800 hover:shadow-sm'}
-                    `}
-                                    >
-                                        <div className="aspect-[4/3] mb-3 bg-navy-700 rounded-sm p-3 flex items-center justify-center">
-                                            <Image src={model.baseImage} alt={model.name} className="w-full h-full object-contain" />
-                                        </div>
-                                        <div className="font-bold text-sm text-white mb-1 leading-tight">{model.name}</div>
-                                        <div className="text-[11px] text-gray-500 line-clamp-2 mb-3">{model.description}</div>
-
-                                        {/* Spec Badges */}
-                                        <div className="flex flex-wrap gap-1">
-                                            <span className="text-[10px] bg-navy-700 text-gray-300 px-1.5 py-0.5 rounded font-mono">{model.specs.formFactor}</span>
-                                            <span className="text-[10px] bg-navy-600 text-gray-200 px-1.5 py-0.5 rounded font-mono">{model.specs.maxRam}</span>
-                                            {model.specs.generation && (
-                                                <span className="text-[10px] bg-action-500/20 text-action-400 px-1.5 py-0.5 rounded font-mono">{model.specs.generation}</span>
-                                            )}
-                                        </div>
-
-                                        <div className="mt-3 pt-3 border-t border-navy-700 flex justify-between items-center">
-                                            <span className="text-xs text-gray-500 font-mono">From</span>
-                                            <span className="font-bold text-white">${model.basePrice.toLocaleString()}</span>
-                                        </div>
-
-                                        {selectedModelId === model.id && (
-                                            <div className="absolute top-2 right-2 bg-action-500 text-white rounded-full p-0.5">
-                                                <Check className="w-4 h-4" />
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
-
-                        {/* 2. Components */}
-                        {selectedModel && (
-                            <section className="bg-navy-900 rounded-sm border border-navy-800 p-6 animate-fadeIn">
-                                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                                    <span className="bg-action-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-                                    Customize Specifications
-                                </h2>
-
-                                {/* Platform Specs Banner */}
-                                <div className="bg-navy-950 rounded-sm p-4 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    <div>
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Form Factor</div>
-                                        <div className="text-sm font-bold text-white">{selectedModel.specs.formFactor}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Max Memory</div>
-                                        <div className="text-sm font-bold text-white">{selectedModel.specs.maxRam}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Drive Bays</div>
-                                        <div className="text-sm font-bold text-white">{selectedModel.specs.maxStorage}</div>
-                                    </div>
-                                    {selectedModel.specs.pciSlots && (
-                                        <div>
-                                            <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">PCIe Slots</div>
-                                            <div className="text-sm font-bold text-white">{selectedModel.specs.pciSlots}</div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* CPU */}
-                                {renderRadioSection(
-                                    `Processors (${selectedModel.specs.cpuSockets || 2}-Socket)`,
-                                    <Cpu className="w-4 h-4 text-gray-400" />,
-                                    1,
-                                    serverData.availableComponents.processors,
-                                    'cpu'
-                                )}
-
-                                {/* RAM */}
-                                {renderRadioSection(
-                                    'Memory (DDR5 ECC)',
-                                    <Server className="w-4 h-4 text-gray-400" />,
-                                    2,
-                                    serverData.availableComponents.memory,
-                                    'ram',
-                                    'ram_qty',
-                                    [2, 4, 6, 8, 12, 16, 24, 32],
-                                    'DIMMs'
-                                )}
-
-                                {/* Storage */}
-                                {renderRadioSection(
-                                    'Storage Drives',
-                                    <HardDrive className="w-4 h-4 text-gray-400" />,
-                                    3,
-                                    serverData.availableComponents.storage,
-                                    'storage',
-                                    'storage_qty',
-                                    [0, 1, 2, 4, 6, 8, 10, 12, 16, 24],
-                                    'Drives'
-                                )}
-
-                                {/* RAID Controller */}
-                                {renderDropdownSection(
-                                    'RAID Controller',
-                                    serverData.availableComponents.raidControllers,
-                                    'raid'
-                                )}
-
-                                {/* Network Card */}
-                                {renderDropdownSection(
-                                    'Network Daughter Card / Adapter',
-                                    serverData.availableComponents.networking,
-                                    'nic'
-                                )}
-
-                                {/* Power Supply */}
-                                {renderRadioSection(
-                                    'Power Supply',
-                                    <Zap className="w-4 h-4 text-gray-400" />,
-                                    4,
-                                    serverData.availableComponents.powerSupplies,
-                                    'psu',
-                                    'psu_qty',
-                                    [1, 2],
-                                    'PSUs'
-                                )}
-
-                            </section>
-                        )}
-
-                    </div>
-
-                    {/* Sidebar: Summary */}
-                    <div className="lg:col-span-4">
-                        <div className="sticky top-24 space-y-4">
-                            <div className="bg-navy-900 rounded-sm border border-navy-800 overflow-hidden">
-                                <div className="bg-navy-800 p-4 text-white border-b border-navy-700">
-                                    <h3 className="font-bold text-lg">Configuration Summary</h3>
-                                    <div className="text-xs opacity-70 font-mono mt-1">
-                                        {selectedModel?.id.toUpperCase()}
-                                    </div>
-                                </div>
-
-                                {selectedModel && (
-                                    <div className="p-6 space-y-4">
-                                        <div className="text-sm border-b border-navy-800 pb-4">
-                                            <div className="flex justify-between font-bold text-white mb-1">
-                                                <span>Base Platform</span>
-                                                <span>${selectedModel.basePrice.toLocaleString()}</span>
-                                            </div>
-                                            <div className="text-xs text-gray-500">{selectedModel.name}</div>
-                                            <div className="text-[10px] text-gray-600 mt-1">{selectedModel.specs.formFactor} • {selectedModel.specs.maxRam} • {selectedModel.specs.maxStorage}</div>
-                                        </div>
-
-                                        {/* Line Items */}
-                                        <div className="space-y-3 text-sm">
-                                            {configuration.cpu && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{selectedModel.specs.cpuSockets || 2}x {configuration.cpu.name.replace(/Intel Xeon/g, '').replace(/\(.*\)/g, '').trim()}</span>
-                                                    <span className="font-medium text-gray-200">${(configuration.cpu.price * (selectedModel.specs.cpuSockets || 2)).toLocaleString()}</span>
-                                                </div>
-                                            )}
-
-                                            {configuration.ram && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{configuration.ram_qty}x {configuration.ram.name.replace(/DDR5.*ECC/g, 'RAM').replace(/\(.*\)/g, '').trim()}</span>
-                                                    <span className="font-medium text-gray-200">${(configuration.ram.price * configuration.ram_qty).toLocaleString()}</span>
-                                                </div>
-                                            )}
-
-                                            {configuration.storage && configuration.storage_qty > 0 && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{configuration.storage_qty}x {configuration.storage.name.replace(/\(.*\)/g, '').trim().slice(0, 30)}...</span>
-                                                    <span className="font-medium text-gray-200">${(configuration.storage.price * configuration.storage_qty).toLocaleString()}</span>
-                                                </div>
-                                            )}
-
-                                            {configuration.raid && configuration.raid.price > 0 && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{configuration.raid.name.split(' ').slice(0, 3).join(' ')}...</span>
-                                                    <span className="font-medium text-gray-200">${configuration.raid.price.toLocaleString()}</span>
-                                                </div>
-                                            )}
-
-                                            {configuration.nic && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{configuration.nic.name.split(' ').slice(0, 3).join(' ')}...</span>
-                                                    <span className="font-medium text-gray-200">${configuration.nic.price.toLocaleString()}</span>
-                                                </div>
-                                            )}
-
-                                            {configuration.psu && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">{configuration.psu_qty}x {configuration.psu.name.split(' ').slice(0, 3).join(' ')}...</span>
-                                                    <span className="font-medium text-gray-200">${(configuration.psu.price * (configuration.psu_qty || 1)).toLocaleString()}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="border-t border-navy-700 pt-4 mt-4">
-                                            <div className="flex justify-between items-end mb-1">
-                                                <span className="text-gray-500 font-bold uppercase text-xs">Total Price</span>
-                                                <span className="text-3xl font-black text-white">${totalPrice.toLocaleString()}</span>
-                                            </div>
-                                            <div className="text-right text-xs text-action-400 font-bold mb-6">Free Shipping Included</div>
-
-                                            <button
-                                                onClick={handleAddToCart}
-                                                className="w-full py-4 bg-action-500 hover:bg-action-600 text-white font-bold rounded-sm shadow-md transition-all flex items-center justify-center gap-2 mb-3"
-                                            >
-                                                <ShoppingCart className="w-5 h-5" /> ADD TO CART
-                                            </button>
-
-                                            <button
-                                                onClick={() => openQuoteModal(`${selectedModel.name} Custom Config`)}
-                                                className="w-full py-3 bg-navy-800 border border-navy-700 hover:border-gray-500 text-gray-200 font-bold rounded-sm transition-all text-sm"
-                                            >
-                                                REQUEST OFFICIAL QUOTE
-                                            </button>
-                                        </div>
-
-                                        <div className="bg-action-500/10 border border-action-500/20 p-3 rounded text-xs text-gray-300 flex items-start gap-2">
-                                            <Shield className="w-4 h-4 shrink-0 mt-0.5 text-action-500" />
-                                            <div>
-                                                <strong className="text-white">Standard 3-Year Warranty</strong> included with this configuration. Logic boards, drives, and power supplies covered.
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="bg-navy-900 p-4 rounded-sm border border-navy-800 text-xs text-center text-gray-500">
-                                Part availability subject to change. <br />
-                                Prices update daily based on market authorized distributors.
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+      <main className="min-h-screen bg-navy-950 px-4 pt-32 text-center text-white">
+        <h1 className="text-2xl font-bold">Server builder unavailable</h1>
+        <p className="mt-2 text-gray-400">No server platforms are configured yet.</p>
+      </main>
     );
+  }
+
+  const memoryQtyOptions = [2, 4, 6, 8, 12, 16, 24, 32].filter((qty) => qty <= (selectedModel.specs.memorySlots || 32));
+  const storageQtyOptions = [0, 1, 2, 4, 6, 8, 10, 12, 16, 20, 24].filter((qty) => qty <= (selectedModel.specs.maxDriveCount || 24));
+
+  return (
+    <main className="min-h-screen bg-navy-950 font-sans text-gray-200 selection:bg-action-500 selection:text-white">
+      <SEOHead
+        title="Enterprise Server Builder | Teraformix"
+        description="Configure production-ready Dell PowerEdge, HPE ProLiant, Lenovo ThinkSystem, and Supermicro rack servers with compatible CPU, RAM, storage, RAID, networking, and support options."
+        canonicalUrl="https://teraformix.com/configurator"
+      />
+
+      <div className="h-20 bg-navy-900" />
+
+      <div className="container mx-auto px-4 py-10">
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-px w-10 bg-action-500" />
+              <span className="text-xs font-bold uppercase tracking-widest text-action-400">Server builder</span>
+            </div>
+            <h1 className="text-4xl font-black text-white">{catalog.title}</h1>
+            <p className="mt-3 max-w-3xl text-base text-gray-400">{catalog.description}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setConfiguration((prev) => ({ ...prev, burnIn: true, support: 'standard' }))}
+            className="inline-flex items-center justify-center gap-2 border border-navy-700 bg-navy-900 px-4 py-3 text-sm font-bold text-gray-200 hover:border-action-500"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset services
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="space-y-8 lg:col-span-8">
+            <section className="border border-navy-800 bg-navy-900 p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">1</span>
+                Select platform
+              </h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {catalog.models.map((model) => (
+                  <button
+                    type="button"
+                    key={model.id}
+                    onClick={() => selectModel(model.id)}
+                    className={`relative border p-4 text-left transition ${selectedModel.id === model.id ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+                  >
+                    <div className="mb-3 flex aspect-[4/3] items-center justify-center bg-navy-800 p-3">
+                      <Image src={model.baseImage} alt={model.name} className="h-full w-full object-contain" priority={selectedModel.id === model.id} />
+                    </div>
+                    <div className="text-sm font-black text-white">{model.name}</div>
+                    <div className="mt-1 line-clamp-3 text-xs text-gray-500">{model.description}</div>
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {[model.specs.formFactor, model.specs.maxRam, model.specs.generation].filter(Boolean).map((badge) => (
+                        <span key={badge} className="bg-navy-800 px-1.5 py-0.5 text-[10px] font-mono text-gray-300">{badge}</span>
+                      ))}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-navy-800 pt-3">
+                      <span className="text-xs text-gray-500">Base</span>
+                      <span className="font-bold text-white">{money(model.basePrice)}</span>
+                    </div>
+                    {selectedModel.id === model.id ? (
+                      <span className="absolute right-2 top-2 rounded-full bg-action-500 p-1 text-white">
+                        <Check className="h-4 w-4" />
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="border border-navy-800 bg-navy-900 p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">2</span>
+                Configure compatible parts
+              </h2>
+
+              <div className="mb-6 grid grid-cols-2 gap-4 bg-navy-950 p-4 sm:grid-cols-4">
+                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Form factor</div><div className="text-sm font-bold text-white">{selectedModel.specs.formFactor}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">CPU sockets</div><div className="text-sm font-bold text-white">{selectedModel.specs.cpuSockets || 2}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Max memory</div><div className="text-sm font-bold text-white">{selectedModel.specs.maxRam}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Drive bays</div><div className="text-sm font-bold text-white">{selectedModel.specs.maxStorage}</div></div>
+              </div>
+
+              <OptionList title="Processors" icon={<Cpu className="h-4 w-4 text-gray-400" />} items={compatible.processors} configKey="cpu" />
+              <OptionList title="Memory" icon={<Server className="h-4 w-4 text-gray-400" />} items={compatible.memory} configKey="ram" qtyKey="ram_qty" qtyOptions={memoryQtyOptions} qtyLabel="DIMMs" />
+              <OptionList title="Storage" icon={<HardDrive className="h-4 w-4 text-gray-400" />} items={compatible.storage} configKey="storage" qtyKey="storage_qty" qtyOptions={storageQtyOptions} qtyLabel="Drives" />
+              <OptionList title="RAID / HBA" icon={<Shield className="h-4 w-4 text-gray-400" />} items={compatible.raidControllers} configKey="raid" />
+              <OptionList title="Networking" icon={<Network className="h-4 w-4 text-gray-400" />} items={compatible.networking} configKey="nic" />
+              <OptionList title="Power supplies" icon={<Zap className="h-4 w-4 text-gray-400" />} items={compatible.powerSupplies} configKey="psu" qtyKey="psu_qty" qtyOptions={[1, 2]} qtyLabel="PSUs" />
+            </section>
+
+            <section className="border border-navy-800 bg-navy-900 p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">3</span>
+                Deployment services
+              </h2>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                {[
+                  ['standard', 'Standard warranty', '3-year parts coverage included.', 0],
+                  ['advanced', 'Advanced support', 'Priority replacement and config review.', 395],
+                  ['mission-critical', 'Mission critical', 'Expedited handling for production clusters.', 895],
+                ].map(([value, label, description, price]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setConfiguration((prev) => ({ ...prev, support: value as BuilderConfig['support'] }))}
+                    className={`border p-4 text-left ${configuration.support === value ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-bold text-white">{label}</div>
+                      <div className="text-sm font-bold text-gray-300">{price ? `+${money(Number(price))}` : 'Included'}</div>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">{description}</div>
+                  </button>
+                ))}
+              </div>
+              <label className="mt-4 flex items-start gap-3 border border-navy-700 bg-navy-950 p-4">
+                <input
+                  type="checkbox"
+                  checked={configuration.burnIn}
+                  onChange={(event) => setConfiguration((prev) => ({ ...prev, burnIn: event.target.checked }))}
+                  className="mt-1 h-4 w-4 rounded border-navy-600 text-action-500 focus:ring-action-500"
+                />
+                <span>
+                  <span className="block font-bold text-white">48-hour burn-in, firmware validation, and asset report (+{money(149)})</span>
+                  <span className="mt-1 block text-xs text-gray-500">Recommended for production deploys. Includes BIOS/iDRAC/iLO baseline checks and drive health report.</span>
+                </span>
+              </label>
+            </section>
+          </div>
+
+          <aside className="lg:col-span-4">
+            <div className="sticky top-24 space-y-4">
+              <section className="overflow-hidden border border-navy-800 bg-navy-900">
+                <div className="border-b border-navy-700 bg-navy-800 p-4">
+                  <h2 className="text-lg font-bold text-white">Build summary</h2>
+                  <div className="mt-1 font-mono text-xs text-gray-500">{selectedModel.id.toUpperCase()}</div>
+                </div>
+                <div className="space-y-5 p-5">
+                  <div>
+                    <div className="flex justify-between gap-3 text-sm font-bold text-white">
+                      <span>{selectedModel.name}</span>
+                      <span>{money(selectedModel.basePrice)}</span>
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">{selectedModel.specs.formFactor} | {selectedModel.specs.maxRam} | {selectedModel.specs.maxStorage}</div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 border-y border-navy-800 py-4 text-center">
+                    <div><div className="text-lg font-black text-white">{metrics.memoryGb}</div><div className="text-[10px] uppercase text-gray-500">GB RAM</div></div>
+                    <div><div className="text-lg font-black text-white">{metrics.storageTb.toFixed(metrics.storageTb >= 10 ? 0 : 1)}</div><div className="text-[10px] uppercase text-gray-500">TB raw</div></div>
+                    <div><div className="text-lg font-black text-white">{metrics.powerWatts}</div><div className="text-[10px] uppercase text-gray-500">Est. watts</div></div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    {[
+                      [`${selectedModel.specs.cpuSockets || 2}x CPU`, configuration.cpu?.name, (configuration.cpu?.price || 0) * (selectedModel.specs.cpuSockets || 2)],
+                      [`${configuration.ram_qty}x DIMM`, configuration.ram?.name, (configuration.ram?.price || 0) * configuration.ram_qty],
+                      [`${configuration.storage_qty}x drive`, configuration.storage?.name, (configuration.storage?.price || 0) * configuration.storage_qty],
+                      ['RAID/HBA', configuration.raid?.name, configuration.raid?.price || 0],
+                      ['NIC', configuration.nic?.name, configuration.nic?.price || 0],
+                      [`${configuration.psu_qty}x PSU`, configuration.psu?.name, (configuration.psu?.price || 0) * configuration.psu_qty],
+                    ].map(([label, name, price]) => (
+                      <div key={String(label)} className="grid grid-cols-[90px_1fr_auto] gap-2">
+                        <span className="text-gray-500">{label}</span>
+                        <span className="truncate text-gray-300">{String(name || 'Not selected')}</span>
+                        <span className="font-medium text-gray-200">{money(Number(price || 0))}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {warnings.length > 0 ? (
+                    <div className="space-y-2">
+                      {warnings.map((warning) => (
+                        <div key={warning.message} className={`flex items-start gap-2 border p-3 text-xs ${warning.type === 'error' ? 'border-red-500/40 bg-red-500/10 text-red-100' : 'border-amber-500/40 bg-amber-500/10 text-amber-100'}`}>
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                          <span>{warning.message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-100">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>Compatibility checks passed. This build is ready for quote or checkout.</span>
+                    </div>
+                  )}
+
+                  <div className="border-t border-navy-700 pt-4">
+                    <div className="mb-1 flex items-end justify-between gap-3">
+                      <span className="text-xs font-bold uppercase text-gray-500">Estimated total</span>
+                      <span className="text-3xl font-black text-white">{money(totalPrice)}</span>
+                    </div>
+                    <div className="mb-5 text-right text-xs font-bold text-action-400">Freight quote finalized after validation</div>
+
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={hasBlockingIssue}
+                      className="mb-3 flex w-full items-center justify-center gap-2 bg-action-500 px-4 py-4 font-bold text-white shadow-md transition hover:bg-action-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      Add to cart
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openQuoteModal(quoteText)}
+                      className="mb-3 flex w-full items-center justify-center gap-2 border border-navy-700 bg-navy-800 px-4 py-3 text-sm font-bold text-gray-200 transition hover:border-gray-500"
+                    >
+                      Request official quote
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyBuild}
+                      className="flex w-full items-center justify-center gap-2 border border-navy-700 px-4 py-3 text-sm font-bold text-gray-300 transition hover:border-gray-500"
+                    >
+                      <Clipboard className="h-4 w-4" />
+                      Copy build
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section className="border border-navy-800 bg-navy-900 p-4 text-xs text-gray-500">
+                <div className="mb-2 flex items-center gap-2 font-bold text-gray-300">
+                  <Info className="h-4 w-4" />
+                  Production notes
+                </div>
+                <p>All custom builds are validated by sales engineering before shipment. Pricing is an estimate until live stock and firmware requirements are confirmed.</p>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  );
 };
 
 export default ConfiguratorPage;

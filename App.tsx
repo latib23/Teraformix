@@ -23,6 +23,7 @@ const AboutPage = lazy(() => import('./src/app/about/page.tsx'));
 const ContactPage = lazy(() => import('./src/app/contact/page.tsx'));
 const ReturnsPage = lazy(() => import('./src/app/returns/page.tsx'));
 const WarrantyPage = lazy(() => import('./src/app/warranty/page.tsx')); // ✅ ADDED
+const ConfiguratorPage = lazy(() => import('./src/app/configurator/page.tsx'));
 const TermsConditionsPage = lazy(() => import('./src/app/terms-conditions/page.tsx'));
 const SitemapPage = lazy(() => import('./src/app/sitemap/page.tsx'));
 const TrackPage = lazy(() => import('./src/app/track/page.tsx'));
@@ -96,6 +97,7 @@ function App() {
                   <Route path="/terms-and-conditions" element={<TermsConditionsPage />} />
                   <Route path="/returns" element={<ReturnsPage />} />
                   <Route path="/warranty" element={<WarrantyPage />} /> {/* ✅ ADDED */}
+                  <Route path="/configurator" element={<ConfiguratorPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/blog" element={<BlogListPage />} />
                   <Route path="/blog/:slug" element={<BlogPostPage />} />

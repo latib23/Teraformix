@@ -1386,7 +1386,7 @@ class SpaController {
     res.sendFile(join(__dirname, '..', 'dist-client', 'index.html'));
   }
 
-  @Get('admin/*')
+  @Get('admin/*path')
   adminAny(@Req() req: any, @Res() res: Response) {
     try {
       const indexHtmlPath = join(__dirname, '..', 'dist-client', 'index.html');
@@ -1555,7 +1555,7 @@ class SpaController {
     ServeStaticModule.forRoot(
       {
         rootPath: join(__dirname, '..', 'dist-client'),
-        exclude: ['/warranty', '/api/(.*)', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/(.*)', '/product/(.*)', '/category/(.*)', '/admin', '/admin/(.*)', '/products', '/products/(.*)', '/contact', '/configurator', '/returns', '/uploads/(.*)'],
+        exclude: ['/warranty', '/api/*path', '/robots.txt', '/sitemap.xml', '/health', '/health/db', '/landing', '/landing/*path', '/product/*path', '/category/*path', '/admin', '/admin/*path', '/products', '/products/*path', '/contact', '/configurator', '/returns', '/uploads/*path'],
         serveStaticOptions: {
           fallthrough: true,
           index: false,
