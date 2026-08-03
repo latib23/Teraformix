@@ -35,6 +35,7 @@ const Header = () => {
 
   const { cartCount } = useCart();
   const { content } = useGlobalContent();
+  const { logoUrl, logoText } = content.settings;
   const activeCategories = content.categories.filter((category) => category.isActive).slice(0, 5);
 
   useEffect(() => {
