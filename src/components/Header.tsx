@@ -19,7 +19,6 @@ import { api } from '../lib/api';
 import { auth } from '../lib/auth';
 import TopBar from './TopBar';
 import Image from './Image';
-import Logo from './Logo';
 import { Product, Category } from '../types';
 
 const Header = () => {
@@ -183,7 +182,13 @@ const Header = () => {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center gap-5 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Teraformix home">
-            <Logo />
+            <img
+              src={logoUrl || '/logo.png'}
+              alt={logoText || 'Teraformix'}
+              className="h-10 w-auto"
+              width={160}
+              height={40}
+            />
           </Link>
 
           <div className="hidden flex-1 justify-center md:flex">
