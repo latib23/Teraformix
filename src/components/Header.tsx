@@ -1,7 +1,18 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Loader2, LogOut, LayoutDashboard, Package, Menu } from 'lucide-react';
+import {
+  ChevronDown,
+  FileUp,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Menu,
+  Search,
+  ServerCog,
+  ShoppingCart,
+  User,
+  X,
+} from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useGlobalContent } from '../contexts/GlobalContent';
 import { api } from '../lib/api';
@@ -15,21 +26,18 @@ const Header = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-
-  // Server-side search states
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [categoryResults, setCategoryResults] = useState<Category[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Auth State
   const [user, setUser] = useState(auth.getUser());
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { cartCount } = useCart();
   const { content } = useGlobalContent();
   const { logoUrl, logoText } = content.settings;
+  const activeCategories = content.categories.filter((category) => category.isActive).slice(0, 5);
 
-  // Listen for auth changes
   useEffect(() => {
     const handleAuthChange = () => {
       setUser(auth.getUser());
@@ -40,45 +48,53 @@ const Header = () => {
     return () => window.removeEventListener('auth-change', handleAuthChange);
   }, [location]);
 
-  // Debounced API Search
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsAuthDropdownOpen(false);
+    setIsFocused(false);
+  }, [location.pathname]);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (searchTerm.trim().length >= 2) {
-        setIsSearching(true);
-        const term = searchTerm.trim().toLowerCase();
-        const matches = content.categories.filter(c =>
-          c.isActive && (c.name.toLowerCase().includes(term) || c.description.toLowerCase().includes(term))
-        );
-        setCategoryResults(matches);
-
-        try {
-          const results = await api.get<Product[]>(`/products/search?q=${encodeURIComponent(searchTerm.trim())}`);
-          setSearchResults(results || []);
-        } catch (error) {
-          setSearchResults([]);
-        } finally {
-          setIsSearching(false);
-        }
-      } else {
+      if (searchTerm.trim().length < 2) {
         setSearchResults([]);
         setCategoryResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      const term = searchTerm.trim().toLowerCase();
+      setCategoryResults(
+        content.categories.filter((category) =>
+          category.isActive
+          && (category.name.toLowerCase().includes(term) || category.description.toLowerCase().includes(term)),
+        ),
+      );
+
+      try {
+        const results = await api.get<Product[]>(`/products/search?q=${encodeURIComponent(searchTerm.trim())}`);
+        setSearchResults(results || []);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
       }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
+  }, [content.categories, searchTerm]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      setIsFocused(false);
-      const category = content.categories.find(c => c.name.toLowerCase() === searchTerm.trim().toLowerCase());
-      if (category) {
-        navigate(`/category/${category.id}`);
-      } else {
-        navigate(`/category?search=${encodeURIComponent(searchTerm.trim())}`);
-      }
-    }
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!searchTerm.trim()) return;
+
+    setIsFocused(false);
+    const category = content.categories.find(
+      (item) => item.name.toLowerCase() === searchTerm.trim().toLowerCase(),
+    );
+    navigate(category
+      ? `/category/${category.id}`
+      : `/category?search=${encodeURIComponent(searchTerm.trim())}`);
   };
 
   const handleLogout = () => {
@@ -86,160 +102,227 @@ const Header = () => {
     navigate('/');
   };
 
+  const SearchBox = ({ mobile = false }: { mobile?: boolean }) => (
+    <div className={`relative ${mobile ? 'w-full' : 'w-full max-w-2xl'}`}>
+      <form onSubmit={handleSearch} className="relative">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          autoComplete="off"
+          aria-label="Search product catalog"
+          className="h-11 w-full border border-slate-300 bg-slate-50 pl-10 pr-10 text-sm text-slate-950 outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/10"
+          placeholder="Search manufacturer part number or product"
+        />
+        {isSearching ? (
+          <Loader2 className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-emerald-600" />
+        ) : null}
+      </form>
+
+      {isFocused && searchTerm.length >= 2 ? (
+        <div className="absolute left-0 right-0 top-full z-[70] mt-2 max-h-[70vh] overflow-y-auto border border-slate-200 bg-white shadow-xl">
+          {categoryResults.length > 0 ? (
+            <div className="border-b border-slate-200">
+              <div className="bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase text-slate-500">
+                Categories
+              </div>
+              {categoryResults.slice(0, 3).map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.id}`}
+                  className="flex items-center gap-3 border-t border-slate-100 px-4 py-3 hover:bg-slate-50"
+                >
+                  <LayoutDashboard className="h-4 w-4 text-emerald-700" />
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">{category.name}</span>
+                    <span className="block text-xs text-slate-500">{category.description}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {searchResults.length > 0 ? (
+            <div>
+              <div className="bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase text-slate-500">
+                Products
+              </div>
+              {searchResults.slice(0, 5).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.sku}`}
+                  className="grid grid-cols-[44px_1fr_auto] items-center gap-3 border-t border-slate-100 px-4 py-3 hover:bg-slate-50"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center border border-slate-200 bg-white p-1">
+                    <Image src={product.image} alt="" className="h-full w-full object-contain mix-blend-multiply" />
+                  </div>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-slate-900">{product.name}</span>
+                    <span className="block font-mono text-xs text-slate-500">{product.sku}</span>
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">${product.price.toLocaleString()}</span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {!isSearching && categoryResults.length === 0 && searchResults.length === 0 ? (
+            <div className="px-4 py-5 text-sm text-slate-500">No matching catalog items found.</div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+
   return (
     <>
       <TopBar />
-      <header className="sticky top-0 z-50 bg-navy-900 border-b border-navy-800 shadow-lg relative transition-all duration-300">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between relative z-10">
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
+        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center gap-5 px-4 sm:px-6 lg:px-8">
+          <Link to="/" className="flex shrink-0 items-center" aria-label="Teraformix home">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={logoText}
-                className="h-12 md:h-14 w-auto object-contain group-hover:opacity-90 transition rounded-sm"
+                className="h-10 w-[170px] object-contain"
               />
             ) : (
-              <span className="text-white text-2xl font-bold tracking-tight">{logoText}</span>
+              <span className="text-xl font-black text-slate-950">{logoText}</span>
             )}
           </Link>
 
-          {/* Integrated Dark Search Bar */}
-          <div className="hidden md:block flex-1 max-w-2xl mx-8 relative z-50">
-            <form onSubmit={handleSearch} className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-action-500 transition-colors" />
-              </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                autoComplete="off"
-                className="block w-full pl-10 pr-10 py-2.5 border border-navy-700 rounded-full leading-5 bg-navy-800 text-white placeholder-gray-500 focus:outline-none focus:bg-navy-950 focus:ring-1 focus:ring-action-500 focus:border-action-500 sm:text-sm transition-all duration-200"
-                placeholder="Search part numbers, models, or keywords..."
-              />
-              {isSearching && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <Loader2 className="h-4 w-4 text-action-500 animate-spin" />
-                </div>
-              )}
-            </form>
-
-            {/* Dark Search Results Dropdown */}
-            {isFocused && searchTerm.length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-navy-900 rounded-lg shadow-2xl border border-navy-700 overflow-hidden max-h-[80vh] overflow-y-auto z-50 ring-1 ring-black ring-opacity-5">
-                {/* Categories */}
-                {categoryResults.length > 0 && (
-                  <div className="border-b border-navy-800">
-                    <div className="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-navy-950/50">
-                      Categories
-                    </div>
-                    <ul>
-                      {categoryResults.slice(0, 3).map((category) => (
-                        <li key={category.id}>
-                          <Link
-                            to={`/category/${category.id}`}
-                            className="flex items-center gap-3 p-3 hover:bg-navy-800 transition"
-                          >
-                            <div className="w-8 h-8 bg-navy-800 text-action-500 rounded flex items-center justify-center border border-navy-700">
-                              <LayoutDashboard className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-white text-sm">{category.name}</div>
-                              <div className="text-xs text-gray-400">{category.description}</div>
-                            </div>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Products */}
-                {searchResults.length > 0 && (
-                  <div className="border-b border-navy-800">
-                    <div className="px-4 py-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-navy-950/50">
-                      Products
-                    </div>
-                    <ul>
-                      {searchResults.slice(0, 5).map((product) => (
-                        <li key={product.id}>
-                          <Link
-                            to={`/product/${product.sku}`}
-                            className="flex items-center gap-4 p-3 hover:bg-navy-800 transition border-b border-navy-800 last:border-0"
-                          >
-                            <div className="h-10 w-10 bg-white rounded p-0.5 flex-shrink-0">
-                              <Image src={product.image} alt="" className="h-full w-full object-contain mix-blend-multiply" />
-                            </div>
-                            <div className="flex-grow min-w-0">
-                              <div className="font-medium text-white text-sm truncate">{product.name}</div>
-                              <div className="text-xs text-gray-400 font-mono">{product.sku}</div>
-                            </div>
-                            <div className="text-action-500 font-bold text-sm">
-                              ${product.price.toLocaleString()}
-                            </div>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="hidden flex-1 justify-center md:flex">
+            <SearchBox />
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-6">
+          <div className="ml-auto flex h-full items-center">
+            <Link
+              to="/configurator"
+              className="hidden h-10 items-center gap-2 border-r border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:text-emerald-700 lg:flex"
+            >
+              <ServerCog className="h-4 w-4" />
+              Server Builder
+            </Link>
+
             <Link
               to="/cart"
-              className="relative group text-gray-400 hover:text-white transition"
+              className="relative flex h-10 items-center gap-2 border-r border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:text-emerald-700"
+              aria-label={`Cart with ${cartCount} items`}
             >
-              <ShoppingCart className="w-6 h-6" />
-              <span className="absolute -top-2 -right-2 bg-action-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                {cartCount}
-              </span>
+              <ShoppingCart className="h-5 w-5" />
+              <span className="hidden xl:inline">Cart</span>
+              {cartCount > 0 ? (
+                <span className="flex h-5 min-w-5 items-center justify-center bg-emerald-700 px-1 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              ) : null}
             </Link>
 
             <div className="relative">
               <button
-                onClick={() => setIsAuthDropdownOpen(!isAuthDropdownOpen)}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition focus:outline-none"
+                type="button"
+                onClick={() => setIsAuthDropdownOpen((open) => !open)}
+                aria-label="Open account menu"
+                aria-expanded={isAuthDropdownOpen}
+                className="flex h-10 items-center gap-2 px-4 text-slate-700 transition hover:text-emerald-700"
               >
                 {user.email ? (
-                  <div className="w-8 h-8 bg-action-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg shadow-action-900/50">
+                  <span className="flex h-8 w-8 items-center justify-center bg-slate-900 text-sm font-bold text-white">
                     {user.name?.charAt(0).toUpperCase()}
-                  </div>
+                  </span>
                 ) : (
-                  <User className="w-6 h-6" />
+                  <User className="h-5 w-5" />
                 )}
+                <ChevronDown className="hidden h-3.5 w-3.5 sm:block" />
               </button>
 
-              {/* Auth Dropdown */}
-              {isAuthDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-navy-900 rounded-lg shadow-xl border border-navy-700 py-1 z-50 animate-fadeIn">
+              {isAuthDropdownOpen ? (
+                <div className="absolute right-0 top-full mt-2 w-56 border border-slate-200 bg-white py-1 shadow-xl">
                   {user.email ? (
                     <>
-                      <div className="px-4 py-3 border-b border-navy-800">
-                        <p className="text-sm font-bold text-white truncate">{user.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                      <div className="border-b border-slate-200 px-4 py-3">
+                        <p className="truncate text-sm font-bold text-slate-900">{user.name}</p>
+                        <p className="truncate text-xs text-slate-500">{user.email}</p>
                       </div>
-                      <Link to="/account" className="block px-4 py-2 text-sm text-gray-300 hover:bg-navy-800 hover:text-white transition">Dashboard</Link>
-                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-navy-800 transition flex items-center gap-2"><LogOut className="w-3 h-3" /> Sign Out</button>
+                      <Link to="/account" className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                        Account dashboard
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
                     </>
                   ) : (
-                    <div className="p-2 space-y-2">
-                      <Link to="/login" className="block text-center w-full py-2 rounded bg-navy-800 text-white hover:bg-navy-700 transition text-sm font-medium">Log In</Link>
-                      <Link to="/register" className="block text-center w-full py-2 rounded bg-action-600 text-white hover:bg-action-500 transition text-sm font-bold">Register</Link>
+                    <div className="space-y-2 p-3">
+                      <Link to="/login" className="block border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                        Log in
+                      </Link>
+                      <Link to="/register" className="block bg-slate-900 px-3 py-2 text-center text-sm font-bold text-white hover:bg-slate-800">
+                        Create account
+                      </Link>
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              aria-label={isMobileMenuOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={isMobileMenuOpen}
+              className="flex h-10 w-10 items-center justify-center border-l border-slate-200 text-slate-800 md:hidden"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        <nav aria-label="Primary navigation" className="hidden border-t border-slate-200 bg-white md:block">
+          <div className="mx-auto flex h-11 max-w-[1440px] items-center gap-7 px-4 text-sm sm:px-6 lg:px-8">
+            <Link to="/category" className="font-bold text-slate-900 hover:text-emerald-700">Products</Link>
+            {activeCategories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.id}`}
+                className="text-slate-600 hover:text-emerald-700"
+              >
+                {category.name}
+              </Link>
+            ))}
+            <span className="h-5 w-px bg-slate-200" />
+            <Link to="/upload-bom" className="flex items-center gap-1.5 text-slate-600 hover:text-emerald-700">
+              <FileUp className="h-4 w-4" />
+              Upload BOM
+            </Link>
+            <Link to="/track" className="ml-auto text-slate-600 hover:text-emerald-700">Track order</Link>
+            <Link to="/contact" className="font-semibold text-slate-900 hover:text-emerald-700">Contact sales</Link>
+          </div>
+        </nav>
+
+        {isMobileMenuOpen ? (
+          <div className="border-t border-slate-200 bg-white p-4 md:hidden">
+            <SearchBox mobile />
+            <nav aria-label="Mobile navigation" className="mt-4 grid grid-cols-2 border-t border-slate-200 pt-3">
+              <Link to="/category" className="border-b border-slate-100 py-3 text-sm font-bold text-slate-900">Products</Link>
+              <Link to="/configurator" className="border-b border-slate-100 py-3 text-sm font-bold text-emerald-700">Server Builder</Link>
+              {activeCategories.slice(0, 4).map((category) => (
+                <Link key={category.id} to={`/category/${category.id}`} className="border-b border-slate-100 py-3 text-sm text-slate-600">
+                  {category.name}
+                </Link>
+              ))}
+              <Link to="/upload-bom" className="border-b border-slate-100 py-3 text-sm text-slate-600">Upload BOM</Link>
+              <Link to="/contact" className="border-b border-slate-100 py-3 text-sm text-slate-600">Contact sales</Link>
+            </nav>
+          </div>
+        ) : null}
       </header>
     </>
   );

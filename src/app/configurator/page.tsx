@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import SEOHead from '../../components/SEO/SEOHead';
 import Image from '../../components/Image';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import { useCart } from '../../contexts/CartContext';
 import { useGlobalContent } from '../../contexts/GlobalContent';
 import { useUI } from '../../contexts/UIContext';
@@ -410,19 +412,19 @@ const ConfiguratorPage = () => {
     qtyOptions?: number[];
     qtyLabel?: string;
   }) => (
-    <section className="border-t border-navy-800 py-6 first:border-t-0 first:pt-0">
+    <section className="border-t border-slate-200 py-6 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h3 className="font-bold text-white flex items-center gap-2">
+        <h3 className="font-bold text-slate-950 flex items-center gap-2">
           {icon}
           {title}
         </h3>
         {qtyKey && qtyOptions ? (
-          <label className="flex items-center gap-2 text-xs text-gray-400">
+          <label className="flex items-center gap-2 text-xs text-slate-600">
             {qtyLabel || 'Qty'}
             <select
               value={configuration[qtyKey]}
               onChange={(event) => updateQuantity(qtyKey, Number(event.target.value))}
-              className="bg-navy-950 border border-navy-700 rounded-sm px-2 py-1 text-sm text-white focus:border-action-500"
+              className="bg-white border border-slate-300 rounded-sm px-2 py-1 text-sm text-slate-950 focus:border-emerald-600"
             >
               {qtyOptions.map((qty) => <option key={qty} value={qty}>{qty}</option>)}
             </select>
@@ -438,16 +440,16 @@ const ConfiguratorPage = () => {
               type="button"
               key={item.partNumber}
               onClick={() => updateOption(configKey, item)}
-              className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-sm border p-3 text-left transition ${isSelected ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+              className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 border p-3 text-left transition ${isSelected ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300 bg-white hover:border-slate-500'}`}
             >
-              <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${isSelected ? 'border-action-500 bg-action-500 text-white' : 'border-navy-600'}`}>
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${isSelected ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-300'}`}>
                 {isSelected ? <Check className="h-3.5 w-3.5" /> : null}
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-bold text-white">{item.name}</span>
-                <span className="block text-xs font-mono text-gray-500">{item.partNumber}</span>
+                <span className="block text-sm font-bold text-slate-950">{item.name}</span>
+                <span className="block text-xs font-mono text-slate-500">{item.partNumber}</span>
               </span>
-              <span className="text-sm font-bold text-gray-200 whitespace-nowrap">{item.price === 0 ? 'Included' : `+${money(item.price)}`}</span>
+              <span className="text-sm font-bold text-slate-800 whitespace-nowrap">{item.price === 0 ? 'Included' : `+${money(item.price)}`}</span>
             </button>
           );
         })}
@@ -457,10 +459,14 @@ const ConfiguratorPage = () => {
 
   if (!selectedModel) {
     return (
-      <main className="min-h-screen bg-navy-950 px-4 pt-32 text-center text-white">
-        <h1 className="text-2xl font-bold">Server builder unavailable</h1>
-        <p className="mt-2 text-gray-400">No server platforms are configured yet.</p>
-      </main>
+      <div className="min-h-screen bg-white text-slate-950">
+        <Header />
+        <main className="px-4 py-24 text-center">
+          <h1 className="text-2xl font-bold">Server builder unavailable</h1>
+          <p className="mt-2 text-slate-600">No server platforms are configured yet.</p>
+        </main>
+        <Footer />
+      </div>
     );
   }
 
@@ -468,29 +474,25 @@ const ConfiguratorPage = () => {
   const storageQtyOptions = [0, 1, 2, 4, 6, 8, 10, 12, 16, 20, 24].filter((qty) => qty <= (selectedModel.specs.maxDriveCount || 24));
 
   return (
-    <main className="min-h-screen bg-navy-950 font-sans text-gray-200 selection:bg-action-500 selection:text-white">
+    <div className="min-h-screen bg-white font-sans text-slate-800 selection:bg-emerald-700 selection:text-white">
       <SEOHead
         title="Enterprise Server Builder | Teraformix"
         description="Configure production-ready Dell PowerEdge, HPE ProLiant, Lenovo ThinkSystem, and Supermicro rack servers with compatible CPU, RAM, storage, RAID, networking, and support options."
         canonicalUrl="https://teraformix.com/configurator"
       />
+      <Header />
 
-      <div className="h-20 bg-navy-900" />
-
-      <div className="container mx-auto px-4 py-10">
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="h-px w-10 bg-action-500" />
-              <span className="text-xs font-bold uppercase tracking-widest text-action-400">Server builder</span>
-            </div>
-            <h1 className="text-4xl font-black text-white">{catalog.title}</h1>
-            <p className="mt-3 max-w-3xl text-base text-gray-400">{catalog.description}</p>
+            <p className="mb-2 text-xs font-bold uppercase text-emerald-700">Validated configuration workspace</p>
+            <h1 className="text-3xl font-bold text-slate-950 lg:text-4xl">{catalog.title}</h1>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">{catalog.description}</p>
           </div>
           <button
             type="button"
             onClick={() => setConfiguration((prev) => ({ ...prev, burnIn: true, support: 'standard' }))}
-            className="inline-flex items-center justify-center gap-2 border border-navy-700 bg-navy-900 px-4 py-3 text-sm font-bold text-gray-200 hover:border-action-500"
+            className="inline-flex items-center justify-center gap-2 border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800 hover:border-emerald-600"
           >
             <RotateCcw className="h-4 w-4" />
             Reset services
@@ -499,9 +501,9 @@ const ConfiguratorPage = () => {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="space-y-8 lg:col-span-8">
-            <section className="border border-navy-800 bg-navy-900 p-6">
-              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">1</span>
+            <section className="border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-950">
+                <span className="flex h-6 w-6 items-center justify-center bg-emerald-700 text-sm text-white">1</span>
                 Select platform
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -510,24 +512,24 @@ const ConfiguratorPage = () => {
                     type="button"
                     key={model.id}
                     onClick={() => selectModel(model.id)}
-                    className={`relative border p-4 text-left transition ${selectedModel.id === model.id ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+                    className={`relative border p-4 text-left transition ${selectedModel.id === model.id ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300 bg-white hover:border-slate-500'}`}
                   >
-                    <div className="mb-3 flex aspect-[4/3] items-center justify-center bg-navy-800 p-3">
+                    <div className="mb-3 flex aspect-[4/3] items-center justify-center bg-slate-50 p-3">
                       <Image src={model.baseImage} alt={model.name} className="h-full w-full object-contain" priority={selectedModel.id === model.id} />
                     </div>
-                    <div className="text-sm font-black text-white">{model.name}</div>
-                    <div className="mt-1 line-clamp-3 text-xs text-gray-500">{model.description}</div>
+                    <div className="text-sm font-black text-slate-950">{model.name}</div>
+                    <div className="mt-1 line-clamp-3 text-xs text-slate-500">{model.description}</div>
                     <div className="mt-3 flex flex-wrap gap-1">
                       {[model.specs.formFactor, model.specs.maxRam, model.specs.generation].filter(Boolean).map((badge) => (
-                        <span key={badge} className="bg-navy-800 px-1.5 py-0.5 text-[10px] font-mono text-gray-300">{badge}</span>
+                        <span key={badge} className="bg-slate-50 px-1.5 py-0.5 text-[10px] font-mono text-slate-700">{badge}</span>
                       ))}
                     </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-navy-800 pt-3">
-                      <span className="text-xs text-gray-500">Base</span>
-                      <span className="font-bold text-white">{money(model.basePrice)}</span>
+                    <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                      <span className="text-xs text-slate-500">Base</span>
+                      <span className="font-bold text-slate-950">{money(model.basePrice)}</span>
                     </div>
                     {selectedModel.id === model.id ? (
-                      <span className="absolute right-2 top-2 rounded-full bg-action-500 p-1 text-white">
+                      <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center bg-emerald-700 text-white">
                         <Check className="h-4 w-4" />
                       </span>
                     ) : null}
@@ -536,30 +538,30 @@ const ConfiguratorPage = () => {
               </div>
             </section>
 
-            <section className="border border-navy-800 bg-navy-900 p-6">
-              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">2</span>
+            <section className="border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-950">
+                <span className="flex h-6 w-6 items-center justify-center bg-emerald-700 text-sm text-white">2</span>
                 Configure compatible parts
               </h2>
 
-              <div className="mb-6 grid grid-cols-2 gap-4 bg-navy-950 p-4 sm:grid-cols-4">
-                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Form factor</div><div className="text-sm font-bold text-white">{selectedModel.specs.formFactor}</div></div>
-                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">CPU sockets</div><div className="text-sm font-bold text-white">{selectedModel.specs.cpuSockets || 2}</div></div>
-                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Max memory</div><div className="text-sm font-bold text-white">{selectedModel.specs.maxRam}</div></div>
-                <div><div className="text-[10px] uppercase tracking-wider text-gray-500">Drive bays</div><div className="text-sm font-bold text-white">{selectedModel.specs.maxStorage}</div></div>
+              <div className="mb-6 grid grid-cols-2 gap-4 border border-slate-200 bg-slate-50 p-4 sm:grid-cols-4">
+                <div><div className="text-[10px] uppercase tracking-wider text-slate-500">Form factor</div><div className="text-sm font-bold text-slate-950">{selectedModel.specs.formFactor}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-slate-500">CPU sockets</div><div className="text-sm font-bold text-slate-950">{selectedModel.specs.cpuSockets || 2}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-slate-500">Max memory</div><div className="text-sm font-bold text-slate-950">{selectedModel.specs.maxRam}</div></div>
+                <div><div className="text-[10px] uppercase tracking-wider text-slate-500">Drive bays</div><div className="text-sm font-bold text-slate-950">{selectedModel.specs.maxStorage}</div></div>
               </div>
 
-              <OptionList title="Processors" icon={<Cpu className="h-4 w-4 text-gray-400" />} items={compatible.processors} configKey="cpu" />
-              <OptionList title="Memory" icon={<Server className="h-4 w-4 text-gray-400" />} items={compatible.memory} configKey="ram" qtyKey="ram_qty" qtyOptions={memoryQtyOptions} qtyLabel="DIMMs" />
-              <OptionList title="Storage" icon={<HardDrive className="h-4 w-4 text-gray-400" />} items={compatible.storage} configKey="storage" qtyKey="storage_qty" qtyOptions={storageQtyOptions} qtyLabel="Drives" />
-              <OptionList title="RAID / HBA" icon={<Shield className="h-4 w-4 text-gray-400" />} items={compatible.raidControllers} configKey="raid" />
-              <OptionList title="Networking" icon={<Network className="h-4 w-4 text-gray-400" />} items={compatible.networking} configKey="nic" />
-              <OptionList title="Power supplies" icon={<Zap className="h-4 w-4 text-gray-400" />} items={compatible.powerSupplies} configKey="psu" qtyKey="psu_qty" qtyOptions={[1, 2]} qtyLabel="PSUs" />
+              <OptionList title="Processors" icon={<Cpu className="h-4 w-4 text-slate-600" />} items={compatible.processors} configKey="cpu" />
+              <OptionList title="Memory" icon={<Server className="h-4 w-4 text-slate-600" />} items={compatible.memory} configKey="ram" qtyKey="ram_qty" qtyOptions={memoryQtyOptions} qtyLabel="DIMMs" />
+              <OptionList title="Storage" icon={<HardDrive className="h-4 w-4 text-slate-600" />} items={compatible.storage} configKey="storage" qtyKey="storage_qty" qtyOptions={storageQtyOptions} qtyLabel="Drives" />
+              <OptionList title="RAID / HBA" icon={<Shield className="h-4 w-4 text-slate-600" />} items={compatible.raidControllers} configKey="raid" />
+              <OptionList title="Networking" icon={<Network className="h-4 w-4 text-slate-600" />} items={compatible.networking} configKey="nic" />
+              <OptionList title="Power supplies" icon={<Zap className="h-4 w-4 text-slate-600" />} items={compatible.powerSupplies} configKey="psu" qtyKey="psu_qty" qtyOptions={[1, 2]} qtyLabel="PSUs" />
             </section>
 
-            <section className="border border-navy-800 bg-navy-900 p-6">
-              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-white">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-action-500 text-sm">3</span>
+            <section className="border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="mb-5 flex items-center gap-2 text-xl font-bold text-slate-950">
+                <span className="flex h-6 w-6 items-center justify-center bg-emerald-700 text-sm text-white">3</span>
                 Deployment services
               </h2>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -572,51 +574,51 @@ const ConfiguratorPage = () => {
                     key={value}
                     type="button"
                     onClick={() => setConfiguration((prev) => ({ ...prev, support: value as BuilderConfig['support'] }))}
-                    className={`border p-4 text-left ${configuration.support === value ? 'border-action-500 bg-action-500/10' : 'border-navy-700 bg-navy-950 hover:border-navy-500'}`}
+                    className={`border p-4 text-left ${configuration.support === value ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300 bg-white hover:border-slate-500'}`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="font-bold text-white">{label}</div>
-                      <div className="text-sm font-bold text-gray-300">{price ? `+${money(Number(price))}` : 'Included'}</div>
+                      <div className="font-bold text-slate-950">{label}</div>
+                      <div className="text-sm font-bold text-slate-700">{price ? `+${money(Number(price))}` : 'Included'}</div>
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">{description}</div>
+                    <div className="mt-2 text-xs text-slate-500">{description}</div>
                   </button>
                 ))}
               </div>
-              <label className="mt-4 flex items-start gap-3 border border-navy-700 bg-navy-950 p-4">
+              <label className="mt-4 flex items-start gap-3 border border-slate-300 bg-white p-4">
                 <input
                   type="checkbox"
                   checked={configuration.burnIn}
                   onChange={(event) => setConfiguration((prev) => ({ ...prev, burnIn: event.target.checked }))}
-                  className="mt-1 h-4 w-4 rounded border-navy-600 text-action-500 focus:ring-action-500"
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
                 />
                 <span>
-                  <span className="block font-bold text-white">48-hour burn-in, firmware validation, and asset report (+{money(149)})</span>
-                  <span className="mt-1 block text-xs text-gray-500">Recommended for production deploys. Includes BIOS/iDRAC/iLO baseline checks and drive health report.</span>
+                  <span className="block font-bold text-slate-950">48-hour burn-in, firmware validation, and asset report (+{money(149)})</span>
+                  <span className="mt-1 block text-xs text-slate-500">Recommended for production deploys. Includes BIOS/iDRAC/iLO baseline checks and drive health report.</span>
                 </span>
               </label>
             </section>
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="sticky top-24 space-y-4">
-              <section className="overflow-hidden border border-navy-800 bg-navy-900">
-                <div className="border-b border-navy-700 bg-navy-800 p-4">
-                  <h2 className="text-lg font-bold text-white">Build summary</h2>
-                  <div className="mt-1 font-mono text-xs text-gray-500">{selectedModel.id.toUpperCase()}</div>
+            <div className="sticky top-32 space-y-4">
+              <section className="overflow-hidden border border-slate-300 bg-white shadow-lg">
+                <div className="border-b border-slate-300 bg-slate-50 p-4">
+                  <h2 className="text-lg font-bold text-slate-950">Build summary</h2>
+                  <div className="mt-1 font-mono text-xs text-slate-500">{selectedModel.id.toUpperCase()}</div>
                 </div>
                 <div className="space-y-5 p-5">
                   <div>
-                    <div className="flex justify-between gap-3 text-sm font-bold text-white">
+                    <div className="flex justify-between gap-3 text-sm font-bold text-slate-950">
                       <span>{selectedModel.name}</span>
                       <span>{money(selectedModel.basePrice)}</span>
                     </div>
-                    <div className="mt-1 text-xs text-gray-500">{selectedModel.specs.formFactor} | {selectedModel.specs.maxRam} | {selectedModel.specs.maxStorage}</div>
+                    <div className="mt-1 text-xs text-slate-500">{selectedModel.specs.formFactor} | {selectedModel.specs.maxRam} | {selectedModel.specs.maxStorage}</div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 border-y border-navy-800 py-4 text-center">
-                    <div><div className="text-lg font-black text-white">{metrics.memoryGb}</div><div className="text-[10px] uppercase text-gray-500">GB RAM</div></div>
-                    <div><div className="text-lg font-black text-white">{metrics.storageTb.toFixed(metrics.storageTb >= 10 ? 0 : 1)}</div><div className="text-[10px] uppercase text-gray-500">TB raw</div></div>
-                    <div><div className="text-lg font-black text-white">{metrics.powerWatts}</div><div className="text-[10px] uppercase text-gray-500">Est. watts</div></div>
+                  <div className="grid grid-cols-3 gap-2 border-y border-slate-200 py-4 text-center">
+                    <div><div className="text-lg font-black text-slate-950">{metrics.memoryGb}</div><div className="text-[10px] uppercase text-slate-500">GB RAM</div></div>
+                    <div><div className="text-lg font-black text-slate-950">{metrics.storageTb.toFixed(metrics.storageTb >= 10 ? 0 : 1)}</div><div className="text-[10px] uppercase text-slate-500">TB raw</div></div>
+                    <div><div className="text-lg font-black text-slate-950">{metrics.powerWatts}</div><div className="text-[10px] uppercase text-slate-500">Est. watts</div></div>
                   </div>
 
                   <div className="space-y-2 text-sm">
@@ -629,9 +631,9 @@ const ConfiguratorPage = () => {
                       [`${configuration.psu_qty}x PSU`, configuration.psu?.name, (configuration.psu?.price || 0) * configuration.psu_qty],
                     ].map(([label, name, price]) => (
                       <div key={String(label)} className="grid grid-cols-[90px_1fr_auto] gap-2">
-                        <span className="text-gray-500">{label}</span>
-                        <span className="truncate text-gray-300">{String(name || 'Not selected')}</span>
-                        <span className="font-medium text-gray-200">{money(Number(price || 0))}</span>
+                        <span className="text-slate-500">{label}</span>
+                        <span className="truncate text-slate-700">{String(name || 'Not selected')}</span>
+                        <span className="font-medium text-slate-800">{money(Number(price || 0))}</span>
                       </div>
                     ))}
                   </div>
@@ -639,31 +641,31 @@ const ConfiguratorPage = () => {
                   {warnings.length > 0 ? (
                     <div className="space-y-2">
                       {warnings.map((warning) => (
-                        <div key={warning.message} className={`flex items-start gap-2 border p-3 text-xs ${warning.type === 'error' ? 'border-red-500/40 bg-red-500/10 text-red-100' : 'border-amber-500/40 bg-amber-500/10 text-amber-100'}`}>
+                        <div key={warning.message} className={`flex items-start gap-2 border p-3 text-xs ${warning.type === 'error' ? 'border-red-200 bg-red-50 text-red-800' : 'border-amber-200 bg-amber-50 text-amber-800'}`}>
                           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                           <span>{warning.message}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-start gap-2 border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-100">
+                    <div className="flex items-start gap-2 border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
                       <Check className="mt-0.5 h-4 w-4 shrink-0" />
                       <span>Compatibility checks passed. This build is ready for quote or checkout.</span>
                     </div>
                   )}
 
-                  <div className="border-t border-navy-700 pt-4">
+                  <div className="border-t border-slate-300 pt-4">
                     <div className="mb-1 flex items-end justify-between gap-3">
-                      <span className="text-xs font-bold uppercase text-gray-500">Estimated total</span>
-                      <span className="text-3xl font-black text-white">{money(totalPrice)}</span>
+                      <span className="text-xs font-bold uppercase text-slate-500">Estimated total</span>
+                      <span className="text-3xl font-black text-slate-950">{money(totalPrice)}</span>
                     </div>
-                    <div className="mb-5 text-right text-xs font-bold text-action-400">Freight quote finalized after validation</div>
+                    <div className="mb-5 text-right text-xs font-bold text-emerald-700">Freight quote finalized after validation</div>
 
                     <button
                       type="button"
                       onClick={handleAddToCart}
                       disabled={hasBlockingIssue}
-                      className="mb-3 flex w-full items-center justify-center gap-2 bg-action-500 px-4 py-4 font-bold text-white shadow-md transition hover:bg-action-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mb-3 flex w-full items-center justify-center gap-2 bg-emerald-700 px-4 py-4 font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       Add to cart
@@ -671,7 +673,7 @@ const ConfiguratorPage = () => {
                     <button
                       type="button"
                       onClick={() => openQuoteModal(quoteText)}
-                      className="mb-3 flex w-full items-center justify-center gap-2 border border-navy-700 bg-navy-800 px-4 py-3 text-sm font-bold text-gray-200 transition hover:border-gray-500"
+                      className="mb-3 flex w-full items-center justify-center gap-2 border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-900"
                     >
                       Request official quote
                       <ChevronRight className="h-4 w-4" />
@@ -679,7 +681,7 @@ const ConfiguratorPage = () => {
                     <button
                       type="button"
                       onClick={copyBuild}
-                      className="flex w-full items-center justify-center gap-2 border border-navy-700 px-4 py-3 text-sm font-bold text-gray-300 transition hover:border-gray-500"
+                      className="flex w-full items-center justify-center gap-2 border border-slate-300 px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900"
                     >
                       <Clipboard className="h-4 w-4" />
                       Copy build
@@ -688,8 +690,8 @@ const ConfiguratorPage = () => {
                 </div>
               </section>
 
-              <section className="border border-navy-800 bg-navy-900 p-4 text-xs text-gray-500">
-                <div className="mb-2 flex items-center gap-2 font-bold text-gray-300">
+              <section className="border border-slate-200 bg-white p-4 text-xs text-slate-500">
+                <div className="mb-2 flex items-center gap-2 font-bold text-slate-700">
                   <Info className="h-4 w-4" />
                   Production notes
                 </div>
@@ -698,8 +700,9 @@ const ConfiguratorPage = () => {
             </div>
           </aside>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 };
 

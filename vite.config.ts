@@ -6,8 +6,11 @@ import react from '@vitejs/plugin-react';
 // Override the target with API_PROXY_TARGET if the backend runs on another port.
 const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:4000';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(command === 'build' ? 'production' : 'development'),
+  },
   server: {
     port: 5173,
     proxy: {
@@ -20,4 +23,4 @@ export default defineConfig({
     emptyOutDir: true,
     modulePreload: false,
   },
-});
+}));

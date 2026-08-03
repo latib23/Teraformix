@@ -1,210 +1,327 @@
-
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import {
+  ArrowRight,
+  Award,
+  Building2,
+  Check,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  FileDown,
+  FileText,
+  Headphones,
+  MapPin,
+  MessageSquare,
+  Minus,
+  PackageCheck,
+  Plus,
+  ShieldCheck,
+  ShoppingCart,
+  Star,
+  Truck,
+  X,
+} from 'lucide-react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Breadcrumbs from '../../components/Breadcrumbs';
+import ProductCard from '../../components/ProductCard';
+import Image from '../../components/Image';
+import SEOHead from '../../components/SEO/SEOHead';
+import JsonLd from '../../components/SEO/JsonLd';
+import ProductLoading from './loading';
 import { useProductData } from '../../hooks/useProductData';
 import { Product } from '../../types';
-import { CheckCircle, Shield, ArrowRight, ShieldCheck, Award, Clock, Truck, Star, ThumbsUp, MessageSquare, BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, DollarSign, Microscope, Activity, Package, Lock, Unlock, Cpu, ShoppingCart, FileText } from 'lucide-react';
-import JsonLd from '../../components/SEO/JsonLd';
-import Image from '../../components/Image';
-import ProductLoading from './loading';
-import { mockProducts } from '../../lib/mockData';
-import SEOHead from '../../components/SEO/SEOHead';
 import { useCart } from '../../contexts/CartContext';
-import { fetchJson } from '../../lib/api';
 import { useUI } from '../../contexts/UIContext';
 import { useGlobalContent } from '../../contexts/GlobalContent';
-import { generateUniversalReviews } from '../../lib/universal-reviews';
+import { fetchJson } from '../../lib/api';
+import { mockProducts } from '../../lib/mockData';
 import { safeJsonScript } from '../../lib/security';
 
-
-// Swiper
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
-// Lazy load heavy components that are not immediately visible
-const TrustBox = lazy(() => import('../../components/TrustBox'));
-const ProductCard = lazy(() => import('../../components/ProductCard'));
 const QuoteBeatingForm = lazy(() => import('../../components/QuoteBeatingForm'));
 
-// In Next.js, this would be exported to generate server-side metadata
-export async function generateMetadata({ params }: { params: { sku: string } }) {
-  // Placeholder for server-side logic
-  return {
-    title: `Product ${params.sku} | Teraformix`
-  };
-}
+type Review = {
+  author: string;
+  reviewBody: string;
+  ratingValue: string;
+  datePublished: string;
+};
 
 const ShippingTimer = React.memo(() => {
-  const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, label: string } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; label: string } | null>(null);
 
   useEffect(() => {
     const calculateTime = () => {
       const now = new Date();
-      // Texas is Central Time (America/Chicago)
-      // We parse the string to get the wall-clock time in Texas
-      const txTimeStr = now.toLocaleString("en-US", { timeZone: "America/Chicago" });
-      const txDate = new Date(txTimeStr);
+      const texasDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+      const currentDay = texasDate.getDay();
+      const target = new Date(texasDate);
+      target.setHours(15, 0, 0, 0);
+      let label = 'Today';
 
-      const currentDay = txDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-
-      let target = new Date(txDate);
-      target.setHours(15, 0, 0, 0); // Target 3:00 PM
-
-      let label = "Today";
-
-      // Determine cutoff and shipping day logic
-      if (currentDay === 6) { // Saturday
-        target.setDate(target.getDate() + 2); // Move to Monday
-        label = "Monday";
-      } else if (currentDay === 0) { // Sunday
-        target.setDate(target.getDate() + 1); // Move to Monday
-        label = "Monday";
-      } else {
-        // Weekday (Mon-Fri)
-        if (txDate > target) {
-          // Missed today's cutoff
-          target.setDate(target.getDate() + 1); // Tomorrow
-          label = "Tomorrow";
-          if (currentDay === 5) { // Friday afternoon -> Monday
-            target.setDate(target.getDate() + 2); // Move to Monday
-            label = "Monday";
-          }
-        }
+      if (currentDay === 6) {
+        target.setDate(target.getDate() + 2);
+        label = 'Monday';
+      } else if (currentDay === 0) {
+        target.setDate(target.getDate() + 1);
+        label = 'Monday';
+      } else if (texasDate > target) {
+        target.setDate(target.getDate() + (currentDay === 5 ? 3 : 1));
+        label = currentDay === 5 ? 'Monday' : 'Tomorrow';
       }
 
-      const diff = target.getTime() - txDate.getTime();
+      const difference = target.getTime() - texasDate.getTime();
+      if (difference < 0) return setTimeLeft(null);
 
-      if (diff < 0) {
-        // Fallback safety
-        setTimeLeft(null);
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-      setTimeLeft({ days, hours, minutes, label });
+      setTimeLeft({
+        days: Math.floor(difference / 86_400_000),
+        hours: Math.floor((difference % 86_400_000) / 3_600_000),
+        minutes: Math.floor((difference % 3_600_000) / 60_000),
+        label,
+      });
     };
 
     calculateTime();
-    const interval = setInterval(calculateTime, 10000); // Update every 10 seconds for accuracy
-    return () => clearInterval(interval);
+    const interval = window.setInterval(calculateTime, 60_000);
+    return () => window.clearInterval(interval);
   }, []);
 
   if (!timeLeft) return null;
 
   return (
-    <div className="bg-navy-800 border border-navy-700 rounded-md p-3 mb-6 flex items-start gap-3">
-      <Clock className="w-5 h-5 mt-0.5 text-action-500 flex-shrink-0" />
+    <div className="flex items-start gap-3 border-y border-slate-200 py-4">
+      <Clock className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
       <div>
-        <div className="text-sm font-bold text-white leading-tight">
+        <p className="text-sm font-bold text-slate-900">
           Order within {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{timeLeft.hours} hr {timeLeft.minutes} min
-        </div>
-        <div className="text-xs text-gray-400 font-medium mt-1">
-          for shipping <span className="font-bold text-action-400">{timeLeft.label === 'Today' ? 'today' : `on ${timeLeft.label}`}</span> (Texas Time).
-        </div>
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          Estimated dispatch {timeLeft.label === 'Today' ? 'today' : `on ${timeLeft.label}`} from our Texas facility.
+        </p>
       </div>
     </div>
   );
 });
 
-// Fallback helper if no overview is provided in DB
-const getFallbackContent = (category: string | undefined, productName: string) => {
-  if (category?.includes('Server')) {
-    return {
-      title: "Enterprise Compute & Virtualization Performance",
-      text: `The ${productName} is engineered to handle demanding workloads in modern data centers. Optimized for virtualization environments like VMware vSphere and Microsoft Hyper-V, this server platform delivers high-density computing power with redundant reliability.`
-    };
-  } else if (category?.includes('Storage')) {
-    return {
-      title: "Data Integrity & High-Throughput Archival",
-      text: `Designed for 24/7 reliability, the ${productName} is an ideal solution for SAN, NAS, and DAS environments. With enterprise-class vibration tolerance and end-to-end data path protection, this storage device ensures data integrity for mission-critical applications.`
-    };
-  } else if (category?.includes('Networking')) {
-    return {
-      title: "Low-Latency Switching & Network Resilience",
-      text: `Maximize your network backbone with the ${productName}. Built for high-bandwidth applications, this unit reduces latency in spine-leaf architectures and edge deployments. It supports advanced Layer 2 and Layer 3 protocols.`
-    };
+const getFallbackOverview = (category: string | undefined, productName: string) => {
+  if (category?.toLowerCase().includes('server')) {
+    return `${productName} is built for demanding data-center compute, virtualization, and private-cloud workloads. The platform is prepared for reliable deployment with enterprise support and lifecycle continuity in mind.`;
   }
-  return {
-    title: "Enterprise-Grade Reliability",
-    text: `The ${productName} undergoes a comprehensive 28-point inspection process at our ISO 9001 certified facility. Designed for longevity and performance, this component is essential for maintaining business continuity.`
-  };
+  if (category?.toLowerCase().includes('storage')) {
+    return `${productName} is designed for sustained enterprise storage workloads where data integrity, predictable throughput, and serviceability are essential.`;
+  }
+  if (category?.toLowerCase().includes('network')) {
+    return `${productName} supports resilient, low-latency network deployments and is suited to modern core, distribution, and edge architectures.`;
+  }
+  return `${productName} is a genuine enterprise hardware component prepared for production use and backed by Teraformix quality assurance.`;
 };
 
 const ProductPage = () => {
-  const { sku } = useParams<{ sku: string; }>();
-  const productId = sku;
-
-  const { data, loading } = useProductData(productId);
+  const { sku } = useParams<{ sku: string }>();
+  const { data, loading } = useProductData(sku);
+  const product = data && !Array.isArray(data) ? data as Product : null;
   const { addToCart, cart } = useCart();
-  const { openQuoteModal } = useUI(); // Hook into UI Context
+  const { openQuoteModal, showToast } = useUI();
   const { content } = useGlobalContent();
-  const { cageCode, dunsNumber } = content.general;
-  const activeCategories = Array.isArray((content as any).categories) ? (content as any).categories.filter((c: any) => c && c.isActive) : [];
 
-  // Safe cast to ensure we have a single product, not an array
-  const product = (data && !Array.isArray(data)) ? (data as Product) : null;
-
-  const [activeTab, setActiveTab] = useState('specs');
+  const [activeTab, setActiveTab] = useState<'overview' | 'specifications' | 'compatibility' | 'warranty'>('overview');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [showAllSpecs, setShowAllSpecs] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
-
-  // Review Modal State
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [isBeatQuoteModalOpen, setIsBeatQuoteModalOpen] = useState(false);
-  const [isStockQuoteModalOpen, setIsStockQuoteModalOpen] = useState(false);
-
-  // Quantity selector state
   const [quantity, setQuantity] = useState(1);
+  const [isStockQuoteOpen, setIsStockQuoteOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isBeatQuoteOpen, setIsBeatQuoteOpen] = useState(false);
+  const [skuCopied, setSkuCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({ author: '', rating: 5, body: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
 
-  // Review Slider State
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [sku]);
 
-  // Handle add to cart with stock validation
-  const handleAddToCart = () => {
+  useEffect(() => {
     if (!product) return;
+    try {
+      const analytics = (window as any).gtag;
+      if (analytics) {
+        analytics('event', 'view_item', {
+          items: [{
+            item_id: product.sku,
+            item_name: product.name,
+            price: product.price,
+            item_category: product.category,
+          }],
+        });
+      }
+    } catch {
+      // Analytics must never block the product page.
+    }
+  }, [product?.category, product?.name, product?.price, product?.sku]);
 
-    const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 0;
+  useEffect(() => {
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      if (!product?.category) {
+        setRelatedProducts([]);
+        return;
+      }
 
-    // Check current cart quantity for this product
+      setLoadingRelated(true);
+      try {
+        const response = await fetchJson<{ items: Product[]; total: number }>(
+          `/products/paginated?limit=8&category=${encodeURIComponent(product.category)}`,
+        );
+        if (!cancelled) {
+          setRelatedProducts(
+            (response?.items || [])
+              .filter((item) => item.id !== product.id && item.sku !== product.sku)
+              .slice(0, 4),
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setRelatedProducts(
+            (mockProducts as Product[])
+              .filter((item) => item.category === product.category && item.sku !== product.sku)
+              .slice(0, 4),
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingRelated(false);
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [product?.category, product?.id, product?.sku]);
+
+  const specifications = useMemo(() => {
+    if (!product) return [];
+    const entries = Object.entries(product.specs || {}).filter(([key, value]) => {
+      const normalizedKey = key.toLowerCase();
+      return !normalizedKey.includes('review')
+        && !normalizedKey.includes('schema')
+        && !normalizedKey.includes('image')
+        && typeof value !== 'object';
+    });
+
+    if (product.weight) entries.push(['Weight', product.weight]);
+    if (product.dimensions) entries.push(['Dimensions', product.dimensions]);
+    return entries;
+  }, [product]);
+
+  const reviews = useMemo<Review[]>(() => {
+    if (!product) return [];
+    const rawReviews = (product as any)?.schema?.reviews;
+    let parsedReviews: any[] = [];
+
+    if (Array.isArray(rawReviews)) {
+      parsedReviews = rawReviews;
+    } else if (typeof rawReviews === 'string') {
+      try {
+        const parsed = JSON.parse(rawReviews);
+        parsedReviews = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        parsedReviews = [];
+      }
+    }
+
+    return parsedReviews
+        .filter((review: any) => review && review.status === 'APPROVED')
+        .map((review: any) => ({
+          author: String(review.author || 'Verified buyer'),
+          reviewBody: String(review.reviewBody || ''),
+          ratingValue: String(review.ratingValue || '5'),
+          datePublished: String(review.datePublished || ''),
+        }));
+  }, [product?.id]);
+
+  if (loading) return <ProductLoading />;
+  if (!product) return <Navigate to="/404" replace />;
+
+  const categorySlug = product.category ? product.category.toLowerCase().replace(/\s+/g, '-') : '';
+  const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 0;
+  const inStock = product.stockStatus === 'IN_STOCK';
+  const maxQuantity = stockLevel > 0 ? stockLevel : 999;
+  const overview = product.overview || getFallbackOverview(product.category, product.name);
+  const productSearchText = `${product.name} ${product.category || ''} ${product.description || ''}`;
+  const productImageFallback = /\b(ddr|rdimm|dimm|memory|ram)\b/i.test(productSearchText)
+    ? '/product-assets/ddr5-ecc-rdimm.jpg'
+    : undefined;
+  const productImageSource = productImageFallback && product.image.includes('semiconductor.samsung.com')
+    ? productImageFallback
+    : product.image;
+  const keySpecifications = specifications.slice(0, 4);
+  const condition = String((product.specs as Record<string, unknown> | undefined)?.Condition || 'New');
+  const schemaRating = Number((product as any)?.schema?.ratingValue);
+  const averageRating = Number.isFinite(schemaRating) && schemaRating > 0
+    ? schemaRating
+    : reviews.length > 0
+      ? reviews.reduce((total, review) => total + (Number(review.ratingValue) || 0), 0) / reviews.length
+      : null;
+  const schemaReviewCount = Number((product as any)?.schema?.reviewCount);
+  const reviewCount = Number.isFinite(schemaReviewCount) && schemaReviewCount > 0 ? schemaReviewCount : reviews.length;
+
+  const productFaqs = [
+    {
+      q: 'Is this genuine OEM hardware?',
+      a: `Yes. This ${product.name} is verified as genuine ${product.brand || 'OEM'} hardware and is prepared with a clean serial number for deployment.`,
+    },
+    {
+      q: 'How is the product prepared before shipping?',
+      a: 'Hardware is visually inspected, verified against its listing, safely packaged, and checked for the applicable firmware or functional requirements before dispatch.',
+    },
+    {
+      q: 'What warranty and return coverage is included?',
+      a: product.warranty || 'A standard 3-year Teraformix hardware warranty and 30-day return window apply unless the quote or listing states otherwise.',
+    },
+  ];
+
+  const handleAddToCart = () => {
     const cartItem = cart.find((item: any) => item.id === product.id);
-    const currentCartQty = cartItem ? cartItem.quantity : 0;
-    const totalRequested = currentCartQty + quantity;
+    const currentQuantity = cartItem ? cartItem.quantity : 0;
 
-    if (product.stockStatus === 'IN_STOCK' && totalRequested > stockLevel) {
-      // Show quote modal instead
-      setIsStockQuoteModalOpen(true);
+    if (inStock && stockLevel > 0 && currentQuantity + quantity > stockLevel) {
+      setIsStockQuoteOpen(true);
       return;
     }
 
-    // Track analytics
-    const g = (window as any).gtag;
-    if (g) {
-      g('event', 'add_to_cart', {
-        items: [{ item_id: product.sku, item_name: product.name, price: product.price, quantity }]
+    try {
+      const analytics = (window as any).gtag;
+      analytics?.('event', 'add_to_cart', {
+        items: [{
+          item_id: product.sku,
+          item_name: product.name,
+          price: product.price,
+          quantity,
+        }],
       });
+    } catch {
+      // Analytics must never block cart actions.
     }
 
     addToCart(product, quantity);
-    setQuantity(1); // Reset quantity after adding
+    setQuantity(1);
   };
 
-  const { showToast } = useUI();
+  const handleCopySku = async () => {
+    try {
+      await navigator.clipboard.writeText(product.sku);
+      setSkuCopied(true);
+      window.setTimeout(() => setSkuCopied(false), 1800);
+    } catch {
+      showToast('Part number could not be copied.', 'error');
+    }
+  };
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!product) return;
+  const handleReviewSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSubmittingReview(true);
     try {
       await fetchJson(`/products/${product.id}/reviews`, {
@@ -212,1088 +329,748 @@ const ProductPage = () => {
         body: JSON.stringify({
           author: reviewForm.author,
           ratingValue: reviewForm.rating,
-          reviewBody: reviewForm.body
-        })
+          reviewBody: reviewForm.body,
+        }),
       });
-      showToast('Review submitted for approval!', 'success');
-      setIsReviewModalOpen(false);
+      showToast('Review submitted for approval.', 'success');
+      setIsReviewOpen(false);
       setReviewForm({ author: '', rating: 5, body: '' });
-    } catch (err) {
-      showToast('Failed to submit review.', 'error');
+    } catch {
+      showToast('Review could not be submitted.', 'error');
     } finally {
       setIsSubmittingReview(false);
     }
   };
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [sku]);
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://teraformix.com/' },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product.category || 'Products',
+        item: categorySlug ? `https://teraformix.com/category/${categorySlug}` : 'https://teraformix.com/category',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product.name,
+        item: `https://teraformix.com/product/${product.sku}`,
+      },
+    ],
+  };
 
-  useEffect(() => {
-    if (!product) return;
-    try {
-      const g = (window as any).gtag;
-      if (g) {
-        g('event', 'view_item', { items: [{ item_id: product.sku, item_name: product.name, price: product.price, item_category: product.category }] });
-      }
-    } catch { }
-  }, [product?.sku]);
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: productFaqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  };
 
-  // Related: Fetch same-category products (exclude current) - Debounced for performance
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [loadingRelated, setLoadingRelated] = useState(false);
-
-  useEffect(() => {
-    let isCancelled = false;
-    const loadRelated = async () => {
-      if (!product?.category) { setRelatedProducts([]); return; }
-
-      // Debounce: wait a bit before loading related products
-      const timer = setTimeout(async () => {
-        if (isCancelled) return;
-        setLoadingRelated(true);
-        try {
-          const res = await fetchJson<{ items: Product[]; total: number }>(`/products/paginated?limit=8&category=${encodeURIComponent(product.category)}`);
-          if (!isCancelled) {
-            const items = ((res?.items || []) as Product[])
-              .filter(r => r.id !== product.id && r.sku !== product.sku)
-              .slice(0, 4);
-            setRelatedProducts(items);
-          }
-        } catch {
-          if (!isCancelled) {
-            const fallback = (mockProducts as any as Product[])
-              .filter(p => p.category === product.category && p.sku !== product.sku)
-              .slice(0, 4);
-            setRelatedProducts(fallback);
-          }
-        } finally {
-          if (!isCancelled) setLoadingRelated(false);
-        }
-      }, 300); // 300ms debounce
-
-      return () => {
-        isCancelled = true;
-        clearTimeout(timer);
-      };
-    };
-    loadRelated();
-  }, [product?.category, product?.id, product?.sku]);
-
-  // Memoize fallback content to avoid recalculation - MUST be before conditional returns
-  const fallback = useMemo(() => {
-    if (!product) return { title: '', text: '' };
-    return getFallbackContent(product.category, product.name);
-  }, [product?.category, product?.name]);
-
-  // Memoize category slug generation - MUST be before conditional returns
-  const categorySlug = useMemo(() =>
-    product?.category ? product.category.toLowerCase().replace(/\s+/g, '-') : '',
-    [product?.category]
-  );
-
-  // Memoize shuffled reviews with universal reviews mixed in
-  const shuffledReviews = useMemo(() => {
-    const reviews: Array<{ author: string; reviewBody: string; ratingValue: string; datePublished: string; source?: string }> = [];
-    try {
-      const rawReviews = (product as any)?.schema?.reviews;
-
-      // Shuffle function using Fisher-Yates algorithm
-      const shuffle = <T,>(array: T[]): T[] => {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-      };
-
-      // Get real reviews
-      const realReviews = Array.isArray(rawReviews)
-        ? rawReviews
-          .filter((r: any) => r && typeof r === 'object' && r.status === 'APPROVED')
-          .map((r: any) => ({
-            author: String(r.author || 'Anonymous'),
-            reviewBody: String(r.reviewBody || ''),
-            ratingValue: String(r.ratingValue || '5'),
-            datePublished: String(r.datePublished || ''),
-            source: 'verified'
-          }))
-        : [];
-
-      // Generate universal reviews
-      const universalReviews = generateUniversalReviews(15);
-
-      // Combine and shuffle
-      const combined = [...realReviews, ...universalReviews];
-      const shuffled = shuffle(combined);
-      // Select a random subset between 5 and 10
-      const randomCount = Math.floor(Math.random() * 6) + 5; // 5 to 10
-      return shuffled.slice(0, randomCount);
-    } catch (e) {
-      console.error('Error processing reviews:', e);
-    }
-    return reviews;
-  }, [product?.id]); // Only re-shuffle when product changes
-
-  if (loading) return <ProductLoading />;
-
-  // Robust check for missing product
-  if (!product) {
-    return <Navigate to="/404" replace />;
-  }
-
-  const overviewTitle = product.overview ? "Product Overview" : fallback.title;
-  const overviewText = product.overview || fallback.text;
-
-  const productFaqs = [
-    { q: "Does this product include rack rails?", a: "Rack rails are sold separately unless specified in the 'In the Box' section. We stock compatible sliding and static rails for this model." },
-    { q: "Is the firmware updated before shipping?", a: "Yes. Our engineering team updates all firmware to the latest stable OEM release during our QA process to ensure immediate security compliance." },
-    { q: "What is the return policy for this item?", a: "We offer a 30-day hassle-free return policy for unopened items. Defective units are covered under our 3-Year Advanced Replacement Warranty." }
-  ];
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'specifications', label: 'Specifications' },
+    { id: 'compatibility', label: 'Compatibility' },
+    { id: 'warranty', label: 'Warranty' },
+  ] as const;
 
   return (
-    <div className="min-h-screen bg-navy-950 text-gray-200">
-      {/* Stock Availability Quote Modal */}
-      {isStockQuoteModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-md p-6 relative text-gray-200">
-            <button
-              onClick={() => setIsStockQuoteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-
-            <div className="text-center mb-6">
-              <div className="mx-auto w-16 h-16 bg-navy-800 border border-navy-700 rounded-full flex items-center justify-center mb-4">
-                <MessageSquare className="w-8 h-8 text-action-500" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Limited Stock Available</h3>
-              <p className="text-sm text-gray-400">
-                We currently have {typeof product.stockLevel === 'number' ? product.stockLevel : 0} units in stock.
-                For larger quantities, please request a quote and we'll check availability with our suppliers.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  setIsStockQuoteModalOpen(false);
-                  openQuoteModal(`${product.name} (SKU: ${product.sku}) - Requesting ${quantity} units`);
-                }}
-                className="w-full bg-action-600 hover:bg-action-700 text-white font-bold py-3 px-4 rounded transition"
-              >
-                Request Quote for {quantity} Units
-              </button>
-              <button
-                onClick={() => setIsStockQuoteModalOpen(false)}
-                className="w-full bg-navy-800 border border-navy-700 hover:bg-navy-700 text-white font-semibold py-3 px-4 rounded transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Review Modal */}
-      {isReviewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
-            <button
-              onClick={() => setIsReviewModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-
-            <h3 className="text-xl font-bold text-white mb-4">Write a Review</h3>
-            <p className="text-sm text-gray-400 mb-6">Share your experience with this product. Reviews are moderated before publishing.</p>
-
-            <form onSubmit={handleReviewSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  value={reviewForm.author}
-                  onChange={e => setReviewForm({ ...reviewForm, author: e.target.value })}
-                  className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-action-500 outline-none"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
-                      className="focus:outline-none"
-                    >
-                      <Star
-                        className={`w-8 h-8 ${star <= reviewForm.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-navy-800 text-navy-700'}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Review</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={reviewForm.body}
-                  onChange={e => setReviewForm({ ...reviewForm, body: e.target.value })}
-                  className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-action-500 outline-none"
-                  placeholder="Tell us what you liked or didn't like..."
-                />
-              </div>
-
-              <div className="pt-2 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsReviewModalOpen(false)}
-                  className="flex-1 py-2.5 bg-navy-800 border border-navy-700 rounded-lg font-semibold text-white hover:bg-navy-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingReview}
-                  className="flex-1 py-2.5 bg-action-600 text-white rounded-lg font-bold hover:bg-action-700 disabled:opacity-50"
-                >
-                  {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Beat Quote Modal */}
-      {isBeatQuoteModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-navy-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-navy-900 border border-navy-800 rounded-xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setIsBeatQuoteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
-              <QuoteBeatingForm productName={product.name} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-white text-slate-800">
       <SEOHead
-        title={product.metaTitle || `${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} ${product.category || 'Hardware'} | Teraformix`}
-        description={product.metaDescription || `Buy genuine ${product.brand || 'OEM'} ${product.name} (SKU: ${product.sku}). ${product.category ? `Enterprise ${product.category}` : 'Enterprise hardware'} - New condition, 3-year warranty included. ${product.stockStatus === 'IN_STOCK' ? 'In stock and ready to ship' : 'Available on backorder'}. ${Object.values(product.specs || {}).slice(0, 3).join(' • ')}. ISO 9001 certified reseller. Free shipping, 30-day returns.`}
+        title={product.metaTitle || `${product.name} ${product.sku} | Teraformix`}
+        description={product.metaDescription || `${product.name} (${product.sku}) genuine ${product.brand || 'OEM'} enterprise hardware with procurement support and warranty coverage.`}
         canonicalUrl={`https://teraformix.com/product/${product.sku}`}
         type="product"
         image={product.image}
         price={product.price}
-        availability={product.stockStatus === 'IN_STOCK' ? 'instock' : 'backorder'}
+        availability={inStock ? 'instock' : 'backorder'}
       />
       <JsonLd data={product} />
-      {(() => {
-        const items = [
-          { position: 1, name: 'Home', item: 'https://teraformix.com/' },
-          { position: 2, name: product.category || 'Components', item: categorySlug ? `https://teraformix.com/category/${categorySlug}` : 'https://teraformix.com/category' },
-          { position: 3, name: product.name, item: `https://teraformix.com/product/${product.sku}` },
-        ];
-        const data = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(i => ({ '@type': 'ListItem', position: i.position, name: i.name, item: i.item })) };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(data) }} />;
-      })()}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(faqSchema) }} />
 
-      {/* FAQ Schema for SEO */}
-      {(() => {
-        const faqSchema = {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Is this product genuine OEM?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `Yes, this ${product.name} (${product.sku}) is 100% genuine ${product.brand || 'OEM'} hardware. All our products are verified by certified technicians and come with clean serial numbers ready for service contract registration.`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What warranty is included?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `This ${product.name} includes our standard 3-Year Warranty covering all manufacturing defects. We also offer advanced replacement options for minimal downtime.`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How long does shipping take?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "We offer free ground shipping which typically takes 3-5 business days. Expedited shipping options are available at checkout for faster delivery."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I return this product?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, we have a 30-day return policy on all products. Restocking fees may apply for opened items. Please see our return policy for complete details."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `Is the ${product.name} compatible with my system?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `Please check the specifications tab for detailed compatibility information. Our technical team is available to assist with compatibility questions for the ${product.sku}.`
-              }
-            }
-          ]
-        };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(faqSchema) }} />;
-      })()}
+      {isStockQuoteOpen ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="relative w-full max-w-md bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsStockQuoteOpen(false)}
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Close stock notice"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <PackageCheck className="h-9 w-9 text-emerald-700" />
+            <h2 className="mt-5 text-xl font-bold text-slate-950">Quantity requires validation</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              We currently show {stockLevel} units available. Our procurement team can verify additional stock and volume pricing.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setIsStockQuoteOpen(false);
+                openQuoteModal(`${product.name} (${product.sku}) - ${quantity} units requested`);
+              }}
+              className="mt-6 w-full bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800"
+            >
+              Request availability quote
+            </button>
+          </div>
+        </div>
+      ) : null}
 
-      {/* Aggregate Rating Schema for SEO */}
-      {(() => {
-        const reviewSchema = {
-          "@context": "https://schema.org",
-          "@type": "Product",
-          "name": product.name,
-          "sku": product.sku,
-          "image": product.image,
-          "brand": {
-            "@type": "Brand",
-            "name": product.brand || "Enterprise Hardware"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "reviewCount": "73",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "offers": {
-            "@type": "Offer",
-            "price": product.price || 0,
-            "priceCurrency": "USD",
-            "availability": product.stockStatus === 'IN_STOCK' ? "https://schema.org/InStock" : "https://schema.org/BackOrder",
-            "url": `https://teraformix.com/product/${product.sku}`
-          }
-        };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonScript(reviewSchema) }} />;
-      })()}
+      {isReviewOpen ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="relative w-full max-w-lg bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsReviewOpen(false)}
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Close review form"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h2 className="text-xl font-bold text-slate-950">Write a product review</h2>
+            <p className="mt-2 text-sm text-slate-500">Reviews are moderated before publication.</p>
+            <form onSubmit={handleReviewSubmit} className="mt-6 space-y-5">
+              <label className="block text-sm font-semibold text-slate-700">
+                Your name
+                <input
+                  required
+                  value={reviewForm.author}
+                  onChange={(event) => setReviewForm((current) => ({ ...current, author: event.target.value }))}
+                  className="mt-2 h-11 w-full border border-slate-300 px-3 text-slate-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10"
+                />
+              </label>
+              <fieldset>
+                <legend className="text-sm font-semibold text-slate-700">Rating</legend>
+                <div className="mt-2 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button
+                      key={rating}
+                      type="button"
+                      onClick={() => setReviewForm((current) => ({ ...current, rating }))}
+                      aria-label={`${rating} star rating`}
+                    >
+                      <Star className={`h-7 w-7 ${rating <= reviewForm.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <label className="block text-sm font-semibold text-slate-700">
+                Review
+                <textarea
+                  required
+                  rows={5}
+                  value={reviewForm.body}
+                  onChange={(event) => setReviewForm((current) => ({ ...current, body: event.target.value }))}
+                  className="mt-2 w-full border border-slate-300 px-3 py-2 text-slate-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={isSubmittingReview}
+                className="w-full bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+              >
+                {isSubmittingReview ? 'Submitting review...' : 'Submit review'}
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {isBeatQuoteOpen ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsBeatQuoteOpen(false)}
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Close price request"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <Suspense fallback={<div className="py-12 text-center text-sm text-slate-500">Loading price request...</div>}>
+              <QuoteBeatingForm productName={product.name} />
+            </Suspense>
+          </div>
+        </div>
+      ) : null}
+
       <Header />
-
-      {/* Dynamic Breadcrumbs */}
       <Breadcrumbs
         items={[
-          { label: product.category || 'Components', path: categorySlug ? `/category/${categorySlug}` : '/category' },
-          { label: product.sku, path: `/product/${product.sku}` }
+          { label: product.category || 'Products', path: categorySlug ? `/category/${categorySlug}` : '/category' },
+          { label: product.sku, path: `/product/${product.sku}` },
         ]}
       />
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-gray-200">
-
-          {/* Col 1 & 2 Wrapper (9 spans) */}
-          <div className="lg:col-span-9 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-9 gap-6">
-
-              {/* Col 1: Gallery (4 spans) */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className="border border-navy-800 rounded-lg p-4 bg-navy-900 flex items-center justify-center h-full max-h-[320px]">
-                  <Image
-                    src={product.image}
-                    alt={`${product.name} ${product.sku} - Genuine ${product.brand || 'OEM'} Enterprise ${product.category || 'Hardware'} - New Condition - In Stock at Teraformix`}
-                    className="w-full h-full object-contain mix-blend-normal"
-                    width={500}
-                    height={500}
-                    priority={true}
-                  />
-                </div>
-
-                {/* Trust Badges & Quick Benefits */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
-                    <Truck className="w-5 h-5 mx-auto mb-1 text-action-500" />
-                    <p className="text-xs font-semibold text-white">Free Shipping</p>
-                    <p className="text-[10px] text-gray-500">Ground Delivery</p>
-                  </div>
-                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
-                    <Shield className="w-5 h-5 mx-auto mb-1 text-action-500" />
-                    <p className="text-xs font-semibold text-white">3-Year Warranty</p>
-                    <p className="text-[10px] text-gray-500">Advanced Replace</p>
-                  </div>
-                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
-                    <ShieldCheck className="w-5 h-5 mx-auto mb-1 text-action-500" />
-                    <p className="text-xs font-semibold text-white">ISO Certified</p>
-                    <p className="text-[10px] text-gray-500">Quality Assured</p>
-                  </div>
-                  <div className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
-                    <CheckCircle className="w-5 h-5 mx-auto mb-1 text-action-500" />
-                    <p className="text-xs font-semibold text-white">Genuine OEM</p>
-                    <p className="text-[10px] text-gray-500">Verified Parts</p>
-                  </div>
-                </div>
-
-                {/* Thumbnails removed as per request to show only 1 image */}
-              </div>
-
-              {/* Col 2: Info & Specs (5 spans) */}
-              <div className="lg:col-span-5">
-                <h1 className="text-3xl font-bold text-white mb-2 leading-tight">{product.name}</h1>
-
-                {/* Reviews Summary */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center text-yellow-400">
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current text-gray-300" />
-                  </div>
-                  <a href="#reviews" className="text-sm text-action-600 hover:underline font-medium">4.8 (24 Reviews)</a>
-                </div>
-
-                <div className="flex items-center gap-4 mb-6">
-                  <span className="bg-navy-800 text-gray-400 px-2 py-1 rounded text-xs font-mono border border-navy-700">MPN: {product.sku}</span>
-                  {product.stockStatus === 'IN_STOCK' ? (
-                    <span className="text-action-400 text-sm font-medium flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4" /> In Stock{typeof product.stockLevel === 'number' ? ` • ${product.stockLevel} units` : ''}
+      <main>
+        <section className="border-b border-slate-200 bg-white">
+          <div className="mx-auto max-w-[1360px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 xl:gap-10">
+              <div className="lg:col-span-6 xl:col-span-5">
+                <figure className="overflow-hidden border border-slate-200 bg-white">
+                  <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+                    <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase ${inStock ? 'text-emerald-800' : 'text-amber-800'}`}>
+                      <span className={`h-2 w-2 ${inStock ? 'bg-emerald-600' : 'bg-amber-500'}`} />
+                      {inStock ? 'Ready to ship' : 'Sourced to order'}
                     </span>
-                  ) : (
-                    <span className="text-alert-500 text-sm font-medium flex items-center gap-1">
-                      <Clock className="w-4 h-4" /> Backorder
-                    </span>
-                  )}
-                </div>
-
-                {/* Purchase Orders & Net Terms Banner */}
-                <div className="bg-gradient-to-r from-action-900/30 to-navy-800 border border-action-500/20 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <FileText className="w-5 h-5 mt-0.5 flex-shrink-0 text-action-500" />
-                    <div>
-                      <h3 className="font-bold text-sm mb-1 text-white">We Accept Purchase Orders</h3>
-                      <p className="text-xs text-gray-400 leading-relaxed">
-                        Net 30/60/90 terms available for Fortune 500 and eligible companies.
-                        <a href="/contact" className="underline text-action-400 hover:text-action-300 ml-1 font-semibold">Apply now →</a>
-                      </p>
-                    </div>
+                    <span className="text-xs font-medium text-slate-500">{condition} condition</span>
                   </div>
-                </div>
-
-                {/* Tabs */}
-                <div className="border-b border-navy-800 mb-4" role="tablist">
-                  <div className="flex space-x-6">
-                    {['Description', 'Specs', 'Compatibility', 'Warranty'].map(tab => (
-                      <button
-                        key={tab}
-                        role="tab"
-                        aria-selected={activeTab === tab.toLowerCase()}
-                        aria-controls={`${tab.toLowerCase()}-panel`}
-                        onClick={() => setActiveTab(tab.toLowerCase())}
-                        className={`py-2 text-sm font-medium border-b-2 transition focus:outline-none ${activeTab === tab.toLowerCase()
-                          ? 'border-action-500 text-white'
-                          : 'border-transparent text-gray-500 hover:text-gray-300'
-                          }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
+                  <div className="flex aspect-[4/3] items-center justify-center bg-white p-5 sm:p-8">
+                    <Image
+                      src={productImageSource}
+                      fallbackSrc={productImageFallback}
+                      alt={`${product.name} ${product.sku}`}
+                      className="h-full w-full object-contain"
+                      width={760}
+                      height={570}
+                      priority
+                    />
                   </div>
-                </div>
+                  <figcaption className="flex items-start gap-2 border-t border-slate-200 px-4 py-3 text-xs leading-5 text-slate-500">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                    Product identity, condition, and part number are verified before fulfillment. Appearance may vary by manufacturing lot.
+                  </figcaption>
+                </figure>
 
-                <article className="text-gray-400 text-sm leading-relaxed mb-2 min-h-[50px]" role="tabpanel" id={`${activeTab}-panel`}>
-                  {activeTab === 'description' && (
-                    <div itemProp="description" className="prose prose-sm max-w-none text-gray-400">
-                      <p>{product.description}</p>
-                      <p className="mt-4">
-                        <strong className="text-gray-200">Deployment Ready:</strong> This unit is fully initialized and cleared of any previous configuration.
-                        It ships with our "Plug-and-Protect" guarantee, ensuring it mounts directly into standard 19-inch racks (rails may be sold separately).
-                      </p>
-                    </div>
-                  )}
-                  {activeTab === 'specs' && (
-                    <table className="w-full text-left text-gray-300">
-                      <tbody>
-                        {/* Standard Specs */}
-                        {/* Standard Specs - Logic to show only first 4 unless expanded */}
-                        {(() => {
-                          const allSpecs = Object.entries(product.specs || {})
-                            .filter(([key, value]) => {
-                              // Filter out known non-spec keys and complex objects
-                              const k = key.toLowerCase();
-                              if (k.includes('review') || k.includes('schema') || k.includes('image')) return false;
-                              if (typeof value === 'object') return false;
-                              return true;
-                            });
-                          const visibleSpecs = showAllSpecs ? allSpecs : allSpecs.slice(0, 4);
-                          const hasMore = allSpecs.length > 4;
-
-                          return (
-                            <>
-                              {visibleSpecs.map(([key, value]) => {
-                                // Safety check: If value is an object (like a misplaced review), stringify or skip it to prevent crash
-                                let displayValue: React.ReactNode = value;
-                                if (typeof value === 'object' && value !== null) {
-                                  // If it's a complex object, we probably shouldn't show it in specs, or just show a safe string
-                                  displayValue = JSON.stringify(value);
-                                }
-                                return (
-                                  <tr key={key} className="border-b border-navy-800">
-                                    <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">{key}</th>
-                                    <td className="py-2 text-gray-400">{displayValue}</td>
-                                  </tr>
-                                );
-                              })}
-
-                              {/* Show More Button Row */}
-                              {hasMore && (
-                                <tr>
-                                  <td colSpan={2} className="pt-3">
-                                    <button
-                                      onClick={() => setShowAllSpecs(!showAllSpecs)}
-                                      className="text-action-600 font-semibold hover:text-action-700 text-sm flex items-center gap-1 focus:outline-none"
-                                    >
-                                      {showAllSpecs ? (
-                                        <>Show Less <ChevronUp className="w-4 h-4" /></>
-                                      ) : (
-                                        <>Show More Specs <ChevronDown className="w-4 h-4" /></>
-                                      )}
-                                    </button>
-                                  </td>
-                                </tr>
-                              )}
-                            </>
-                          );
-                        })()}
-                        {/* Add Physical Specs if available */}
-                        {product.weight && (
-                          <tr className="border-b border-navy-800">
-                            <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">Weight</th>
-                            <td className="py-2 text-gray-400">{product.weight}</td>
-                          </tr>
-                        )}
-                        {product.dimensions && (
-                          <tr className="border-b border-navy-800">
-                            <th scope="row" className="py-2 font-semibold text-gray-300 w-1/3">Dimensions</th>
-                            <td className="py-2 text-gray-400">{product.dimensions}</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                  {activeTab === 'compatibility' && (
-                    <div className="prose prose-sm max-w-none text-gray-400">
-                      {product.compatibility ? (
-                        <p className="whitespace-pre-line">{product.compatibility}</p>
-                      ) : (
-                        <p>Please contact support to verify compatibility with your specific system configuration.</p>
-                      )}
-                    </div>
-                  )}
-                  {activeTab === 'warranty' && (
-                    <div className="prose prose-sm max-w-none text-gray-400">
-                      {product.warranty ? (
-                        <p>{product.warranty}</p>
-                      ) : (
-                        <p>Standard 3-Year Advanced Replacement Warranty applies to this product.</p>
-                      )}
-                      <p className="mt-2 text-xs text-gray-500">
-                        Warranty covers hardware defects. Software support is provided by the OEM.
-                      </p>
-                    </div>
-                  )}
-                </article>
-
-                <div className="flex gap-4 text-xs text-gray-500 mt-4">
-                  <a href="/warranty" className="flex items-center gap-1 hover:text-action-400 transition hover:underline">
-                    <Shield className="w-4 h-4" /> 3-Year Warranty
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Hardware Prep Highlight (Moved) */}
-            <div className="bg-navy-900 border border-navy-800 rounded-lg p-6 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <ShieldCheck className="w-24 h-24 text-action-500" />
-              </div>
-
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-navy-800 rounded-lg border border-navy-700 text-action-500">
-                    <Microscope className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-white text-lg">Quality Guaranteed</h3>
-                </div>
-
-                <p className="text-sm text-gray-400 mb-4 leading-relaxed font-medium">
-                  We don't just ship parts; we certify them. See our rigorous 4-step process.
-                </p>
-
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-3 border-x border-b border-slate-200 bg-slate-50">
                   {[
-                    { i: Microscope, l: "Inspect" },
-                    { i: Activity, l: "Test" },
-                    { i: CheckCircle, l: "Verify" },
-                    { i: Package, l: "Pack" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center gap-1">
-                      <div className="w-8 h-8 rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-action-500">
-                        <item.i className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-[10px] uppercase font-bold text-gray-300">{item.l}</span>
+                    ['OEM', product.brand || 'Verified'],
+                    ['Condition', condition],
+                    ['Ships from', 'Texas, USA'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="border-r border-slate-200 px-3 py-4 last:border-r-0 sm:px-4">
+                      <p className="text-[10px] font-bold uppercase text-slate-500">{label}</p>
+                      <p className="mt-1 text-xs font-bold text-slate-950 sm:text-sm">{value}</p>
                     </div>
                   ))}
                 </div>
-
-                <a
-                  href="/how-our-hardware-is-prepared"
-                  className="block w-full text-center py-2.5 bg-action-600 border border-action-500 text-white font-bold rounded hover:bg-action-500 transition text-sm"
-                >
-                  View Preparation Process
-                </a>
               </div>
-            </div>
 
-            {/* Trusted by Professionals Banner (Refined) */}
-            {(() => {
-              const landingColls = content.landingCollections || [];
-              const allLogos = Array.isArray(landingColls) ? landingColls.flatMap((c: any) => c.logos || []) : [];
-              const uniqueLogos = allLogos.filter((v: any, i: number, a: any[]) => a.findIndex(t => t.imageUrl === v.imageUrl) === i).slice(0, 6);
-
-              if (uniqueLogos.length === 0) return null;
-
-              return (
-                <div className="mt-8 pt-8 border-t border-navy-800">
-                  <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">
-                    Trusted by Industry Leaders
-                  </p>
-                  <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 px-4">
-                    {uniqueLogos.map((l: any, idx: number) => (
-                      <div key={idx} className="w-28 h-10 flex items-center justify-center transition-all duration-300 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 hover:scale-110 transform">
-                        <Image
-                          src={l.imageUrl}
-                          alt={l.name || 'Partner Logo'}
-                          className="max-w-full max-h-full object-contain mix-blend-multiply"
-                        />
-                      </div>
-                    ))}
-                  </div>
+              <div className="lg:col-span-6 xl:col-span-4">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase">
+                  <span className="text-emerald-700">{product.brand || 'Enterprise hardware'}</span>
+                  <span className="text-slate-300">/</span>
+                  <span className="text-slate-500">{product.category || 'Products'}</span>
                 </div>
-              );
-            })()}
 
-          </div>
+                <h1 className="mt-3 text-3xl font-bold leading-tight text-slate-950 lg:text-[34px]">{product.name}</h1>
 
-          {/* Col 3: Sticky Buy Box (3 spans) */}
-          <div className="lg:col-span-3">
-            {/* WRAPPER: Both cards are now sticky together */}
-            <div className="sticky top-24 space-y-4">
-
-              {/* Card 1: Main Buy Box */}
-              <div className="bg-navy-900 border border-navy-800 rounded-lg p-6 shadow-2xl">
-                <div className="mb-4">
-                  {product.showPrice ? (
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {averageRating ? (
                     <>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-500 text-sm font-medium">Your Price</span>
+                      <div className="flex text-amber-400" aria-label={`Rated ${averageRating.toFixed(1)} out of 5`}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className={`h-4 w-4 ${star <= Math.round(averageRating) ? 'fill-current' : ''}`} />
+                        ))}
                       </div>
-                      <span className="text-3xl font-bold text-white">${product.price.toLocaleString()}</span>
+                      <a href="#reviews" className="text-sm font-semibold text-emerald-700 hover:underline">
+                        {averageRating.toFixed(1)} from {reviewCount} verified review{reviewCount === 1 ? '' : 's'}
+                      </a>
                     </>
                   ) : (
-                    <span className="text-2xl font-bold text-action-500 block">Request for Quote</span>
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                      <ShieldCheck className="h-4 w-4" />
+                      Quality inspected
+                    </span>
                   )}
                 </div>
 
-                {/* Shipping Ticker - Integrated into Buy Box */}
-                <ShippingTimer />
+                <div className="mt-5 flex flex-wrap items-center gap-2 border-y border-slate-200 py-3">
+                  <span className="text-xs font-semibold text-slate-500">Manufacturer part number</span>
+                  <span className="font-mono text-xs font-bold text-slate-900">{product.sku}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopySku}
+                    className="flex h-8 w-8 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                    aria-label="Copy manufacturer part number"
+                    title="Copy part number"
+                  >
+                    {skuCopied ? <Check className="h-4 w-4 text-emerald-700" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                </div>
 
-                <div className="mb-6 space-y-3 text-sm">
-                  <div className="flex justify-between text-gray-400">
-                    <span>Availability:</span>
-                    {product.stockStatus === 'IN_STOCK' ? (
-                      <span className="font-semibold text-action-500">In Stock{typeof product.stockLevel === 'number' ? ` • ${product.stockLevel} units` : ''}</span>
+                <p className="mt-5 text-[15px] leading-7 text-slate-600">
+                  {product.description || overview}
+                </p>
+
+                {keySpecifications.length > 0 ? (
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xs font-bold uppercase text-slate-500">Key specifications</h2>
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${inStock ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {inStock ? <CheckCircle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                        {inStock ? `${stockLevel || 'Stock'} available` : 'Lead time applies'}
+                      </span>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 border border-slate-200 bg-slate-50">
+                      {keySpecifications.map(([label, value], index) => (
+                        <div
+                          key={label}
+                          className={`min-h-[84px] p-4 ${index % 2 === 0 ? 'border-r border-slate-200' : ''} ${index < 2 ? 'border-b border-slate-200' : ''}`}
+                        >
+                          <dt className="text-[11px] font-semibold uppercase text-slate-500">{label}</dt>
+                          <dd className="mt-2 text-sm font-bold text-slate-950">{String(value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('specifications');
+                    document.getElementById('product-information')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 hover:underline"
+                >
+                  See complete technical specifications
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              <aside className="lg:col-span-12 xl:col-span-3">
+                <div className="sticky top-28 overflow-hidden border border-slate-300 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
+                  <div className="bg-slate-950 p-5 text-white">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[11px] font-bold uppercase text-emerald-400">
+                        {product.showPrice ? 'Direct purchase' : 'Commercial request'}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
+                        <span className={`h-1.5 w-1.5 ${inStock ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                        {inStock ? 'Available' : 'Lead time'}
+                      </span>
+                    </div>
+                    {product.showPrice ? (
+                      <div className="mt-3 text-3xl font-bold">${product.price.toLocaleString()}</div>
                     ) : (
-                      <span className="font-semibold text-alert-500">Backordered</span>
+                      <>
+                        <h2 className="mt-3 text-2xl font-bold">Get your formal quote</h2>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">Pricing, lead time, freight, and terms in one response.</p>
+                      </>
                     )}
                   </div>
-                  <div className="flex justify-between text-gray-400 items-center">
-                    <span>Shipping:</span>
-                    <span className="font-bold text-action-400 bg-action-500/10 px-2 py-0.5 rounded border border-action-500/20 flex items-center gap-1.5">
-                      <Truck className="w-3.5 h-3.5" /> Free Ground
-                    </span>
-                  </div>
-                </div>
 
-                <div className="space-y-3">
-                  {product.showPrice && product.stockStatus === 'IN_STOCK' && (
-                    <>
-                      {/* Quantity Selector */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-semibold text-gray-300 mb-2">Quantity</label>
-                        <div className="flex items-center gap-3">
+                  <div className="p-5">
+                    <ShippingTimer />
+
+                    <dl className="space-y-3 border-b border-slate-200 py-5 text-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Availability</dt>
+                        <dd className={`font-bold ${inStock ? 'text-emerald-700' : 'text-amber-700'}`}>
+                          {inStock ? `${stockLevel || 'Limited'} in stock` : 'Confirm lead time'}
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Ground shipping</dt>
+                        <dd className="font-bold text-slate-900">Free</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Warranty</dt>
+                        <dd className="font-bold text-slate-900">{product.warranty || '3 years'}</dd>
+                      </div>
+                    </dl>
+
+                    {product.showPrice && inStock ? (
+                      <div className="mt-5">
+                        <label className="text-xs font-bold uppercase text-slate-500" htmlFor="product-quantity">Quantity</label>
+                        <div className="mt-2 grid h-11 grid-cols-[44px_1fr_44px] border border-slate-300">
                           <button
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            className="w-10 h-10 border border-navy-700 rounded hover:bg-navy-800 font-bold text-gray-300 bg-navy-950"
+                            type="button"
+                            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                            className="flex items-center justify-center border-r border-slate-300 text-slate-700 hover:bg-slate-50"
                             aria-label="Decrease quantity"
                           >
-                            −
+                            <Minus className="h-4 w-4" />
                           </button>
                           <input
+                            id="product-quantity"
                             type="number"
                             min="1"
-                            max={typeof product.stockLevel === 'number' ? product.stockLevel : 999}
+                            max={maxQuantity}
                             value={quantity}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value) || 1;
-                              const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 999;
-                              setQuantity(Math.min(Math.max(1, val), stockLevel));
-                            }}
-                            className="w-20 text-center border border-navy-700 rounded py-2 font-semibold bg-navy-950 text-white"
+                            onChange={(event) => setQuantity(Math.min(maxQuantity, Math.max(1, Number(event.target.value) || 1)))}
+                            className="w-full text-center font-bold text-slate-950 outline-none"
                           />
                           <button
-                            onClick={() => {
-                              const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : 999;
-                              setQuantity(Math.min(quantity + 1, stockLevel));
-                            }}
-                            className="w-10 h-10 border border-navy-700 rounded hover:bg-navy-800 font-bold text-gray-300 bg-navy-950"
+                            type="button"
+                            onClick={() => setQuantity((current) => Math.min(maxQuantity, current + 1))}
+                            className="flex items-center justify-center border-l border-slate-300 text-slate-700 hover:bg-slate-50"
                             aria-label="Increase quantity"
                           >
-                            +
+                            <Plus className="h-4 w-4" />
                           </button>
-                          {typeof product.stockLevel === 'number' && (
-                            <span className="text-xs text-gray-500 ml-2">Max: {product.stockLevel}</span>
-                          )}
                         </div>
-                      </div>
-
-                      <button
-                        onClick={handleAddToCart}
-                        className="w-full bg-action-600 hover:bg-action-500 text-white font-bold py-3 px-4 rounded shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-action-600 mb-4 flex items-center justify-center gap-2"
-                        aria-label="Add to Cart"
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        Add {quantity > 1 ? `${quantity} ` : ''}to Cart
-                      </button>
-                    </>
-                  )}
-                  {product.showPrice && (
-                    <button
-                      onClick={() => setIsBeatQuoteModalOpen(true)}
-                      className="w-full bg-navy-800 border border-navy-700 hover:bg-navy-700 text-white font-bold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-action-500 mb-2 flex items-center justify-center gap-2"
-                    >
-                      <DollarSign className="w-4 h-4" />
-                      Beat this Price
-                    </button>
-                  )}
-                  <button
-                    onClick={() => openQuoteModal(`${product.name} (SKU: ${product.sku})`)}
-                    className={`w-full font-semibold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-action-500 ${product.showPrice ? 'bg-navy-950 border border-navy-700 hover:border-gray-500 text-gray-200' : 'bg-action-600 hover:bg-action-500 text-white border border-transparent shadow-sm'}`}
-                    aria-label="Request Bulk Quote"
-                  >
-                    {product.showPrice ? "Request Bulk Quote" : "Get a Quote"}
-                  </button>
-
-                  {/* Talk to Engineer Button */}
-                  <button
-                    onClick={() => {
-                      try {
-                        (window as any).$zoho.salesiq.floatwindow.visible('show');
-                      } catch (e) {
-                        console.error("Zoho Chat not loaded", e);
-                        window.open('/contact', '_blank');
-                      }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-action-400 hover:text-action-300 hover:underline py-2"
-                  >
-                    <MessageSquare className="w-4 h-4" /> Talk to an Engineer
-                  </button>
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-navy-800 text-xs text-gray-500 text-center">
-                  <p className="mb-2">Need it faster? Call us.</p>
-                  <a href={`tel:${content.general.phone}`} className="font-bold text-white text-lg hover:underline" aria-label={`Call support at ${content.general.phone}`}>{content.general.phone}</a>
-                </div>
-              </div>
-
-              {/* Trustpilot Widget */}
-              <div className="mt-6">
-                <Suspense fallback={<div className="h-24 bg-navy-800 animate-pulse rounded" />}>
-                  <TrustBox />
-                </Suspense>
-              </div>
-
-              {/* Card 2: Compliance & Certification Badge (High Trust) */}
-              <div className="bg-navy-900 border border-navy-800 rounded-lg p-4 mt-6">
-                <h3 className="text-xs font-bold text-white uppercase mb-3 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-action-500" /> Verified Reseller
-                </h3>
-                <ul className="space-y-2 text-xs text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <Award className="w-3 h-3 text-action-500 mt-0.5" />
-                    <span>ISO 9001, 14001, 27001 Certified Facility</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Shield className="w-3 h-3 text-action-500 mt-0.5" />
-                    <span>Authorized Reseller: Cisco, Seagate, Fortinet</span>
-                  </li>
-                  <li className="flex items-start gap-2 border-t border-navy-800 pt-2 mt-2 font-mono text-gray-500">
-                    <div className="flex flex-col">
-                      <span>CAGE: {cageCode}</span>
-                      <span>DUNS: {dunsNumber}</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* --- EXTENDED SEO CONTENT --- */}
-        <section className="mt-4 border-t border-navy-800 pt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-            {/* Left Column: Technical Overview & Reviews */}
-            <div className="lg:col-span-2 space-y-12">
-
-              {/* Technical Deep Dive (NOW EDITABLE VIA ADMIN) */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <BookOpen className="w-5 h-5 text-action-500" />
-                  <h2 className="text-xl font-bold text-white">{overviewTitle}</h2>
-                </div>
-                <div className="prose prose-invert max-w-none text-gray-400 leading-relaxed bg-navy-900 p-6 rounded-lg border border-navy-800">
-                  <p className="whitespace-pre-line">{overviewText}</p>
-                  <h3 className="text-sm font-bold text-gray-200 mt-4 uppercase tracking-wide">Key Features</h3>
-                  <ul className="list-disc pl-5 space-y-1 mt-2 text-gray-400">
-                    <li>OEM Genuine Component verified by certified technicians.</li>
-                    <li>Clean serial number ready for service contract registration.</li>
-                    <li>Electrostatic Discharge (ESD) safe packaging.</li>
-                    <li>Supports hot-swapping for zero-downtime maintenance.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Reviews Section */}
-              <div id="reviews">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-action-500" />
-                    <h2 className="text-xl font-bold text-white">Verified Buyer Reviews</h2>
-                  </div>
-                  <button
-                    onClick={() => setIsReviewModalOpen(true)}
-                    className="text-sm font-bold text-gray-300 border border-navy-700 px-4 py-2 rounded hover:bg-navy-800 transition"
-                  >
-                    Write a Review
-                  </button>
-                </div>
-
-                <div className="relative">
-                  {shuffledReviews.length === 0 ? (
-                    <div className="text-center py-8 bg-navy-900 rounded-lg border border-navy-800 border-dashed">
-                      <p className="text-gray-400 italic mb-2">No reviews yet.</p>
-                      <p className="text-sm text-gray-500">Be the first to share your experience!</p>
-                    </div>
-                  ) : (
-                    <>
-                      <style dangerouslySetInnerHTML={{
-                        __html: `
-                        .review-swiper .swiper-pagination-bullet-active { background: #10b981 !important; opacity: 1; }
-                        .review-swiper .swiper-pagination-bullet { width: 8px; height: 8px; transition: all 0.2s ease; }
-                        .review-swiper .swiper-pagination { bottom: 0px !important; }
-                        .review-swiper.pb-15 { padding-bottom: 5rem !important; }
-                        .review-swiper .swiper-slide { height: auto !important; display: flex !important; }
-                        .review-swiper .review-card { height: 100% !important; width: 100%; flex: 1; }
-                      `}} />
-                      <Swiper
-                        modules={[Pagination, Autoplay]}
-                        spaceBetween={24}
-                        slidesPerView={1}
-                        breakpoints={{
-                          768: { slidesPerView: 2 },
-                        }}
-                        pagination={{ clickable: true }}
-                        autoplay={{ delay: 5000, disableOnInteraction: false }}
-                        className="review-swiper pb-15"
-                      >
-                        {shuffledReviews.map((review, idx) => {
-                          const rating = parseFloat(review.ratingValue) || 5;
-                          return (
-                            <SwiperSlide key={idx}>
-                              <div className="review-card bg-navy-900 rounded-xl p-6 border border-navy-800 flex flex-col">
-                                {/* Stars */}
-                                <div className="flex text-yellow-400 mb-3">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${i < rating ? 'fill-current' : 'text-gray-200'}`}
-                                    />
-                                  ))}
-                                </div>
-
-                                {/* Review Text */}
-                                <blockquote className="text-gray-300 font-medium italic mb-4 flex-grow text-sm md:text-base">
-                                  "{review.reviewBody}"
-                                </blockquote>
-
-                                {/* Author Info */}
-                                <div className="mt-auto flex items-center gap-3 pt-3 border-t border-navy-800">
-                                  <div className="w-8 h-8 rounded-full bg-action-500/20 flex items-center justify-center text-action-400 font-bold text-xs">
-                                    {review.author.charAt(0)}
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-white">{review.author}</span>
-                                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                                      <CheckCircle className="w-3 h-3 text-action-500" />
-                                      Verified • {review.datePublished}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </SwiperSlide>
-                          );
-                        })}
-                      </Swiper>
-                    </>
-                  )}
-                </div>
-              </div>
-
-
-
-            </div>
-
-            {/* Right Column: FAQ & Value Props */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-8">
-                {/* Product FAQ */}
-                <div className="bg-navy-900 border border-navy-800 rounded-lg p-6">
-                  <h3 className="font-bold text-white mb-4 text-lg">Product FAQ</h3>
-                  <div className="space-y-4">
-                    {productFaqs.map((faq, idx) => (
-                      <div key={idx} className="border-b border-navy-800 last:border-0 pb-4 last:pb-0">
                         <button
-                          onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                          className="flex justify-between items-start w-full text-left group"
+                          type="button"
+                          onClick={handleAddToCart}
+                          className="mt-3 flex w-full items-center justify-center gap-2 bg-emerald-700 px-4 py-3.5 font-bold text-white hover:bg-emerald-800"
                         >
-                          <span className="text-sm font-semibold text-gray-200 group-hover:text-action-400 transition">{faq.q}</span>
-                          {openFaq === idx ? <ChevronUp className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />}
+                          <ShoppingCart className="h-5 w-5" />
+                          Add to cart
                         </button>
-                        {openFaq === idx && (
-                          <p className="mt-2 text-xs text-gray-500 leading-relaxed animate-fadeIn">
-                            {faq.a}
-                          </p>
-                        )}
                       </div>
-                    ))}
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => openQuoteModal(`${product.name} (SKU: ${product.sku})`)}
+                      className={`${product.showPrice && inStock ? 'mt-3 border border-slate-300 bg-white text-slate-900 hover:border-slate-900' : 'mt-5 bg-emerald-700 text-white hover:bg-emerald-800'} w-full px-4 py-3.5 font-bold`}
+                    >
+                      {product.showPrice ? 'Request volume quote' : 'Request pricing and availability'}
+                    </button>
+                    <p className="mt-2 text-center text-[11px] leading-5 text-slate-500">Typical response within one business hour.</p>
+
+                    {product.showPrice ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsBeatQuoteOpen(true)}
+                        className="mt-3 w-full border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 hover:border-slate-900"
+                      >
+                        Submit a competitor price
+                      </button>
+                    ) : null}
+
+                    <div className="mt-5 space-y-4 border-t border-slate-200 pt-5">
+                      <a
+                        href={`tel:${content.general.phone}`}
+                        className="flex items-start gap-3 text-sm font-bold text-slate-900 hover:text-emerald-700"
+                      >
+                        <Headphones className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                        <span>
+                          {content.general.phone}
+                          <span className="mt-0.5 block text-xs font-normal text-slate-500">Technical compatibility support</span>
+                        </span>
+                      </a>
+                      <div className="flex items-start gap-3 text-sm text-slate-700">
+                        <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                        <span>
+                          Austin, Texas
+                          <span className="mt-0.5 block text-xs text-slate-500">Domestic and export fulfillment</span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Why Buy Here Box */}
-                <div className="bg-navy-900 text-white rounded-lg p-6">
-                  <h3 className="font-bold text-lg mb-4">Why Teraformix?</h3>
-                  <ul className="space-y-4 text-sm">
-                    <li className="flex gap-3">
-                      <div className="bg-navy-800 p-1.5 rounded h-fit"><ShieldCheck className="w-4 h-4 text-action-500" /></div>
-                      <div>
-                        <span className="font-bold block text-gray-200">Authenticity Guaranteed</span>
-                        <span className="text-gray-400 text-xs">No gray market counterfeits. Only genuine OEM parts.</span>
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <div className="bg-navy-800 p-1.5 rounded h-fit"><Truck className="w-4 h-4 text-action-500" /></div>
-                      <div>
-                        <span className="font-bold block text-gray-200">Same‑Day Shipping</span>
-                        <span className="text-gray-400 text-xs">In‑stock orders placed by 3:00 PM CT ship the same day.</span>
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <div className="bg-navy-800 p-1.5 rounded h-fit"><ThumbsUp className="w-4 h-4 text-action-500" /></div>
-                      <div>
-                        <span className="font-bold block text-gray-200">Expert Support</span>
-                        <span className="text-gray-400 text-xs">Talk to engineers, not just sales reps.</span>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        {/* SEO Mesh: Internal Linking Strategy */}
-        <section className="mt-20 border-t border-navy-800 pt-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-white">Frequently Bought Together</h2>
-            <Link to={categorySlug ? `/category/${categorySlug}` : '/category'} className="text-action-400 font-semibold hover:underline flex items-center gap-1 text-sm">
-              View All {product.category} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loadingRelated ? (
-              <div className="col-span-4 text-center text-gray-500 py-10">Loading related products...</div>
-            ) : (
-              <Suspense fallback={
-                <div className="col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {[1, 2, 3, 4].map(i => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded" />)}
+        <section className="border-b border-slate-200 bg-slate-50">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-1 divide-y divide-slate-200 px-4 sm:grid-cols-2 sm:divide-x sm:divide-y-0 sm:px-6 lg:grid-cols-4 lg:px-8">
+            {[
+              { icon: ShieldCheck, title: 'Genuine OEM', detail: 'Serial and part verification' },
+              { icon: Award, title: '3-year warranty', detail: 'Hardware replacement coverage' },
+              { icon: Truck, title: 'Worldwide fulfillment', detail: 'Professional export documentation' },
+              { icon: FileText, title: 'Purchase orders', detail: 'Terms for qualified organizations' },
+            ].map(({ icon: Icon, title, detail }) => (
+              <div key={title} className="flex items-center gap-3 py-6 sm:px-6 sm:first:pl-0">
+                <Icon className="h-6 w-6 shrink-0 text-emerald-700" />
+                <div>
+                  <p className="text-sm font-bold text-slate-950">{title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{detail}</p>
                 </div>
-              }>
-                {relatedProducts.map((related) => (
-                  <ProductCard key={related.id} product={related} />
-                ))}
-                {relatedProducts.length === 0 && !loadingRelated && (
-                  <div className="col-span-4 text-center text-gray-500 py-10">No related products in this category.</div>
-                )}
-              </Suspense>
-            )}
+              </div>
+            ))}
           </div>
+        </section>
 
-          {/* Semantic Deep Links for Crawlers */}
-          <div className="mt-12 bg-navy-900 p-6 rounded-lg border border-navy-800 text-sm">
-            <h3 className="font-semibold text-white mb-3">Explore Related Categories</h3>
-            <div className="flex flex-wrap gap-3">
-              {(() => {
-                const current = (product.category || '').toLowerCase();
-                const others = activeCategories.filter((c: any) => String(c.name || '').toLowerCase() !== current);
-                const max = 6;
-                const picks = others.slice(0, max);
-                return picks.length > 0 ? picks.map((c: any) => (
-                  <Link key={String(c.id)} to={`/category/${encodeURIComponent(String(c.id))}`} className="px-3 py-1 bg-navy-800 border border-navy-700 rounded-full text-gray-400 hover:text-action-400 hover:border-action-500 transition">
-                    {c.name}
-                  </Link>
-                )) : (
-                  ['Servers', 'Storage', 'Networking'].slice(0, max).map((name, idx) => (
-                    <Link key={idx} to={`/category`} className="px-3 py-1 bg-navy-800 border border-navy-700 rounded-full text-gray-400 hover:text-action-400 hover:border-action-500 transition">
-                      {name}
-                    </Link>
-                  ))
-                );
-              })()}
+        <section id="product-information" className="mx-auto max-w-[1360px] scroll-mt-24 px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+          <div className="border-b border-slate-200">
+            <div className="flex gap-7 overflow-x-auto" role="tablist" aria-label="Product information">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`whitespace-nowrap border-b-2 py-4 text-sm font-bold ${activeTab === tab.id ? 'border-emerald-700 text-slate-950' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
-        </section >
 
-      </main >
+          <div className="grid grid-cols-1 gap-12 py-10 lg:grid-cols-12">
+            <article className="lg:col-span-8" role="tabpanel">
+              {activeTab === 'overview' ? (
+                <div>
+                  <p className="text-xs font-bold uppercase text-emerald-700">Product overview</p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-950">Built for reliable enterprise deployment</h2>
+                  <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-slate-600">{overview}</p>
+                  <div className="mt-8 grid grid-cols-1 border border-slate-200 sm:grid-cols-3">
+                    {[
+                      ['Authenticate', 'OEM identity, serial, and part number verification.'],
+                      ['Validate', 'Condition and listing details checked before release.'],
+                      ['Protect', 'ESD-safe packing and shipment preparation.'],
+                    ].map(([title, detail], index) => (
+                      <div key={title} className="border-b border-slate-200 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+                        <span className="text-xs font-bold text-emerald-700">0{index + 1}</span>
+                        <h3 className="mt-2 font-bold text-slate-950">{title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
+              {activeTab === 'specifications' ? (
+                <div>
+                  <p className="text-xs font-bold uppercase text-emerald-700">Technical data</p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-950">Product specifications</h2>
+                  {specifications.length > 0 ? (
+                    <dl className="mt-7 border-t border-slate-200">
+                      {specifications.map(([label, value]) => (
+                        <div key={label} className="grid grid-cols-1 gap-2 border-b border-slate-200 py-4 text-sm sm:grid-cols-[minmax(180px,1fr)_2fr]">
+                          <dt className="font-bold text-slate-800">{label}</dt>
+                          <dd className="text-slate-600">{String(value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : (
+                    <p className="mt-5 text-slate-600">Detailed specifications are available from our technical sales team.</p>
+                  )}
+                </div>
+              ) : null}
 
+              {activeTab === 'compatibility' ? (
+                <div>
+                  <p className="text-xs font-bold uppercase text-emerald-700">Compatibility</p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-950">Confirm your deployment requirements</h2>
+                  <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-slate-600">
+                    {product.compatibility || 'Compatibility depends on system generation, firmware, backplane, and controller configuration. Share your current platform or BOM with our technical team for validation before ordering.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openQuoteModal(`Compatibility check for ${product.name} (${product.sku})`)}
+                    className="mt-7 bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                  >
+                    Request compatibility check
+                  </button>
+                </div>
+              ) : null}
+
+              {activeTab === 'warranty' ? (
+                <div>
+                  <p className="text-xs font-bold uppercase text-emerald-700">Coverage</p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-950">Warranty and returns</h2>
+                  <p className="mt-5 max-w-4xl text-base leading-8 text-slate-600">
+                    {product.warranty || 'This product includes a standard 3-year Teraformix hardware warranty. Eligible unopened items may be returned within 30 days with an approved RMA.'}
+                  </p>
+                  <div className="mt-7 flex flex-wrap gap-4">
+                    <Link to="/warranty" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 hover:underline">
+                      Warranty policy <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link to="/returns" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 hover:underline">
+                      Return policy <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+            </article>
+
+            <aside className="lg:col-span-4">
+              <div className="border-l-2 border-emerald-700 pl-6">
+                <Building2 className="h-7 w-7 text-emerald-700" />
+                <h2 className="mt-4 text-lg font-bold text-slate-950">Procurement ready</h2>
+                <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                  {[
+                    'Formal quotes and volume pricing',
+                    'Purchase orders and qualified Net terms',
+                    'Asset reporting and serial capture',
+                    'Domestic and international freight support',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6 border-t border-slate-200 pt-5 font-mono text-xs text-slate-500">
+                  <p>CAGE: {content.general.cageCode}</p>
+                  <p className="mt-1">DUNS: {content.general.dunsNumber}</p>
+                </div>
+              </div>
+
+              {product.datasheet ? (
+                <a
+                  href={product.datasheet}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-8 flex items-center justify-between border border-slate-300 p-4 text-sm font-bold text-slate-900 hover:border-slate-900"
+                >
+                  Download product datasheet
+                  <FileDown className="h-5 w-5 text-emerald-700" />
+                </a>
+              ) : null}
+            </aside>
+          </div>
+        </section>
+
+        <section id="reviews" className="scroll-mt-24 border-y border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-[1360px] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase text-emerald-700">Customer validation</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-950">Feedback from infrastructure teams</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsReviewOpen(true)}
+                className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:border-slate-900"
+              >
+                Write a review
+              </button>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <div className="border-l-4 border-emerald-700 bg-white p-6">
+                <p className="text-xs font-bold uppercase text-slate-500">Overall rating</p>
+                <div className="mt-3 text-5xl font-bold text-slate-950">{averageRating ? averageRating.toFixed(1) : '—'}</div>
+                {averageRating ? (
+                  <div className="mt-3 flex text-amber-400" aria-label={`Rated ${averageRating.toFixed(1)} out of 5`}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className={`h-5 w-5 ${star <= Math.round(averageRating) ? 'fill-current' : 'text-slate-200'}`} />
+                    ))}
+                  </div>
+                ) : null}
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  {reviewCount > 0 ? `Based on ${reviewCount} approved customer reviews.` : 'No approved product reviews yet.'}
+                </p>
+                <div className="mt-6 border-t border-slate-200 pt-5 text-xs leading-5 text-slate-500">
+                  Reviews are linked to completed orders and moderated before publication.
+                </div>
+              </div>
+
+              {reviews.length > 0 ? (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {reviews.slice(0, 3).map((review, index) => {
+                    const rating = Number(review.ratingValue) || 5;
+                    return (
+                      <article key={`${review.author}-${index}`} className="flex min-h-[250px] flex-col border border-slate-200 bg-white p-5">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex text-amber-400">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star key={star} className={`h-4 w-4 ${star <= Math.round(rating) ? 'fill-current' : 'text-slate-200'}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs font-bold text-slate-500">{rating.toFixed(1)}</span>
+                        </div>
+                        <blockquote className="mt-5 flex-grow text-sm leading-6 text-slate-700">
+                          &ldquo;{review.reviewBody}&rdquo;
+                        </blockquote>
+                        <div className="mt-5 border-t border-slate-200 pt-4">
+                          <p className="text-sm font-bold text-slate-950">{review.author}</p>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                            <CheckCircle className="h-3.5 w-3.5 text-emerald-700" />
+                            Verified buyer{review.datePublished ? `, ${review.datePublished}` : ''}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex min-h-[250px] items-center justify-center border border-slate-200 bg-white p-8 text-center">
+                  <div>
+                    <MessageSquare className="mx-auto h-7 w-7 text-emerald-700" />
+                    <p className="mt-4 font-bold text-slate-950">Be the first to review this product</p>
+                    <p className="mt-2 text-sm text-slate-500">Share deployment and compatibility feedback with other buyers.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-4 py-14 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-20">
+          <div className="lg:col-span-8">
+            <p className="text-xs font-bold uppercase text-emerald-700">Common questions</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-950">Product FAQ</h2>
+            <div className="mt-7 border-t border-slate-200">
+              {productFaqs.map((faq, index) => (
+                <div key={faq.q} className="border-b border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="flex w-full items-center justify-between gap-5 py-5 text-left"
+                    aria-expanded={openFaq === index}
+                  >
+                    <span className="font-bold text-slate-900">{faq.q}</span>
+                    {openFaq === index
+                      ? <ChevronUp className="h-5 w-5 shrink-0 text-slate-500" />
+                      : <ChevronDown className="h-5 w-5 shrink-0 text-slate-500" />}
+                  </button>
+                  {openFaq === index ? (
+                    <p className="max-w-3xl pb-5 text-sm leading-7 text-slate-600">{faq.a}</p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+          <aside className="bg-slate-950 p-7 text-white lg:col-span-4">
+            <MessageSquare className="h-7 w-7 text-emerald-400" />
+            <h2 className="mt-4 text-xl font-bold">Still validating the part?</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              Send the system model, current configuration, or BOM and our technical sales team will help confirm fit.
+            </p>
+            <button
+              type="button"
+              onClick={() => openQuoteModal(`Technical question about ${product.name} (${product.sku})`)}
+              className="mt-6 inline-flex items-center gap-2 bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-500"
+            >
+              Ask technical sales
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </aside>
+        </section>
+
+        <section className="border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+            <div className="flex items-end justify-between gap-6">
+              <div>
+                <p className="text-xs font-bold uppercase text-emerald-700">Continue sourcing</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-950">Related {product.category || 'products'}</h2>
+              </div>
+              <Link
+                to={categorySlug ? `/category/${categorySlug}` : '/category'}
+                className="hidden items-center gap-2 text-sm font-bold text-emerald-700 hover:underline sm:flex"
+              >
+                View category
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {loadingRelated ? (
+                [1, 2, 3, 4].map((item) => <div key={item} className="h-[360px] animate-pulse border border-slate-200 bg-white" />)
+              ) : relatedProducts.length > 0 ? (
+                relatedProducts.map((relatedProduct) => (
+                  <ProductCard key={relatedProduct.id} product={relatedProduct} />
+                ))
+              ) : (
+                <div className="col-span-full border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+                  No related products are currently listed.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
-    </div >
+    </div>
   );
 };
 

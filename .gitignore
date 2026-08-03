@@ -16,3 +16,6 @@ pnpm-debug.log*
 
 uploads/
 *.tsbuildinfo
+
+# Generated graphify knowledge graph (build artifact)
+graphify-out/

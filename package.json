@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:server && npm run build:client",
-    "build:client": "vite build",
+    "build:client": "NODE_ENV=production vite build",
     "build:server": "nest build",
     "build:ts": "tsc -p tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",

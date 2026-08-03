@@ -2,6 +2,7 @@
 import React, { Suspense, lazy, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 const Header = lazy(() => import('../components/Header'));
+const Footer = lazy(() => import('../components/Footer'));
 import { fetchJson } from '../lib/api';
 import { useGlobalContent } from '../contexts/GlobalContent';
 import { Product } from '../types';
@@ -314,12 +315,16 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Footer is handled by layout, but we include TrustBox here as a final signal */}
+      {/* Final confidence signal */}
       <div className="bg-navy-950 border-t border-navy-900 py-8">
         <div className="container mx-auto px-4">
           <TrustBox />
         </div>
       </div>
+
+      <Suspense fallback={<div className="h-64 bg-slate-50" />}>
+        <Footer />
+      </Suspense>
     </div>
   );
 };
