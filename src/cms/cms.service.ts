@@ -72,7 +72,7 @@ export class CmsService implements OnModuleInit {
           content: `## Warranty Policy\n\n**3-Year Advanced Replacement Warranty**\nWe stand behind our hardware. All refurbished servers, storage, and networking equipment include our standard 3-Year Warranty.\n\n### How It Works\n1. **Report Issue:** Contact support with your order number and serial number.\n2. **Troubleshoot:** Our engineers will verify the failure remotely.\n3. **Shipment:** We ship a replacement part immediately, often before receiving your return.\n4. **Return:** Use the improved label to return the defective unit within 14 days.\n\n**New Retail Items**\nNew items carry the original manufacturer's warranty (e.g., 1-Year or 3-Year OEM coverage). We assist with the RMA process.\n\n## Return Policy\n\n**Defective Items**\nDOA or failing items are replaced at no cost. We cover round-trip shipping.\n\n**Non-Defective Returns**\n- Accepted within 30 days.\n- Subject to a **25% Restocking Fee**.\n- Buyer pays return shipping.\n- Items must be in original condition (unopened/sealed if new).`,
         },
         settings: {
-          favicon: 'https://cdn-icons-png.flaticon.com/512/4400/4400508.png',
+          favicon: '/favicon.svg',
           faviconDarkUrl: '',
           siteTitle: 'Teraformix | Enterprise Hardware Reseller',
           logoUrl: '',

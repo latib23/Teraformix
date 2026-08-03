@@ -19,6 +19,7 @@ import { api } from '../lib/api';
 import { auth } from '../lib/auth';
 import TopBar from './TopBar';
 import Image from './Image';
+import Logo from './Logo';
 import { Product, Category } from '../types';
 
 const Header = () => {
@@ -35,7 +36,6 @@ const Header = () => {
 
   const { cartCount } = useCart();
   const { content } = useGlobalContent();
-  const { logoUrl, logoText } = content.settings;
   const activeCategories = content.categories.filter((category) => category.isActive).slice(0, 5);
 
   useEffect(() => {
@@ -183,15 +183,7 @@ const Header = () => {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center gap-5 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Teraformix home">
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt={logoText}
-                className="h-10 w-[170px] object-contain"
-              />
-            ) : (
-              <span className="text-xl font-black text-slate-950">{logoText}</span>
-            )}
+            <Logo />
           </Link>
 
           <div className="hidden flex-1 justify-center md:flex">
